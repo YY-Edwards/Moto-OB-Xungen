@@ -478,8 +478,9 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 					phy_rx_state = WAITING_CHECK_SUM;
 				break;
 				default:
-					vPortFree(phy_frame_ptr);
-					phy_frame_ptr = NULL;					
+					set_xnl_idle_isr(phy_frame_ptr);
+					//vPortFree(phy_frame_ptr);
+					//phy_frame_ptr = NULL;					
 				break;
 			}	
 			break;
@@ -545,8 +546,9 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 				}
 				else
 				{
-					vPortFree(phy_frame_ptr);
-					phy_frame_ptr = NULL;
+					set_xnl_idle_isr(phy_frame_ptr);
+					//vPortFree(phy_frame_ptr);
+					//phy_frame_ptr = NULL;
 				}
 
 				phy_rx_state = WAITING_FOR_HEADER;
@@ -577,8 +579,9 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 			}
 			else
 			{
-				vPortFree(phy_frame_ptr);
-				phy_frame_ptr = NULL;
+				set_xnl_idle_isr(phy_frame_ptr);
+				//vPortFree(phy_frame_ptr);
+				//phy_frame_ptr = NULL;
 			}
 				
 			phy_rx_state = WAITING_FOR_HEADER;

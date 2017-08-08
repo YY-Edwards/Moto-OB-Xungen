@@ -662,7 +662,8 @@ static void xnl_tx_process(void * pvParameters)
 					if(ptr->xnl_header.opcode == 0x0000)
 					{
 						/*invalid XNL opcode*/
-						vPortFree(ptr);
+						set_xnl_idle(ptr);
+						//vPortFree(ptr);
 						break;
 					}
 					
@@ -758,7 +759,6 @@ static void xnl_rx_process(void * pvParameters)
 				xnl_rx(xnl_ptr);
 				set_xnl_idle(xnl_ptr);
 				
-				//vPortFree(xnl_ptr);
 			}			
 		}
 		
