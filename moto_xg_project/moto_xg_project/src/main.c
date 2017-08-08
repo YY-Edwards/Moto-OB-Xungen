@@ -1,0 +1,73 @@
+/**
+Copyright (C), Jihua Information Tech. Co., Ltd.
+
+File name: mian.c
+Author: Edwrds
+Version: 1.0.0.
+Date: 2017/08/08 15:30:51
+
+Description:
+History:
+*/
+
+/*
+ * Include header files for all drivers that have been imported from
+ * Atmel Software Framework (ASF).
+ */
+/*
+ * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
+ */
+#include <stdbool.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
+
+#include "intc.h"
+
+#include "timer.h"
+
+#include "log.h"
+#include "xcmp.h"
+
+
+#include "voice.h"
+
+#include "app.h"
+
+int main (void)
+{
+	
+	//Force SSC_TX_DATA_ENABLE Disabled as soon as possible.
+	AVR32_GPIO.port[1].ovrs  =  0x00000001;  //Value will be high.
+	AVR32_GPIO.port[1].oders =  0x00000001;  //Output Driver will be Enabled.
+	AVR32_GPIO.port[1].gpers =  0x00000001;  //Enable as GPIO.
+		
+	Disable_global_interrupt();
+	local_start_pll0();
+		
+	INTC_init_interrupts();
+		
+	log_init();
+	log("----start debug----");
+		
+	voc_init();
+
+	//tc_init();
+		
+	app_init();
+		
+	xcmp_init();
+		
+	while ((AVR32_GPIO.port[1].pvr & 0x00000002) == 0); //Wait for FS High.
+	while ((AVR32_GPIO.port[1].pvr & 0x00000002) != 0); //Wait for FS Low.
+	local_start_timer();
+		
+	Enable_global_interrupt();
+		
+	vTaskStartScheduler();
+	return 0;
+	
+}
+
+	
+
