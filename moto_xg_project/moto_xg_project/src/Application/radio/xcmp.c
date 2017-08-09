@@ -483,13 +483,13 @@ U8 DataPayload[20]={//注意payload的格式很重要，//Each CSBK can carry 10 bytes as
 extern U8  MAX_ADDRESS_SIZE;
 
 /**
-Function: xcmp_data_session
-Parameters:
+Function: xcmp_data_session_req
+Parameters:cmd
 Description: send data-session request to test
 Calls: xcmp_tx
 Called By:...
 */
-void xcmp_data_session(void)
+void xcmp_data_session_req( unsigned char cmd );
 {
 	//U8 *DMR_Raw_Data= &DataPayload[0];
 	U8 i =0;
@@ -504,7 +504,9 @@ void xcmp_data_session(void)
 	/*point to xcmp payload*/
 	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_farme.u8;
 	
-	ptr->Function = Single_Data_Uint;//0x01
+	
+	ptr->Function = cmd;
+	//ptr->Function = Single_Data_Uint;//0x01
 	
 	ptr->DataDefinition.Data_Protocol_Version = DMR_CSBK_Data;//0x70
 	

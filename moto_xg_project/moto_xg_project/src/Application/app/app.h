@@ -19,21 +19,10 @@
 
 #define tskIDLE_PRIORITY			( ( unsigned portBASE_TYPE ) 0 )
 
-#define DATA_FLASH_TEST_PRIORITY    ( tskIDLE_PRIORITY + 2 )
-#define XNL_TASK_PRIORITY   ( tskIDLE_PRIORITY + 1 )
-#define TIMER_TASK_PRIORITY   ( tskIDLE_PRIORITY + 5 )
-#define ACC_TASK_PRIORITY   ( tskIDLE_PRIORITY + 3 )
-
-
-
-
-
 
 typedef struct
 {
 	
-	
-
 }xQueueHandle_t;
 
 

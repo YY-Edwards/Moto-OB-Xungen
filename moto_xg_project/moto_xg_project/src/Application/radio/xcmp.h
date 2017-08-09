@@ -1563,7 +1563,7 @@ void xcmp_function_mic( void );
 void xcmp_mute_speaker( void );
 void xcmp_transmit_control( void );
 void xcmp_transmit_dekeycontrol( void );
-void xcmp_data_session( void );
+void xcmp_data_session_req( unsigned char cmd );
 void xcmp_button_config(void);
 void xcmp_volume_control(void);
 void xcmp_enter_enhanced_OB_mode(void);

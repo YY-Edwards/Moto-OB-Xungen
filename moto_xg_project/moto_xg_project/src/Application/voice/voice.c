@@ -81,7 +81,7 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 				return FALSE;
 			}
 			current_voice_index = 0;
-			log("\r\n----create voice info， okay!----\r\n");
+			log("\r\n----create voice info okay!----\r\n");
 		}
 		else//success
 		{
@@ -119,7 +119,7 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 						}
 					}
 				}
-				log("\r\n----read voice info， okay!----\r\n");
+				log("\r\n----read voice info okay!----\r\n");
 			}
 			else
 			return FALSE;
@@ -450,6 +450,6 @@ void voc_init(void)
 	//create_data_flash_test_task();
 	voice_list_info_init(Current_total_voice);
 	
-	voc_read_write_test();
+	//voc_read_write_test();
 
 }

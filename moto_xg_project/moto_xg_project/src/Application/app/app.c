@@ -73,7 +73,7 @@ void ToneControl_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{		
-		log("Tone OK");
+		log("Tone OK\n");
 		//fl_write("/test.txt", FILE_END, (void *)"send tone ok\r\n", sizeof("send tone ok\r\n") - 1);
 	}
 	else
@@ -818,21 +818,11 @@ static __app_Thread_(app_cfg)
 	{
 		if (0x00000003 == (bunchofrandomstatusflags & 0x00000003))//确认连接成功了，再发送请求
 		{	
-			//if((++coun) % 3 ==0)		
 			{
-				
-				// xcmp_audio_route_speaker();
-				xcmp_IdleTestTone();
-				
-				//if (Terminator_Flag == 1)
-				//{
-					////xcmp_transmit_dekeycontrol();
-					//
-				//}
-				
+				xcmp_IdleTestTone();						
 				if(isAudioRouting == 0)
 				{
-					//xcmp_data_session();
+					//xcmp_data_session_req();
 					//xcmp_audio_route_mic();
 					//xcmp_button_config();
 					//xcmp_audio_route_speaker();
@@ -849,7 +839,7 @@ static __app_Thread_(app_cfg)
 					//xcmp_exit_device_control_mode();
 					//xcmp_audio_route_AMBE();
 					//xcmp_function_mic();
-					//xcmp_data_session();
+					//xcmp_data_session_req();
 				    //xcmp_transmit_control();
 					//xcmp_volume_control();
 					//xcmp_enter_enhanced_OB_mode();
@@ -866,7 +856,7 @@ static __app_Thread_(app_cfg)
 					
 					//xcmp_exit_device_control_mode();
 					//xcmp_volume_control();
-					//xcmp_data_session();
+					//xcmp_data_session_req();
 					//xcmp_audio_route_speaker();
 					//xcmp_unmute_speaker();
 					//xcmp_enter_device_control_mode();
@@ -914,27 +904,6 @@ static __app_Thread_(app_cfg)
 					//log("\n\r time: %d \n\r", tc_tick);   
 					
 				}
-				//if(Speaker_is_unmute == 2)
-				//{
-					//
-					//
-					//xcmp_mute_speaker();					
-					//isAudioRouting = 4;
-					//Speaker_is_unmute = 1;
-				//}
-				//
-				//if(isAudioRouting == 3)
-				{
-					//xcmp_audio_route_speaker();
-					//xcmp_exit_device_control_mode();
-					//isAudioRouting = 5;
-				}
-				//
-				//if(isAudioRouting == 5)
-				//{
-					//xcmp_audio_route_revert();
-					//isAudioRouting = 6;
-				//}
 			}
 			
 		}
