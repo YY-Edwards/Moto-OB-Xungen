@@ -115,7 +115,7 @@ Description: send device_master_query to connect radio.
 Calls:xnl_tx
 Call By:xnl_init
 */
-static void xnl_send_device_master_query(void)
+void xnl_send_device_master_query(void)
 {
 	/*
 	All non-master devices must wait until a MASTER_STATUS_BRDCST is received. 
@@ -663,7 +663,6 @@ static void xnl_tx_process(void * pvParameters)
 					{
 						/*invalid XNL opcode*/
 						set_xnl_idle(ptr);
-						//vPortFree(ptr);
 						break;
 					}
 					
@@ -671,8 +670,7 @@ static void xnl_tx_process(void * pvParameters)
 					/*send physical data*/
 					phy_tx((phy_fragment_t *)ptr);
 					//log("\n\r T_xcmp:%4x \n\r", ptr->xnl_payload.xnl_content_data_msg.xcmp_opcode);
-					xnl_send_times = 1;
-					
+					xnl_send_times = 1;				
 					/*clear timeout semaphore and wait XNL reply*/
 					xSemaphoreTake( xnl_timeout_semphr, ( portTickType )0);			
 					xnl_tx_state = WAITING_FOR_REPLY;
@@ -685,7 +683,6 @@ static void xnl_tx_process(void * pvParameters)
 					, ( portTickType )50*2/ portTICK_RATE_MS))//按ADK文档中提示500ms一次超时,但是实际情况下程序中启用freertos的任务延时不够精准。因此根据经验需要降低延时等待的时间
 				{
 					/*No timeout*/
-					//vPortFree(ptr);	
 					set_xnl_idle(ptr);			
 					xnl_tx_state = WAITING_FOR_TX;
 				}
@@ -787,9 +784,35 @@ void xnl_init(void)
 
 	/*initialize the semaphore and queue*/
 	vSemaphoreCreateBinary(xnl_timeout_semphr);		
-	//xnl_frame_tx = xQueueCreate(10, sizeof(xnl_fragment_t *)); 
 	
 	xnl_frame_tx = xQueueCreate(20, sizeof(xnl_fragment_t *)); //扩大xnl_frame_tx的队列深度
+		
+	xnl_store_idle = xQueueCreate(MAX_XNL_STORE, sizeof(phy_fragment_t *));
+	for(int i= 0; i < MAX_XNL_STORE; i++ )
+	{
+		set_xnl_idle(&xnl_store[i]);
+	}
+	
+	/*initialize the queue to send/receive xnl packet */
+	phy_xnl_frame_tx = xQueueCreate(TX_XNL_QUEUE_DEEP, sizeof(phy_fragment_t *));
+	phy_xnl_frame_rx = xQueueCreate(RX_XNL_QUEUE_DEEP, sizeof(phy_fragment_t *));
+	
+	
+	/*if enable send/receive payload(media), defined in physical.h*/
+	#if ENABLE == PAYLOAD_ENABLE
+	payload_store_idle = xQueueCreate(MAX_PAYLOAD_STORE, sizeof(void *));
+	for(int i= 0; i < MAX_PAYLOAD_STORE; i++ )
+	{
+		set_payload_idle(payload_store[i]);
+	}
+	
+	/*initialize the queue to send/receive payload packet */
+	//phy_payload_frame_tx =
+	//xQueueCreate(TX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t));
+	
+	phy_payload_frame_rx = xQueueCreate(RX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t *));
+	
+	#endif /*end if*/
 		
 	/*create task*/	
 	/*this task is used to receive xnl message*/
@@ -811,9 +834,6 @@ void xnl_init(void)
 	,  tskXNL_PRIORITY//+1
 	,  NULL
 	);
-	
-	/*send device_master_query to connect radio*/	
-	xnl_send_device_master_query();
 	
 	/*initialize the physical layer*/
 	phy_init();

@@ -63,6 +63,7 @@ static U8 AMBE_Per_Burst_Flag = 0;
 
 volatile xQueueHandle test_tx = NULL;
 extern U32 tc_tick;
+extern void xnl_send_device_master_query(void);
 /**
 Function: phy_init
 Description: initialize the SSC;
@@ -76,39 +77,14 @@ Called By: xnl_init -- xnl.c
 */
 void phy_init( void )
 {
-    /*initialize the SSC*/
-    ssc_init();
-
     /*register the func to send/receive ssc packet*/
     register_rx_tx_func(phy_rx_func, phy_tx_func);	
 	
-	/*if enable send/receive payload(media), defined in physical.h*/	
-	xnl_store_idle = xQueueCreate(MAX_XNL_STORE, sizeof(phy_fragment_t *));
-	phy_fragment_t * xnl_ptr = NULL;
-	for(int i= 0; i < MAX_XNL_STORE; i++ )
-	{
-		set_xnl_idle(&xnl_store[i]);
-	}
-		
-    /*initialize the queue to send/receive xnl packet */	
-    phy_xnl_frame_tx = xQueueCreate(TX_XNL_QUEUE_DEEP, sizeof(phy_fragment_t *));
-    phy_xnl_frame_rx = xQueueCreate(RX_XNL_QUEUE_DEEP, sizeof(phy_fragment_t *));
+	/*initialize the SSC*/
+	ssc_init();
 	
-	#if ENABLE == PAYLOAD_ENABLE
-	payload_store_idle = xQueueCreate(MAX_PAYLOAD_STORE, sizeof(void *));
-	U8 * payload_ptr = NULL;
-	for(int i= 0; i < MAX_PAYLOAD_STORE; i++ )
-	{
-		set_payload_idle(payload_store[i]);
-	}
-		
-	/*initialize the queue to send/receive xnl packet */
-	phy_payload_frame_tx =
-	xQueueCreate(TX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t));
-		
-	//phy_payload_frame_rx =
-	//xQueueCreate(RX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t *));
-	#endif /*end if*/
+	/*send device_master_query to connect radio*/
+	xnl_send_device_master_query();
 	
 }
 
@@ -355,7 +331,6 @@ static void phy_xnl_tx(xnl_channel_t * xnl_tx_channel)
 				xnl_tx_channel->dword |= PHYTERMRIGHT;
 				
 				/*Go back to waiting.*/
-				//vPortFree(phy_ptr);
 				phy_tx_state = WAITING_FOR_PHY_TX;
 				break;
 			}
@@ -377,8 +352,7 @@ static void phy_xnl_tx(xnl_channel_t * xnl_tx_channel)
 			/*send 0x00BA0000*/
 			xnl_tx_channel->dword = PHYTERMLEFT;
 			
-			/*Go back to waiting.*/	
-			//vPortFree(phy_ptr);		
+			/*Go back to waiting.*/		
 			phy_tx_state = WAITING_FOR_PHY_TX;		
 			break;
 			/*This fragment finished.*/
@@ -448,17 +422,12 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 			}
 		
 			phy_rx_length = 0;
-			
-			//get_xnl_idle_isr(&phy_frame_ptr, &xHigherPriorityTaskWoken);
+
 			phy_frame_ptr = get_xnl_idle_isr();
 			if(NULL == phy_frame_ptr)
 			{
 				break;
 			}
-			//
-			//xQueueReceiveFromISR(phy_store_idle, &phy_frame_ptr, &xHigherPriorityTaskWoken);
-			
-			//phy_frame_ptr = pvPortMalloc(sizeof(phy_fragment_t));
 					
 			phy_frame_ptr->fragment_element[phy_rx_length++] = phy_dword;
 			
@@ -478,9 +447,7 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 					phy_rx_state = WAITING_CHECK_SUM;
 				break;
 				default:
-					set_xnl_idle_isr(phy_frame_ptr);
-					//vPortFree(phy_frame_ptr);
-					//phy_frame_ptr = NULL;					
+					set_xnl_idle_isr(phy_frame_ptr);			
 				break;
 			}	
 			break;
@@ -547,8 +514,6 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 				else
 				{
 					set_xnl_idle_isr(phy_frame_ptr);
-					//vPortFree(phy_frame_ptr);
-					//phy_frame_ptr = NULL;
 				}
 
 				phy_rx_state = WAITING_FOR_HEADER;
@@ -580,8 +545,6 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 			else
 			{
 				set_xnl_idle_isr(phy_frame_ptr);
-				//vPortFree(phy_frame_ptr);
-				//phy_frame_ptr = NULL;
 			}
 				
 			phy_rx_state = WAITING_FOR_HEADER;
@@ -1533,7 +1496,6 @@ else//Send-PCM-data（注意测试回放时：模拟信道码流为40bytes/2.5ms.）
 
 }
 
-
 static void payload_tx(void * payload)
 {
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
@@ -1555,35 +1517,23 @@ static void payload_tx(void * payload)
 	}
 }
 
-
-
-
 static void payload_rx(void * payload)
 {
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	
-	//set_payload_idle(payload);
 	if(NULL == phy_payload_frame_rx)
 	{
 		phy_payload_frame_rx = xQueueCreate(RX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t *));		
 	}
 
 	if(errQUEUE_FULL == xQueueSendFromISR(phy_payload_frame_rx, &payload, &xHigherPriorityTaskWoken))
-	//if(errQUEUE_FULL == xQueueSend(phy_payload_frame_rx, &payload, 0))
-	{	//To payload_rx_process();	
+	{
 		
 		set_payload_idle_isr(payload);
 		logFromISR("mm");
 	}
 	else
 	{
-		
-		if (xHigherPriorityTaskWoken == pdTRUE)
-		{
-			//taskYIELD();
-			
-		}
-		//set_payload_idle_isr(payload);
 		//logFromISR("ss");
 	}
 }
@@ -1607,7 +1557,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 	static U32 RxBytesWaiting = 0;
 	static U32 ArrayDiscLength = 0;
 	
-	//static U16 * payload_ptr = NULL;
+	static U16 * payload_ptr = NULL;
 	static U8 * AMBE_payload_ptr = NULL;
 	
 	static Bool is_first = FALSE;
@@ -1621,12 +1571,10 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 						//0xABCDC010时，_flag为1；
 			
 	//payload_ptr_t *AMBE_payload_ptr;		
-				
-	
 	
 	if(is_first == FALSE)
 	{
-		//payload_ptr = get_payload_idle_isr();
+		payload_ptr = get_payload_idle_isr();
 		AMBE_payload_ptr = get_payload_idle_isr();
 		is_first = TRUE;
 	}	
@@ -1646,7 +1594,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
             
 			if ((payload_rx_channel->dword[0]  & 0xFFFF0000) != 0xABCD0000)break; //Skip until Header. 
 				
-		#if 0
+#if 0
 			//if (((payload_rx_channel->dword[0]  & 0x0000F000) == 0x00002000))break; 
 			//if (((payload_rx_channel->dword[0]  & 0x0000F000) != 0x00001000) //media data from mic or speaker
 			//&&((payload_rx_channel->dword[0]  & 0x0000F000) != 0x00002000))
@@ -1686,29 +1634,20 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 			}
 			//logFromISR("\n\r P: %X \n\r", payload_rx_channel->word[1]);//测试收到的数据
 			
-			#endif
+#endif
 			
 			RxBytesWaiting = payload_rx_channel->dword[0] & 0x000000FF;
-		
-			if( (NULL== AMBE_payload_ptr))
-			{
-				//payload_ptr = get_payload_idle_isr();
-				AMBE_payload_ptr = get_payload_idle_isr();
-				
-				if (NULL== AMBE_payload_ptr)
-				{
-					logFromISR("\n\r xxxxx_QQ_xxxxx \n\r");//测试是否有这种情况出现
-					break;
-				}
-			}
-			
-		
 			/****Note AMBE stream protocol frame structure and the PCM frame structure is different*****/
 					
 			if ((payload_rx_channel->dword[0] & 0x0000F000 ) == PAYLOAD_DATA_ENH )//PAYLOAD_DATA_ENH (0x0c))
 			{
 				AMBE_Media = 1;	
-											
+				
+				if (NULL== AMBE_payload_ptr){
+					logFromISR("\n\r xxxxx_QQ_xxxxx \n\r");//测试是否有这种情况出现
+					break;
+				}
+																	
 				Item_ID = payload_rx_channel->byte[5];
 				
 				Item_Length = (payload_rx_channel->byte[4] & 0x7F);//7bits
@@ -1828,109 +1767,14 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				break;
 			}
 			
-			else
-			{
-				AMBE_Media = 0;	
-				break;
-			}
-			
-					
-#if 0
-
-					//
-				////The OB know the Call begin and discard the Voice Header
-				////The OB know the Call end and discard the Voice  Terminator			
-				//if (Item_ID == Raw_Tx_Data_HT)
-				//{
-					////HT_index = 0;
-					////AMBE_HT[0] = payload_rx_channel->dword[0];
-					////AMBE_HT[1] = payload_rx_channel->dword[1];
-					////
-					//if ((payload_rx_channel->byte[6] & 0xF0 )== 0x10)//header
-					//{
-						//m_RxBurstType = VOICEHEADER;		
-//
-					//}
-					//else if ((payload_rx_channel->byte[6] & 0xF0) == 0x20)//Terminator
-					//{
-						//m_RxBurstType = VOICETERMINATOR;
-						////In order to complete the save data AMBE stream to SDcard.
-						////AMBE-data and PCM-data is not the same. AMBE is compressed data,
-						////if there was a missing portion, a clear voice is difficult to extract the data. 
-						////It must ensure that all the data received AMBE.
-						//
-						////注意！！！考虑是否需要把剩余的空间置0。
-						//memset((AMBE_payload_ptr+ (RxAMBE_IsFillingNext8 +1)), 0x00, (512-(RxAMBE_IsFillingNext8 + 1)));
-						//
-						//RxAMBE_IsFillingNext8 = 0;
-						//payload_rx(AMBE_payload_ptr);
-						//AMBE_payload_ptr = get_payload_idle_isr();
-						////logFromISR("\n\r QQ1 \n\r");
-						//
-					//}
-					//else//error voice
-					//{
-						//m_RxBurstType = VOICE_WATING;
-					//}
-					//
-					//break;//WAITINGABAB.
-		//
-						//
-				//}
-				//else if (Item_ID == Vocoder_Bit_Stream_Parameter)//Vocoder Bits Stream Parameter
-				//{	
-						//
-						//VBSP_data[0] = payload_rx_channel->word[2];
-						//VBSP_data[1] = payload_rx_channel->word[3];
-						//m_RxBurstType = CalculateBurst(VF_SN);
-//
-				//}
-				//else if ((Item_ID == 0x04) || (Item_ID == 0x03) )//Unknown type data directly back hair
-				//{
-					////break;
-					//m_RxBurstType = UNSUREDATA;
-					//AMBE_HT[0] = payload_rx_channel->dword[0];
-					//AMBE_HT[1] = payload_rx_channel->dword[1];
-					//
-					//if (RxBytesWaiting == 0x00000014)
-					//{
-						//RxBytesWaiting = 0x18;//24 Reassigned
-						////_flag =0;
-							//
-					//}
-					//if (RxBytesWaiting == 0x00000010)
-					//{
-						//RxBytesWaiting = 0x10;//16 Reassigned
-						////_flag =1;	
-					//}
-					//
-					//
-				//}
-				//else
-				//{
-					//
-					//logFromISR("\n\r Item_ID:%x \n\r", payload_rx_channel->word[2]);
-					//logFromISR("\n\r Axiba \n\r");
-					////Soft Decision Value(0x13):
-					////The Soft Decision Value parameter carriers soft decode value of FEC decoding. When used
-					////along with Pre-Voice Decoder Audio Data item, it matches the dedicated bits of Pre-Voice
-					////Decoder Audio Data for their soft decode value.
-					//
-					////Radio Internal Parameter(0x7F):
-					////The OB should use the route back this item to radio without change content.
-					//break;
-				//}
-				//
-				//RxMediaState = READING_AMBE_MEDIA;//Jump
-		//
+			//else
+			//{
+				//AMBE_Media = 0;	
+				//break;
 			//}
-	
-#endif	
+			
 
-#if 0
-
-
-		
+//#if 0
 			else//PCM-media-data
 			{	
 				//logFromISR("\n\r RX:%x \n\r", payload_rx_channel->dword[0]);
@@ -1942,66 +1786,69 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				AMBE_rx_flag = 0;
 				
 				Item_ID = 0;//To make sure your save PCM data.
+			
+				if (NULL== payload_ptr){
+					logFromISR("\n\r xxxxx_QQ_xxxxx \n\r");//测试是否有这种情况出现
+					break;
+				}
+				
 				
 				if ((payload_rx_channel->dword[0]  & 0x00000F00) <= 1){  //Flag type must process Array Descriptor.
 				//The first word of the media access payload must be the Array descriptor length. And the
 				//unit of the length is in word (16-bit). The length field itself does not count into the length.
 				//When there is no array descriptor, the length must be set to zero.[9.1.4.1]
-				if ((RxBytesWaiting -= 4) <= 0) break;          //Nothing beyond this Phy buffer. Keep looking for Header
-				ArrayDiscLength = payload_rx_channel->word[2];
-				
-				switch (ArrayDiscLength){
-					case 0:          //The usual case. Remaining word in Phy buffer is Audio.
+					if ((RxBytesWaiting -= 4) <= 0) break;          //Nothing beyond this Phy buffer. Keep looking for Header
+					ArrayDiscLength = payload_rx_channel->word[2];
+					switch (ArrayDiscLength){
+						case 0:          //The usual case. Remaining word in Phy buffer is Audio.
 								
-						payload_ptr[RxMedia_IsFillingNext16] = payload_rx_channel->word[3];
-						RxMedia_IsFillingNext16 += 1;
-						if (RxMedia_IsFillingNext16 >= MAX_PAYLOAD_BUFF_SIZE)
-						{
-							RxMedia_IsFillingNext16 = 0;	
-							payload_rx(payload_ptr);	
-							payload_ptr = get_payload_idle_isr();
-							if(NULL == payload_ptr)
+							payload_ptr[RxMedia_IsFillingNext16] = payload_rx_channel->word[3];
+							RxMedia_IsFillingNext16 += 1;
+							if (RxMedia_IsFillingNext16 >= MAX_PAYLOAD_BUFF_SIZE)
 							{
-								break;
-							}				
-						}
+								RxMedia_IsFillingNext16 = 0;	
+								payload_rx(payload_ptr);	
+								payload_ptr = get_payload_idle_isr();
+								if(NULL == payload_ptr){
+									break;
+								}				
+							}
 							RxMediaState = READINGMEDIA;
-					break;
+						break;
 				
-					case 1: //The next usual case.
-							//In general case, add code to process single word Array descriptor.
-							if (payload_rx_channel->word[3] == 0x0003)//Stream Terminator
-							{
-								Terminator_Flag = 1;
+						case 1: //The next usual case.
+								//In general case, add code to process single word Array descriptor.
+								if (payload_rx_channel->word[3] == 0x0003)//Stream Terminator
+								{
+									Terminator_Flag = 1;
 
-							}
-							else if(payload_rx_channel->word[3] == 0x0004)//Silent Descriptor
-							{
+								}
+								else if(payload_rx_channel->word[3] == 0x0004)//Silent Descriptor
+								{
 							
-								//Silent_flag = 1;
-							}
-							else if (payload_rx_channel->word[3] == 0x1026)//Tone Descriptor
-							{
-								//Tone_flag = 1;
+									//Silent_flag = 1;
+								}
+								else if (payload_rx_channel->word[3] == 0x1026)//Tone Descriptor
+								{
+									//Tone_flag = 1;
 							
-							}
-							else
-							{
-								//Terminator_Flag = 0;
-							}
-					
-					
-							RxMediaState = READINGMEDIA;
-					break;
+								}
+								else
+								{
+									//Terminator_Flag = 0;
+								}
+								
+								RxMediaState = READINGMEDIA;
+						break;
 				
-					default: //So far, can't happen, but need to code anyway.
-							//In general, add code to process multi-word array descriptor.
-							//ArrayDiscLength -= 1;
-							//RxMediaState = READINGARRAYDISCRPT;
-					break;
+						default: //So far, can't happen, but need to code anyway.
+								//In general, add code to process multi-word array descriptor.
+								//ArrayDiscLength -= 1;
+								//RxMediaState = READINGARRAYDISCRPT;
+						break;
 					}
 				break;
-				}
+			}
 		
 				//Code gets here on Middle or last Fragment. No Array descriptor.
 				if (RxBytesWaiting < 2) break;//This shouldn't happen, but must check.
@@ -2010,12 +1857,12 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				if (RxMedia_IsFillingNext16 >= MAX_PAYLOAD_BUFF_SIZE)
 				{
 					RxMedia_IsFillingNext16 = 0;
-								payload_rx(payload_ptr);
-								payload_ptr = get_payload_idle_isr();
-													if(NULL == payload_ptr)
-													{
-														break;
-													}
+					payload_rx(payload_ptr);
+					payload_ptr = get_payload_idle_isr();
+					if(NULL == payload_ptr)
+					{
+						break;
+					}
 				}
 				if ((RxBytesWaiting -= 2) <= 0) break;  //This shouldn't happen, but must check;
 				RxMediaState = READINGMEDIA;
@@ -2031,16 +1878,16 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				payload_ptr[RxMedia_IsFillingNext16] = payload_rx_channel->word[0];
 				RxMedia_IsFillingNext16 += 1;	
 				if (RxMedia_IsFillingNext16 >= MAX_PAYLOAD_BUFF_SIZE)
+				{
+					RxMedia_IsFillingNext16 = 0;
+					payload_rx(payload_ptr);
+					payload_ptr = get_payload_idle_isr();
+					if(NULL == payload_ptr)
 					{
-							RxMedia_IsFillingNext16 = 0;
-							payload_rx(payload_ptr);
-							payload_ptr = get_payload_idle_isr();
-							if(NULL == payload_ptr)
-							{
-								RxMediaState = WAITINGABAB;
-								break;
-							}
+						RxMediaState = WAITINGABAB;
+						break;
 					}
+				}
 				if ((RxBytesWaiting -= 2) <= 0)
 				{
 					RxMediaState = WAITINGABAB;
@@ -2050,16 +1897,16 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				payload_ptr[RxMedia_IsFillingNext16] = payload_rx_channel->word[1];
 				RxMedia_IsFillingNext16 += 1;
 				if (RxMedia_IsFillingNext16 >= MAX_PAYLOAD_BUFF_SIZE)
-						{
-							RxMedia_IsFillingNext16 = 0;
-								payload_rx(payload_ptr);
-								payload_ptr = get_payload_idle_isr();
-								if(NULL == payload_ptr)
-								{
-									RxMediaState = WAITINGABAB;
-									break;
-								}
-						}
+				{
+					RxMedia_IsFillingNext16 = 0;
+					payload_rx(payload_ptr);
+					payload_ptr = get_payload_idle_isr();
+					if(NULL == payload_ptr)
+					{
+						RxMediaState = WAITINGABAB;
+						break;
+					}
+				}
 				if ((RxBytesWaiting -= 2) <= 0){
 					RxMediaState = WAITINGABAB;
 					break;
@@ -2068,16 +1915,16 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				payload_ptr[RxMedia_IsFillingNext16] = payload_rx_channel->word[2];
 				RxMedia_IsFillingNext16 += 1;
 				if (RxMedia_IsFillingNext16 >= MAX_PAYLOAD_BUFF_SIZE)
-						{
-							RxMedia_IsFillingNext16 = 0;
-								payload_rx(payload_ptr);
-									payload_ptr = get_payload_idle_isr();
-									if(NULL == payload_ptr)
-									{
-										RxMediaState = WAITINGABAB;
-										break;
-									}
-						}
+				{
+					RxMedia_IsFillingNext16 = 0;
+					payload_rx(payload_ptr);
+					payload_ptr = get_payload_idle_isr();
+					if(NULL == payload_ptr)
+					{
+						RxMediaState = WAITINGABAB;
+						break;
+					}
+				}
 				if ((RxBytesWaiting -= 2) <= 0){
 					RxMediaState = WAITINGABAB;
 					break;
@@ -2086,23 +1933,23 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				payload_ptr[RxMedia_IsFillingNext16] = payload_rx_channel->word[3];
 				RxMedia_IsFillingNext16 += 1;
 				if (RxMedia_IsFillingNext16 >= MAX_PAYLOAD_BUFF_SIZE)
-						{
-							RxMedia_IsFillingNext16 = 0;
-							payload_rx(payload_ptr);
-							payload_ptr = get_payload_idle_isr();
-							if(NULL == payload_ptr)
-							{
-								RxMediaState = WAITINGABAB;
-								break;
-							}
-						}
+				{
+					RxMedia_IsFillingNext16 = 0;
+					payload_rx(payload_ptr);
+					payload_ptr = get_payload_idle_isr();
+					if(NULL == payload_ptr)
+					{
+						RxMediaState = WAITINGABAB;
+						break;
+					}
+				}
 				if ((RxBytesWaiting -= 2) <= 0){
 					RxMediaState = WAITINGABAB;
 					break;
 				}
 			}
-			break; //End of READINGMEDIA.
-#endif
+		break; //End of READINGMEDIA.
+//#endif
 
 		case READING_AMBE_MEDIA:
 		
@@ -2555,7 +2402,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 					}
 			
 			
-			break;//End of READING_AMBE_MEDIA.
+		break;//End of READING_AMBE_MEDIA.
 
         case READING_AMBE_AUX:
 			
@@ -2604,7 +2451,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 				}
 
 		 
-			break;//End of READING_AMBE_AUX.
+		break;//End of READING_AMBE_AUX.
 		 
 #if 0
 

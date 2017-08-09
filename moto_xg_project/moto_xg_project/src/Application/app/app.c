@@ -785,10 +785,11 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
 
 void app_init(void)
 {	
-	//将app_payload_rx_proc更改为PCM加密功能
-	payload_init( app_payload_rx_proc , app_payload_tx_proc );	
 	xcmp_register_app_list(the_app_list);
-			
+	
+	//将app_payload_rx_proc更改为PCM加密功能
+	payload_init( app_payload_rx_proc , app_payload_tx_proc );
+	
 	static portBASE_TYPE res = 0;
 	 res = xTaskCreate(
 	app_cfg
@@ -797,7 +798,6 @@ void app_init(void)
 	,  NULL
 	,  1
 	,  NULL );
-	
 	
 }
 
@@ -836,8 +836,8 @@ static __app_Thread_(app_cfg)
 					//xcmp_audio_route_mic();
 					//xcmp_button_config();
 					//xcmp_audio_route_speaker();
-					xcmp_enter_device_control_mode();//调换3个命令的顺序，则不会导致掉线。。。奇葩
-					xcmp_enter_enhanced_OB_mode();
+					//xcmp_enter_device_control_mode();//调换3个命令的顺序，则不会导致掉线。。。奇葩
+					//xcmp_enter_enhanced_OB_mode();
 					//xcmp_unmute_speaker();
 					//Speaker_is_unmute = 1;
 					//xcmp_function_mic();
@@ -847,7 +847,7 @@ static __app_Thread_(app_cfg)
 				else if(isAudioRouting == 1)
 				{
 					//xcmp_exit_device_control_mode();
-					xcmp_audio_route_AMBE();
+					//xcmp_audio_route_AMBE();
 					//xcmp_function_mic();
 					//xcmp_data_session();
 				    //xcmp_transmit_control();
@@ -939,7 +939,7 @@ static __app_Thread_(app_cfg)
 			
 		}
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
-		log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
+		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		
 		vTaskDelayUntil( &xLastWakeTime, 2000*2 / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}

@@ -221,7 +221,7 @@ extern volatile xQueueHandle xnl_store_idle;
 
 /*queue is used to receive xnl*/
 extern volatile xQueueHandle phy_xnl_frame_rx;
-
+extern volatile xQueueHandle phy_xnl_frame_tx;
 /*if enable send/receive payload(media)*/
 #if ENABLE == PAYLOAD_ENABLE
 

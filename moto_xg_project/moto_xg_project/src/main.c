@@ -2,7 +2,7 @@
 Copyright (C), Jihua Information Tech. Co., Ltd.
 
 File name: mian.c
-Author: Edwrds
+Author: Edwards
 Version: 1.0.0.
 Date: 2017/08/08 15:30:51
 
@@ -10,29 +10,17 @@ Description:
 History:
 */
 
-/*
- * Include header files for all drivers that have been imported from
- * Atmel Software Framework (ASF).
- */
-/*
- * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
- */
 #include <stdbool.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
-
 #include "intc.h"
-
 #include "timer.h"
-
 #include "log.h"
 #include "xcmp.h"
-
-
 #include "voice.h"
-
 #include "app.h"
+
 
 int main (void)
 {
@@ -50,7 +38,7 @@ int main (void)
 	log_init();
 	log("----start debug----");
 		
-	voc_init();
+	//voc_init();
 
 	//tc_init();
 		
