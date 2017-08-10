@@ -24,6 +24,10 @@ src\Application\radio\xcmp.c
 
 src\Application\radio\xnl.c
 
+src\Application\RFID\MFRC522\rc522.c
+
+src\Application\RFID\RFID.c
+
 src\Application\rtc\rtc.c
 
 src\Application\timers\timer.c

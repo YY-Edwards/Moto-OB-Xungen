@@ -168,7 +168,7 @@ void tc_init()
 	 */
 	//tc_write_rc(tc, EXAMPLE_TC_CHANNEL, (sysclk_get_pba_hz() / 8 / 100));
 	
-	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2) / 8 / 100));
+	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2) / 8 / 2000));//200ms
 	
 	//tc_write_rc(tc, EXAMPLE_TC_CHANNEL, (FOSC0 / 8 / 100000));
 	

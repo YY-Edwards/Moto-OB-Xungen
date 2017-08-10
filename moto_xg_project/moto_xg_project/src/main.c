@@ -18,7 +18,7 @@ History:
 #include "timer.h"
 #include "log.h"
 #include "xcmp.h"
-#include "voice.h"
+#include "rtc.h"
 #include "app.h"
 
 
@@ -41,6 +41,8 @@ int main (void)
 	//voc_init();
 
 	//tc_init();
+	
+	rfid_init();
 		
 	app_init();
 		

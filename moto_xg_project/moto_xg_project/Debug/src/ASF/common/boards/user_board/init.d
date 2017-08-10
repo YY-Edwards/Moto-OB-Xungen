@@ -64,6 +64,14 @@ src/ASF/common/boards/user_board/init.d \
  ../src/ASF/avr32/drivers/pm/power_clocks_lib.h \
  ../src/ASF/avr32/drivers/pm/pm.h ../src/ASF/avr32/drivers/pm/sleep.h \
  ../src/ASF/avr32/drivers/spi/spi.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h \
+ ../src/config/FreeRTOSConfig.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/ASF/common/services/spi/usart_spi.h \
  ../src/ASF/common/services/spi/uc3_usart_spi/usart_spi.h \
  ../src/ASF/avr32/drivers/usart/usart.h ../src/config/conf_usart_spi.h \
@@ -209,6 +217,22 @@ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/ASF/avr32/drivers/pm/sleep.h:
 
 ../src/ASF/avr32/drivers/spi/spi.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h:
+
+../src/config/FreeRTOSConfig.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/ASF/common/services/spi/usart_spi.h:
 

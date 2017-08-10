@@ -68,6 +68,14 @@ src/ASF/common/services/spi/uc3_spi/spi_master.d \
  ../src/ASF/common/services/clock/genclk.h \
  ../src/ASF/common/services/clock/uc3b0_b1/genclk.h \
  ../src/ASF/avr32/utils/status_codes.h ../src/ASF/avr32/drivers/spi/spi.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h \
+ ../src/config/FreeRTOSConfig.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/config/conf_spi_master.h
 
 ../src/ASF/common/services/spi/uc3_spi/spi_master.h:
@@ -207,5 +215,21 @@ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/ASF/avr32/utils/status_codes.h:
 
 ../src/ASF/avr32/drivers/spi/spi.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h:
+
+../src/config/FreeRTOSConfig.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/config/conf_spi_master.h:

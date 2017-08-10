@@ -53,7 +53,17 @@ src/ASF/avr32/drivers/spi/spi.d src/ASF/avr32/drivers/spi/spi.o \
  ../src/ASF/common/utils/interrupt.h \
  ../src/ASF/common/utils/interrupt/interrupt_avr32.h \
  ../src/ASF/avr32/utils/preprocessor/tpaste.h \
- ../src/ASF/avr32/drivers/intc/intc.h
+ ../src/ASF/avr32/drivers/intc/intc.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h \
+ ../src/config/FreeRTOSConfig.h ../src/ASF/common/boards/board.h \
+ ../src/ASF/common/boards/user_board/user_board.h \
+ ../src/config/conf_board.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h
 
 ../src/ASF/avr32/drivers/spi/spi.h:
 
@@ -164,3 +174,25 @@ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/ASF/avr32/utils/preprocessor/tpaste.h:
 
 ../src/ASF/avr32/drivers/intc/intc.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h:
+
+../src/config/FreeRTOSConfig.h:
+
+../src/ASF/common/boards/board.h:
+
+../src/ASF/common/boards/user_board/user_board.h:
+
+../src/config/conf_board.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
