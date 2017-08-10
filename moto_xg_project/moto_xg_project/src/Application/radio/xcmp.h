@@ -1020,7 +1020,7 @@ An XCMP device can initiate multiple data sessions at one time.
 
 */
 
-#define AUDIO_DATA_REQUEST   0x41D
+#define DATA_SESSION   0x41D
 
 //Function
 #define  Single_Data_Uint   (unsigned char)0x01	//Send a single data uint.
@@ -1052,7 +1052,7 @@ An XCMP device can initiate multiple data sessions at one time.
 
 //#define  Remote_Address    (U32)0x000002
 
-#define  Remote_Port     (U16)0x0000
+#define  Remote_Port     (U16)0x0FA7//4007
 
 //Data  payload
 //Session ID
@@ -1071,7 +1071,7 @@ typedef struct
 {
 	U8 Remote_Address_Type;
 	U8 Remote_Address_Size;
-	U8 Remote_Address[3];
+	U8 Remote_Address[4];
 	U8 Remote_Port_Com[2];   
 }Dest_Address_t;
 
@@ -1563,7 +1563,8 @@ void xcmp_function_mic( void );
 void xcmp_mute_speaker( void );
 void xcmp_transmit_control( void );
 void xcmp_transmit_dekeycontrol( void );
-void xcmp_data_session_req( unsigned char cmd );
+void xcmp_data_session_req(void *message, U16 length, U8 dest);
+void xcmp_data_session_brd( void *message, U16 length, U8 SessionID);
 void xcmp_button_config(void);
 void xcmp_volume_control(void);
 void xcmp_enter_enhanced_OB_mode(void);

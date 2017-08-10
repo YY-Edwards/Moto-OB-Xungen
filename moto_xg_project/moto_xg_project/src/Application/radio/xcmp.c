@@ -489,7 +489,7 @@ Description: send data-session request to test
 Calls: xcmp_tx
 Called By:...
 */
-void xcmp_data_session_req( unsigned char cmd );
+void xcmp_data_session_req(void *message, U16 length, U8 dest)
 {
 	//U8 *DMR_Raw_Data= &DataPayload[0];
 	U8 i =0;
@@ -499,44 +499,88 @@ void xcmp_data_session_req( unsigned char cmd );
 	xcmp_fragment_t xcmp_farme;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | AUDIO_DATA_REQUEST;
+	xcmp_farme.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
 	
 	/*point to xcmp payload*/
 	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_farme.u8;
 	
+	if (length > 20)return -1;
 	
-	ptr->Function = cmd;
-	//ptr->Function = Single_Data_Uint;//0x01
+	ptr->Function = Single_Data_Uint;
 	
-	ptr->DataDefinition.Data_Protocol_Version = DMR_CSBK_Data;//0x70
+	ptr->DataDefinition.Data_Protocol_Version = TMP_Ver_1_1;//0x20
 	
-	ptr->DataDefinition.Dest_Address.Remote_Address_Type = Remote_Mototrbo_Address;//0x01
+	ptr->DataDefinition.Dest_Address.Remote_Address_Type = Remote_IPV4_Address;//0x02
 	
-	ptr->DataDefinition.Dest_Address.Remote_Address_Size = Remote_Mototrbo_Address_Size;//0x03
+	ptr->DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;//0x04
 	
-	ptr->DataDefinition.Dest_Address.Remote_Address[0] = 0x00;
-	ptr->DataDefinition.Dest_Address.Remote_Address[1] = 0x00;
-	ptr->DataDefinition.Dest_Address.Remote_Address[2] = 0x02;//ID:2
+	unsigned int addr = 0x0C000000 | (dest & 0x00FFFFFF);
+	memcpy(ptr->DataDefinition.Dest_Address.Remote_Address, &addr, Remote_IPV4_Address_Size);
+	//ptr->DataDefinition.Dest_Address.Remote_Address[0] = 0x0C;//12
+	//ptr->DataDefinition.Dest_Address.Remote_Address[1] = 0x00;//0
+	//ptr->DataDefinition.Dest_Address.Remote_Address[2] = 0x00;//0
+	//ptr->DataDefinition.Dest_Address.Remote_Address[3] = 0x02;//2
 	
-	ptr->DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//0x00
-	ptr->DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//0x00
+	ptr->DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
+	ptr->DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
 	
     
 	ptr->DataPayload.Session_ID_Number = Session_ID;//0x00
 	
-	ptr->DataPayload.DataPayload_Length[0] =(sizeof(DataPayload) >> 8) & 0xFF ;//可能会变化
-	ptr->DataPayload.DataPayload_Length[1] =sizeof(DataPayload) & 0xFF  ;//可能会变化
+	ptr->DataPayload.DataPayload_Length[0] =(length >> 8) & 0xFF ;//可能会变化
+	ptr->DataPayload.DataPayload_Length[1] =length & 0xFF  ;//可能会变化
 	
-	for (i=0; i< sizeof(DataPayload) ; i++)
-	{
+	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
 	
-		ptr->DataPayload.DataPayload[i] = DataPayload[i];//长度计算了吗？
-		
-	}
-	
-	/*send xcmp frame*///注意！！！！！！！！！！
-	xcmp_tx( &xcmp_farme, sizeof(DataSession_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(DataSession_req_t) - 7);
 }
+
+/**
+Function: xcmp_data_session_brd
+Parameters:message
+Description: send data-session broadcast to radio
+Calls: xcmp_tx
+Called By:...
+*/
+void xcmp_data_session_brd( void *message, U16 length, U8 SessionID)
+{
+	U8 i =0;
+	//static U8 SessionID = 0;
+	
+	/*xcmp frame will be sent*/
+	xcmp_fragment_t xcmp_farme;
+	
+	/*insert XCMP opcode*/
+	xcmp_farme.xcmp_opcode = XCMP_BRDCAST | DATA_SESSION;
+	
+	/*point to xcmp payload*/
+	DataSession_brdcst_t * ptr = (DataSession_brdcst_t *)xcmp_farme.u8;
+	
+	
+	ptr->State = Data_Session_Start;//0x10
+
+	ptr->DataPayload.Session_ID_Number = SessionID;//0x00++
+	
+	if (length > 20)return -1;
+	
+	ptr->DataPayload.DataPayload_Length[0] =(length >> 8) & 0xFF ;//可能会变化
+	ptr->DataPayload.DataPayload_Length[1] =length & 0xFF  ;//可能会变化
+	
+	//for (i=0; i< length ; i++)
+	//{
+		//
+		//ptr->DataPayload.DataPayload[i] = message[i];//长度计算了吗？
+		//
+	//}
+	
+	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
+
+		
+	xcmp_tx( &xcmp_farme, sizeof(DataSession_brdcst_t)-(sizeof(DataPayload_t) - length));
+
+	
+}
+
 
 /**
 Function: xcmp_button_config

@@ -70,7 +70,9 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/ASF/avr32/drivers/usart/usart.h ../src/Application/radio/xcmp.h \
  ../src/Application/radio/xnl.h ../src/Application/radio/payload.h \
  ../src/Application/rtc/rtc.h ../src/Application/radio/physical.h \
- ../src/Application/radio/payload.h
+ ../src/Application/radio/payload.h \
+ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
+ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h
 
 ../src/Application/app/app.h:
 
@@ -223,3 +225,7 @@ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/Application/radio/physical.h:
 
 ../src/Application/radio/payload.h:
+
+d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
+
+d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h:

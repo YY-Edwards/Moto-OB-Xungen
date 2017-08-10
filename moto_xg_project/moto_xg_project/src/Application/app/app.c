@@ -11,6 +11,7 @@
 #include <payload.h>
 #include <rtc.h>
 #include <physical.h>
+#include "string.h"
 
 static __app_Thread_(app_cfg);
 
@@ -30,6 +31,8 @@ volatile U8 VF_SN = 0;
 
 /* Declare a variable that will be incremented by the hook function. */
 unsigned long ulIdleCycleCount = 0UL;
+
+volatile U8  allocated_session_ID =0;
 
 
 /*until receive/transmit payload data*/
@@ -425,23 +428,21 @@ void CallControl_brdcst_func(xcmp_fragment_t * xcmp)
 	
 }
 
-
-
 void DataSession_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{
-		log("\n\r DATArep OK \n\r");
-		//log("\n\r Func: 0x %X \n\r", xcmp->u8[1]);
-		//log("\n\r ID: 0x %X \n\r", xcmp->u8[2]);
+		log("DATArep OK \n");
+		log("Func: %X \n", xcmp->u8[1]);
+		log("ID: %X \n", xcmp->u8[2]);
 		
 	}
 	else
-	{
-		log("\n\r Result:  %X \n\r", xcmp->u8[0]);
-		log("\n\r DATArep error \n\r");
-		log("\n\r Func:  %X \n\r", xcmp->u8[1]);
-		log("\n\r ID:  %X \n\r", xcmp->u8[2]);
+	{	
+		log("DATArep error \n");
+		log("Result:  %X \n", xcmp->u8[0]);
+		log("Func:  %X \n", xcmp->u8[1]);
+		log("ID:  %X \n", xcmp->u8[2]);
 	}
 	
 }
@@ -476,7 +477,24 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	else
 	{
 		//log("\n\r State: 0x %X \n\r", xcmp->u8[0]);
-		log("\n\r State: 0x %X \n\r", ptr->State);
+		log("State: 0x %X \n", ptr->State);
+		if (ptr->State)
+		{
+			log("data transmit success\n");
+		}
+		Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];
+			
+		data_length = (ptr->DataPayload.DataPayload_Length[0]<<8) | (ptr->DataPayload.DataPayload_Length[1]);//( xcmp->u8[2]<<8) | (xcmp->u8[3]);
+
+		log("\n\r Session_ID: %x \n\r",Session_number );
+		log("\n\r paylaod_length: %d \n\r",data_length );
+		for(i=0; i<data_length; i++)
+		{
+				
+			//log("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
+			log("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
+				
+		}
 		
 	}
 	
@@ -667,9 +685,6 @@ void FD_brdcst_func(xcmp_fragment_t * xcmp)
 
 
 
-
-
-
 static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
 {
     /*XCMP_REQUEST,XCMP_REPLY,XCMP_BOARDCAST-*/
@@ -783,6 +798,21 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
 		
 };
 
+U8 message[20]={
+	0x00,0x0a,
+	0xe0,0x00,
+	0x97,0x04,//µÝÔö
+	0x0d,0x00,
+	0x0a,0x00,
+		
+	0x37,
+	0x00//CSBK munufactturing ID.byte2
+	
+	//0xe0,0x81,0x04,//;header
+	//0x00,0x39
+
+
+};
 void app_init(void)
 {	
 	xcmp_register_app_list(the_app_list);
@@ -836,6 +866,7 @@ static __app_Thread_(app_cfg)
 				}
 				else if(isAudioRouting == 1)
 				{
+					//xcmp_data_session_req(message, 13, 9);
 					//xcmp_exit_device_control_mode();
 					//xcmp_audio_route_AMBE();
 					//xcmp_function_mic();
@@ -852,8 +883,8 @@ static __app_Thread_(app_cfg)
 					//isAudioRouting++;
 				}
 				else if(isAudioRouting == 2)
-				{
-					
+				{				
+					xcmp_data_session_req(message, 12, 9);
 					//xcmp_exit_device_control_mode();
 					//xcmp_volume_control();
 					//xcmp_data_session_req();
@@ -867,6 +898,8 @@ static __app_Thread_(app_cfg)
 				}
 				else if(isAudioRouting == 3)
 				{
+					//xcmp_data_session_req(Data_Session_End);
+					//xcmp_data_session_req(Data_Session_End);
 					//xcmp_audio_route_AMBE();
 					//xcmp_unmute_speaker();
 					//xcmp_enter_device_control_mode();
@@ -879,6 +912,7 @@ static __app_Thread_(app_cfg)
 				else
 				{
 					isAudioRouting++;
+					if(isAudioRouting == 5)xcmp_data_session_req(message, 12, 9);
 				}
 
 				//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
