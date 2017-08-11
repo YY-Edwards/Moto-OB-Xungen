@@ -1086,7 +1086,7 @@ typedef struct
 {
 	U8 Session_ID_Number;
 	U8 DataPayload_Length[2];
-	U8 DataPayload[20];
+	U8 DataPayload[256];
 }DataPayload_t;
 
 #pragma pack(1)

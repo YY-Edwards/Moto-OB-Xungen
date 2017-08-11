@@ -194,7 +194,7 @@ typedef enum
 #define SET_RC522RST  gpio_set_gpio_pin(AVR32_PIN_PA25)//GPIOF->BSRR=0X02
 #define CLR_RC522RST  gpio_clr_gpio_pin(AVR32_PIN_PA25)//GPIOF->BRR=0X02
 
-void InitRc522(void);
+//void InitRc522(void);
 void ClearBitMask(U8   reg,U8   mask);
 void WriteRawRC(U8   Address, U8   value);
 void SetBitMask(U8   reg,U8   mask);
@@ -228,7 +228,7 @@ void Reset_RC522(void);
 #define spi_read_byte(x)                    spi_read(spi, (U16*)x)
 
 
-void rc522_init();
+void rc522_init(void);
 
 
 

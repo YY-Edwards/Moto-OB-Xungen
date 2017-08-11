@@ -504,7 +504,7 @@ void xcmp_data_session_req(void *message, U16 length, U8 dest)
 	/*point to xcmp payload*/
 	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_farme.u8;
 	
-	if (length > 20)return -1;
+	if (length > 256)return -1;
 	
 	ptr->Function = Single_Data_Uint;
 	
@@ -532,7 +532,7 @@ void xcmp_data_session_req(void *message, U16 length, U8 dest)
 	
 	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
 	
-	xcmp_tx( &xcmp_farme, sizeof(DataSession_req_t) - 7);
+	xcmp_tx(&xcmp_farme, sizeof(DataSession_req_t) - (256 - length));
 }
 
 /**
