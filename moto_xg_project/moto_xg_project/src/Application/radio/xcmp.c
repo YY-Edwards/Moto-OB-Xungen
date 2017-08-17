@@ -377,7 +377,7 @@ Description: send tone request to test
 Calls: xcmp_tx
 Called By:...
 */
-void xcmp_IdleTestTone(void)
+void xcmp_IdleTestTone(U16 type)
 {
 	/*xcmp frame will be sent*/
 	xcmp_fragment_t xcmp_farme;
@@ -392,8 +392,11 @@ void xcmp_IdleTestTone(void)
 	ptr->Function = Tone_Start;
 	
 	/*This tone shall be sounded when radio landed on a priority channel*/
-	ptr->ToneIdentifier[0] = (Priority_Beep >> 8) & 0xFF;
-	ptr->ToneIdentifier[1] = Priority_Beep & 0xFF;
+	//ptr->ToneIdentifier[0] = (Priority_Beep >> 8) & 0xFF;
+	//ptr->ToneIdentifier[1] = Priority_Beep & 0xFF;
+	
+	ptr->ToneIdentifier[0] = (type >> 8) & 0xFF;
+	ptr->ToneIdentifier[1] = type & 0xFF;	
 	
 	/*
 	The alert tone is played according to any rules for alert tones, given the 

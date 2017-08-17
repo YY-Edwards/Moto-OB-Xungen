@@ -1551,7 +1551,7 @@ void xcmp_DeviceInitializationStatus_request(void);
 void xcmp_opcode_not_supported(void);
 
 /*send tone to test*/
-void xcmp_IdleTestTone(void);
+void xcmp_IdleTestTone(U16 type);
 
 void xcmp_audio_route_mic(void);
 void xcmp_audio_route_speaker(void);

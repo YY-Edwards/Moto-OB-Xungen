@@ -23,7 +23,7 @@ volatile U32 tc_tick = 0;
 __attribute__((__interrupt__))
 static void _tc_interrupt(void)
  {
-	// Increment the 10ms seconds counter
+	// Increment the 200ms seconds counter
 	tc_tick++;
 	/*
 	 * TODO: Place a breakpoint here and watch the update of tc_tick variable

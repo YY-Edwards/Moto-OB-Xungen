@@ -33,6 +33,7 @@ volatile U8 VF_SN = 0;
 unsigned long ulIdleCycleCount = 0UL;
 
 volatile U8  allocated_session_ID =0;
+static volatile U8 connect_flag =0; 
 
 
 /*until receive/transmit payload data*/
@@ -290,7 +291,7 @@ void AudioRoutingControl_reply_func(xcmp_fragment_t * xcmp)
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{
 		log("AudioRouting OK");
-		xcmp_IdleTestTone();//提示通道配置成功
+		//xcmp_IdleTestTone();//提示通道配置成功
 		//xcmp_IdleTestTone();
 		//xcmp_IdleTestTone();
 		//Speaker_is_unmute = 1;
@@ -536,18 +537,18 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 	PUI_State_Min_Value = xcmp->u8[5];
 	PUI_State_Max_Value = xcmp->u8[6];
 	
-	log("\n\r PhysicalUserInput_broadcast  \n\r"  );
+	log("PhysicalUserInput_broadcast  \n\r"  );
 	
-	log("\n\r PUI_Source: %X \n\r" , PUI_Source);
-	log("\n\r PUI_Type: %X \n\r" , PUI_Type);
-	log("\n\r PUI_ID: %X \n\r" , PUI_ID);
-	log("\n\r PUI_State: %X \n\r" , PUI_State);
-	log("\n\r PUI_State_Min_Value: %X \n\r" , PUI_State_Min_Value);
-	log("\n\r PUI_State_Max_Value: %X \n\r" , PUI_State_Max_Value);
-	
-	
-	
-	
+	if((PUI_ID == 0x0060) && (PUI_State = 0x02) && (connect_flag == 1)){
+		log("send message\n");
+		//rfid_sendID_message();//send message		
+	}
+	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
+	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);
+	//log("\n\r PUI_ID: %X \n\r" , PUI_ID);
+	//log("\n\r PUI_State: %X \n\r" , PUI_State);
+	//log("\n\r PUI_State_Min_Value: %X \n\r" , PUI_State_Min_Value);
+	//log("\n\r PUI_State_Max_Value: %X \n\r" , PUI_State_Max_Value);
 	
 }
 
@@ -837,114 +838,50 @@ extern U32 tc_tick;
 static __app_Thread_(app_cfg)
 {
 	static int coun=0;
-	static  U32 isAudioRouting = 0;
+	static U32 isAudioRouting = 0;
 	static  portTickType xLastWakeTime;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
+	char card_id[4]={0};
 	
 	 xLastWakeTime = xTaskGetTickCount();
 		
 	for(;;)
 	{
-		if (0x00000003 == (bunchofrandomstatusflags & 0x00000003))//确认连接成功了，再发送请求
+		if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
 		{	
-			{
-				xcmp_IdleTestTone();						
-				if(isAudioRouting == 0)
-				{
-					//xcmp_data_session_req();
-					//xcmp_audio_route_mic();
-					//xcmp_button_config();
-					//xcmp_audio_route_speaker();
-					//xcmp_enter_device_control_mode();//调换3个命令的顺序，则不会导致掉线。。。奇葩
-					//xcmp_enter_enhanced_OB_mode();
-					//xcmp_unmute_speaker();
-					//Speaker_is_unmute = 1;
-					//xcmp_function_mic();
-					
-					isAudioRouting = 1;
-				}
-				else if(isAudioRouting == 1)
-				{
-					//xcmp_data_session_req(message, 13, 9);
-					//xcmp_exit_device_control_mode();
-					//xcmp_audio_route_AMBE();
-					//xcmp_function_mic();
-					//xcmp_data_session_req();
-				    //xcmp_transmit_control();
-					//xcmp_volume_control();
-					//xcmp_enter_enhanced_OB_mode();
-					//xcmp_button_config();
-					//xcmp_audio_route_speaker();
-					//xcmp_unmute_speaker();
-					//log("\n\r time: %d \n\r", tc_tick);
-					
-					isAudioRouting = 2;
-					//isAudioRouting++;
-				}
-				else if(isAudioRouting == 2)
-				{				
-					xcmp_data_session_req(message, 12, 9);
-					//xcmp_exit_device_control_mode();
-					//xcmp_volume_control();
-					//xcmp_data_session_req();
-					//xcmp_audio_route_speaker();
-					//xcmp_unmute_speaker();
-					//xcmp_enter_device_control_mode();
-					//xcmp_mute_speaker();	
-					//log("\n\r time: %d \n\r", tc_tick); 
-					isAudioRouting = 3;
-					
-				}
-				else if(isAudioRouting == 3)
-				{
-					//xcmp_data_session_req(Data_Session_End);
-					//xcmp_data_session_req(Data_Session_End);
-					//xcmp_audio_route_AMBE();
-					//xcmp_unmute_speaker();
-					//xcmp_enter_device_control_mode();
-					//xcmp_exit_enhanced_OB_mode();
-					//xcmp_mute_speaker();
-					//xcmp_enhanced_OB_mode();
-					isAudioRouting = 4;
-					
-				}
-				else
-				{
-					isAudioRouting++;
-					if(isAudioRouting == 5)xcmp_data_session_req(message, 12, 9);
-				}
-
-				//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-				//log("\n\r un: %d \n\r", Speaker_is_unmute);
-				//log("\n\r S_flag: %d \n\r", Silent_flag);
-				//log("\n\r Tend_flag: %d \n\r", Terminator_Flag);			
-			
-				//log("\n\r AMBE_Rx_flag: %d \n\r", AMBE_rx_flag);
-				//log("\n\r AMBE_Tx_flag: %d \n\r", AMBE_tx_flag);
-				//log("\n\r VF_SN: %x \n\r",  VF_SN);
-				//log("\n\r time: %d \n\r", tc_tick);
-				
-				if(isAudioRouting  == 6)
-				{
-					//xcmp_audio_route_speaker();
-					//xcmp_unmute_speaker();
-					
-					//xcmp_audio_route_speaker();
-					//xcmp_enter_device_control_mode();//调换3个命令的顺序，则不会导致掉线。。。奇葩
-					//xcmp_unmute_speaker();
-					//xcmp_enter_device_control_mode();
-					//xcmp_exit_device_control_mode();
-					//log("\n\r time: %d \n\r", tc_tick);   
-					
-				}
-			}
-			
+			xcmp_IdleTestTone(Priority_Beep);
+			connect_flag=1;	
 		}
+		else if(connect_flag)
+		{
+				//if(rfid_auto_reader(card_id) == 0){
+					//log("card_id : 0x%X, 0x%X, 0x%X, 0x%X\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
+				//}
+				//else
+				{
+					log("read card err!!!\n");
+				}
+				
+		}
+		else
+		{
+			nop();
+			nop();
+			nop();
+		}
+		
+		//{
+			//xcmp_IdleTestTone();						
+				//
+			////xcmp_data_session_req(message, 12, 9);	
+		//}
+			
+		//}
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		
-		vTaskDelayUntil( &xLastWakeTime, 2000*2 / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 }
 

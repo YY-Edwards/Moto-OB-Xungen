@@ -8,15 +8,18 @@
 
 #ifndef RFID_H_
 #define RFID_H_
+#include <string.h>
 #include "rc522.h"
 #include "timer.h"
+#include "xcmp.h"
+#include "log.h"
 
-#define DEST 9;
+
+#define DEST 9;//目的ID
 
 U8 CT[2];				//卡类型
 U8 SN[4];				//卡号	
 U8 RFID[16];			//存放RFID
-U8 unsure_data[5]={0x04, 0x0d, 0x00, 0x0a, 0x00};
 #pragma pack(1)
 typedef struct
 {

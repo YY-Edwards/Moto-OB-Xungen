@@ -68,12 +68,13 @@ src/main.d src/main.o src/main.o: ../src/main.c \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/Application/radio/xcmp.h ../src/Application/radio/xnl.h \
  ../src/Application/rtc/rtc.h ../src/Application/app/app.h \
- ../src/Application/RFID/RFID.h ../src/Application/RFID/MFRC522/rc522.h \
+ ../src/Application/RFID/RFID.h \
+ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
+ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h \
+ ../src/Application/RFID/MFRC522/rc522.h \
  ../src/ASF/avr32/drivers/spi/spi.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
- d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
- d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h \
  ../src/ASF/avr32/drivers/gpio/gpio.h ../src/Application/radio/xnl.h
 
 d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/include/stdbool.h:
@@ -224,6 +225,10 @@ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/Application/RFID/RFID.h:
 
+d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
+
+d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h:
+
 ../src/Application/RFID/MFRC522/rc522.h:
 
 ../src/ASF/avr32/drivers/spi/spi.h:
@@ -231,10 +236,6 @@ d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
-
-d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
-
-d:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h:
 
 ../src/ASF/avr32/drivers/gpio/gpio.h:
 
