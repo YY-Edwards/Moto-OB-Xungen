@@ -187,14 +187,17 @@ typedef enum
 #define READCARD	0xa3
 #define ADDMONEY	0xa4
 
-
-#define SET_SPI_CS  spi_unselectChip(spi, DF_SPI_PCS_0)
-#define CLR_SPI_CS  spi_selectChip(spi, DF_SPI_PCS_0)
+#define SET_SPI_CS   gpio_set_gpio_pin(AVR32_SPI_NPCS_0_1_PIN)
+#define CLR_SPI_CS   gpio_clr_gpio_pin(AVR32_SPI_NPCS_0_1_PIN)
 
 #define SET_RC522RST  gpio_set_gpio_pin(AVR32_PIN_PA25)//GPIOF->BSRR=0X02
 #define CLR_RC522RST  gpio_clr_gpio_pin(AVR32_PIN_PA25)//GPIOF->BRR=0X02
 
 //void InitRc522(void);
+
+U8 RC522_WriteByte(U8 Data);
+U8 RC522_ReadByte(void);
+
 void ClearBitMask(U8   reg,U8   mask);
 void WriteRawRC(U8   Address, U8   value);
 void SetBitMask(U8   reg,U8   mask);
@@ -219,13 +222,15 @@ char PcdWrite(unsigned char addr,unsigned char *pData);
 char PcdRead(unsigned char addr,unsigned char *pData);
 char PcdHalt(void);
 void Reset_RC522(void);
+void RC522_SPI_SetSpeed(U16 SPI_BaudRatePrescaler);
+void RC522_SPI_SetSpeedLow(void);
+void RC522_SPI_SetSpeedHi(void);
 
 
 
-
-#define spi_write_dummy()                   spi_write(spi, 0xFF)
-#define spi_write_byte(x)                   spi_write(spi, (U16)x)
-#define spi_read_byte(x)                    spi_read(spi, (U16*)x)
+//#define spi_write_dummy()                   spi_write(spi, 0xFF)
+//#define spi_write_byte(x)                   spi_write(spi, (U16)x)
+//#define spi_read_byte(x)                    spi_read(spi, (U16*)x)
 
 
 void rc522_init(void);

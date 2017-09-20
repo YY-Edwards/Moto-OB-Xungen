@@ -7,6 +7,11 @@
 #include "rc522.h"
 
 volatile avr32_spi_t *spi;
+#define spi_write_dummy()                   spi_write(spi, 0xFF)
+#define spi_write_byte(x)                   spi_write(spi, (U16)x)
+#define spi_read_byte(x)                    spi_read(spi, (U16*)x)
+
+
 U8 rc522_init_failure =0;
 
 void delay_ns(U32 ns)
@@ -35,6 +40,50 @@ void delay_ms(U32 ms)
 }
 
 
+U8 RC522_WriteByte(U8 Data)
+{
+	U8 temp =0;
+	
+	spi_selectChip(spi, DF_SPI_PCS_0);
+	
+	/*!< Send the byte */
+	spi_write(spi,  (U16)Data);
+	
+	/*!< Wait to receive a byte*/
+
+	//temp = spi_read(spi, (U16*)&Data);
+	
+	spi_unselectChip(spi, DF_SPI_PCS_0);
+	
+	/*!< Return the byte read from the SPI bus */
+	return  temp;
+
+}
+U8 RC522_ReadByte(void)
+{
+	U16 *Data ;
+
+	//必须这样才能正常读写
+	spi_selectChip(spi, DF_SPI_PCS_0);
+	
+	/*!< Send the byte */
+
+	spi_write(spi,  0xFF);
+	
+	/*!< Return the byte read from the SPI bus */
+
+	spi_read(spi, Data);
+
+	/*!< Return the shifted data */
+	
+	spi_unselectChip(spi, DF_SPI_PCS_0);
+	
+	return (U8)(*Data);
+	
+}
+
+
+
 /////////////////////////////////////////////////////////////////////
 //功    能：读RC632寄存器
 //参数说明：Address[IN]:寄存器地址
@@ -44,12 +93,12 @@ U8 ReadRawRC(U8   Address)
 {
 	U8   ucAddr;
 	U8   ucResult=0;
-	CLR_SPI_CS;
-	
+	CLR_SPI_CS;	
+	 
 	ucAddr = ((Address<<1)&0x7E)|0x80;
 	
-	spi_write_byte(ucAddr);
-	spi_read_byte(&ucResult);
+	RC522_WriteByte(ucAddr);
+	ucResult = RC522_ReadByte();
 	
 	SET_SPI_CS;
 	return ucResult;
@@ -64,15 +113,36 @@ void WriteRawRC(U8   Address, U8   value)
 {
 	U8   ucAddr;
 
-	CLR_SPI_CS;
+	CLR_SPI_CS;	
 	
 	ucAddr = ((Address<<1)&0x7E);
-	spi_write_byte(ucAddr);
-	spi_write_byte(value);
+	RC522_WriteByte(ucAddr);
+	RC522_WriteByte(value);
 	
 	SET_SPI_CS;
 
 }
+
+void RC522_SPI_SetSpeed(U16 SPI_BaudRatePrescaler)
+{
+	spi->csr0 = (spi->csr0 & (U16)0x00FF) |SPI_BaudRatePrescaler;
+
+	spi_enable(spi); /*!< SD_SPI enable */
+		
+	
+}
+void RC522_SPI_SetSpeedLow(void)
+{
+	RC522_SPI_SetSpeed(0xFF00);//baudDiv=255
+	
+}
+void RC522_SPI_SetSpeedHi(void)
+{
+	
+	RC522_SPI_SetSpeed(0x0100);//baudDiv=1
+	
+}
+
 
 
 void static spi_init()
@@ -91,7 +161,7 @@ void static spi_init()
 	spi_options_t spiOptions =
 	{
 		.reg          = DF_SPI_FIRST_NPCS,   // PCS0
-		.baudrate     = DF_SPI_MASTER_SPEED, // 24MHz
+		.baudrate     = DF_SPI_MASTER_SPEED/2, // 24MHz
 		.bits         = DF_SPI_BITS,         // 8 bit per transfer
 		.spck_delay   = 0,
 		.trans_delay  = 0,
@@ -105,7 +175,9 @@ void static spi_init()
 
 	// Configure PA25 as RST pin
 	gpio_enable_gpio_pin(AVR32_PIN_PA25);
-	//gpio_set_gpio_pin(AVR32_PIN_PA25);
+	gpio_set_gpio_pin(AVR32_PIN_PA25);
+	
+	//gpio_enable_gpio_pin(AVR32_PIN_PA24);
 
 	spi = &AVR32_SPI;
 
@@ -119,13 +191,14 @@ void static spi_init()
 	spi_enable(spi);
 
 	// Initialize RC522 with SPI clock Osc0.
-	if (spi_setupChipReg(spi, &spiOptions, 2*12000000) != SPI_OK)
+	if (spi_setupChipReg(spi, &spiOptions, 12000000) != SPI_OK)
 	{
 		
 		rc522_init_failure = FATAL_ERROR_RC522_SPI_INIT;
 		return;
 	}
 	
+	RC522_SPI_SetSpeedLow();
 	
 }
 /////////////////////////////////////////////////////////////////////

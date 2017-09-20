@@ -11,10 +11,14 @@ U8 unsure_data[5]={0x04, 0x0d, 0x00, 0x0a, 0x00};
 
 void rfid_init()
 {
-	
+	char card_id[4]={0};
 	//tc_init();//用定时器200ms自动寻卡
 	
-	//rc522_init();
+	rc522_init();
+	
+	if(rfid_auto_reader(card_id) == 0){
+				log("card_id : 0x%X, 0x%X, 0x%X, 0x%X\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
+	}
 		
 }
 
