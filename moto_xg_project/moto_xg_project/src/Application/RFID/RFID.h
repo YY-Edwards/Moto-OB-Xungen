@@ -33,7 +33,7 @@ typedef struct
 
 void rfid_init();
 U8 rfid_auto_reader(void *card_id);
-void rfid_sendID_message();
+U8 rfid_sendID_message();
 
 
 

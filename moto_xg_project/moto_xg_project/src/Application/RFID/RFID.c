@@ -16,9 +16,9 @@ void rfid_init()
 	
 	rc522_init();
 	
-	if(rfid_auto_reader(card_id) == 0){
-		log("card_id : 0x%X, 0x%X, 0x%X, 0x%X\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
-	}
+	//if(rfid_auto_reader(card_id) == 0){
+		//log("card_id : 0x%X, 0x%X, 0x%X, 0x%X\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
+	//}
 		
 }
 
@@ -28,10 +28,9 @@ U8 rfid_auto_reader(void *card_id)
 	U8 status = MI_ERR;
 	
 	PcdReset();
-while(1){
-		
+//while(1){
 	status=PcdRequest(PICC_REQALL,	CT);//寻天线区内全部的卡，返回卡片类型 2字节
-	if(status!=MI_OK) continue;;
+	if(status!=MI_OK) return;//continue;
 	
 	if(CT[0]==0x04&&CT[1]==0x00)
 		log("MFOne-S50\n");
@@ -46,28 +45,26 @@ while(1){
 	else
 		log("Unknown\n");
 		
-	   
 	status=PcdAnticoll(SN);//防冲撞，返回卡的序列号 4字节
-	if(status!=MI_OK)continue;
+	if(status!=MI_OK)return;//continue;
 	
 	//memcpy(MLastSelectedSnr,&RevBuffer[2],4);
 	status=PcdSelect(SN);//选卡
-	if(status!=MI_OK)continue;
+	if(status!=MI_OK)return;//continue;
 	else{//选卡成功
 			
 		memcpy(card_id, SN, 4);
-		//log("select okay\n");
-		continue;
+		log("select okay\n");
 		//break;
-		//return status;	
+		return status;	
 	}
 	
-}
+//}
 	
 }
 
 
-void rfid_sendID_message()
+U8 rfid_sendID_message()
 {
 	char SN[10];
 	char data_buffer[16];
@@ -83,21 +80,24 @@ void rfid_sendID_message()
 	memset(message, 0x00, 80);
 
 	return_err = rfid_auto_reader(SN);
+	
 	if(return_err == 0){
 		
-		xcmp_IdleTestTone(Good_Key_Chirp);//set tone to noticy okay!!!
+		log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
+		
+		xcmp_IdleTestTone(Accessory_Connected);//set tone to noticy okay!!!
 		 
 		for(int i = 0; i<4; i++){//将Unicode码转换为大端模式	
 		
 			 temp = ((SN[i] & 0xF0) >> 4);//取字节高四位
-			 if((temp > 0) && (temp < 9))data_buffer[i*4] = temp+0x30;
+			 if((temp >= 0) && (temp <= 9))data_buffer[i*4] = temp+0x30;
 			 else 
 				data_buffer[i*4] = ((temp - 0x0a)+0x61);
 			
 			 data_buffer[i*4+1] = 0x00; 
 		 
 			 temp = (SN[i] & 0x0F);//取字节低四位
-			 if((temp > 0) && (temp < 9))data_buffer[i*4+2] = temp+0x30;
+			 if((temp >= 0) && (temp <= 9))data_buffer[i*4+2] = temp+0x30;
 			 else
 				data_buffer[i*4+2] = ((temp - 0x0a)+0x61);
 
@@ -122,8 +122,10 @@ void rfid_sendID_message()
 	}
 	else
 	{
-	
+		log("no card find...\n");
 	}
+	
+	return return_err;
 	
 }
 

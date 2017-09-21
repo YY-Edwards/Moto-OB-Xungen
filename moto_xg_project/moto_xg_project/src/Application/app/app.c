@@ -855,13 +855,16 @@ static __app_Thread_(app_cfg)
 		}
 		else if(connect_flag)
 		{
+				
+				rfid_sendID_message();
 				//if(rfid_auto_reader(card_id) == 0){
-					//log("card_id : 0x%X, 0x%X, 0x%X, 0x%X\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
+					//log("card_id : %X, %X, %X, %X\n", card_id[0], card_id[1], card_id[2], card_id[3]);
+					//memset(card_id,0x00,4);	
 				//}
 				//else
-				{
-					log("read card err!!!\n");
-				}
+				//{
+					//log("no find card...\n");
+				//}
 				
 		}
 		else
