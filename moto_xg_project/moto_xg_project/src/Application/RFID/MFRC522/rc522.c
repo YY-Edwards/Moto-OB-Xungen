@@ -51,7 +51,7 @@ U8 RC522_WriteByte(U8 Data)
 	
 	/*!< Wait to receive a byte*/
 
-	//temp = spi_read(spi, (U16*)&Data);
+	temp = spi_read(spi, (U16*)&Data);
 	
 	spi_unselectChip(spi, DF_SPI_PCS_0);
 	
@@ -161,7 +161,7 @@ void static spi_init()
 	spi_options_t spiOptions =
 	{
 		.reg          = DF_SPI_FIRST_NPCS,   // PCS0
-		.baudrate     = DF_SPI_MASTER_SPEED/2, // 24MHz
+		.baudrate     = DF_SPI_MASTER_SPEED, // 24MHz
 		.bits         = DF_SPI_BITS,         // 8 bit per transfer
 		.spck_delay   = 0,
 		.trans_delay  = 0,
@@ -191,7 +191,7 @@ void static spi_init()
 	spi_enable(spi);
 
 	// Initialize RC522 with SPI clock Osc0.
-	if (spi_setupChipReg(spi, &spiOptions, 12000000) != SPI_OK)
+	if (spi_setupChipReg(spi, &spiOptions, 2*12000000) != SPI_OK)
 	{
 		
 		rc522_init_failure = FATAL_ERROR_RC522_SPI_INIT;
@@ -199,6 +199,7 @@ void static spi_init()
 	}
 	
 	RC522_SPI_SetSpeedLow();
+	
 	
 }
 /////////////////////////////////////////////////////////////////////
