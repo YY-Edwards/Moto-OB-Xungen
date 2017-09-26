@@ -207,22 +207,24 @@ static void phy_tx_func( void * ssc)
     }
 	
     /*if enable send/receive payload(media)and enable playback function, defined in physical.h*/
-    #if (ENABLE == PAYLOAD_ENABLE) 
-    //if(NULL != phy_payload_frame_tx)
-    {
-		//启用回放功能
-		//if (ENABLE == PLAYBACK_ENABLE)
-		{
-			/*send ssc data in payload(media) frame*/
-			phy_payload_tx(&(((ssc_fragment_t * )ssc)->payload_channel));	
-			
-		}
-    }
-	#else
-	/*send idle frame*/	
+    //#if (ENABLE == PAYLOAD_ENABLE) 
+    ////if(NULL != phy_payload_frame_tx)
+    //{
+		////启用回放功能
+		////if (ENABLE == PLAYBACK_ENABLE)
+		//{
+			///*send ssc data in payload(media) frame*/
+			//phy_payload_tx(&(((ssc_fragment_t * )ssc)->payload_channel));	
+			//
+		//}
+    //}
+	//#else
+	///*send idle frame*/	
+	//((ssc_fragment_t * )ssc)->payload_channel.dword[0] = PAYLOADIDLE0;
+	//((ssc_fragment_t * )ssc)->payload_channel.dword[1] = PAYLOADIDLE1;
+	//#endif /*end if*/
 	((ssc_fragment_t * )ssc)->payload_channel.dword[0] = PAYLOADIDLE0;
 	((ssc_fragment_t * )ssc)->payload_channel.dword[1] = PAYLOADIDLE1;
-	#endif /*end if*/
 }
 
 

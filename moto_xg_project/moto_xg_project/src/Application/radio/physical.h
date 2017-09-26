@@ -23,7 +23,7 @@ History:
 #define RX_XNL_QUEUE_DEEP	10
 
 /*Enable payload(media) or disable*/
-#define PAYLOAD_ENABLE	ENABLE
+#define PAYLOAD_ENABLE	ENABLE	
 
 /*Enable playback(media) or disable*/
 #define PLAYBACK_ENABLE ENABLE

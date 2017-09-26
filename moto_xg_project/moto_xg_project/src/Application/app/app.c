@@ -910,7 +910,7 @@ static void app_payload_rx_proc(void  * payload)
 	}
 	
 	//payload_fragment_t * ptr = (payload_fragment_t *)payload;
-	set_payload_idle(payload);
+	//set_payload_idle(payload);
 
 }
 
