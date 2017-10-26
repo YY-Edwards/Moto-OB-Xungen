@@ -16,6 +16,9 @@ History:
 #include "xnl.h"
 #include "payload.h"
 
+#define TRUE 1
+#define FALSE 0
+
 #define MAX_XNL_STORE	 30
 
 /*the queue depth is used to create xnl queue*/

@@ -133,7 +133,7 @@ void RC522_SPI_SetSpeed(U16 SPI_BaudRatePrescaler)
 }
 void RC522_SPI_SetSpeedLow(void)
 {
-	RC522_SPI_SetSpeed(0xFF00);//baudDiv=255
+	RC522_SPI_SetSpeed(0x0400);//baudDiv=255
 	
 }
 void RC522_SPI_SetSpeedHi(void)

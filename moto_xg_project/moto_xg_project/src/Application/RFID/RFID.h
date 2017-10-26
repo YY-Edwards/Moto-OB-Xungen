@@ -16,10 +16,6 @@
 
 
 #define DEST 9;//目的ID
-
-U8 CT[2];				//卡类型
-U8 SN[4];				//卡号	
-U8 RFID[16];			//存放RFID
 #pragma pack(1)
 typedef struct
 {
@@ -32,8 +28,8 @@ typedef struct
 #pragma pack()
 
 void rfid_init();
-U8 rfid_auto_reader(void *card_id);
 U8 rfid_sendID_message();
+U8 rfid_auto_reader(void *card_id);
 
 
 
