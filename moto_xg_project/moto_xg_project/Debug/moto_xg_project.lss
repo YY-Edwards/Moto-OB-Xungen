@@ -23,21 +23,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   9 .debug_pubnames 00002347  00000000  00000000  0000eeb0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_info   00025fbd  00000000  00000000  000111f7  2**0
+ 10 .debug_info   00025fba  00000000  00000000  000111f7  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_abbrev 00006267  00000000  00000000  000371b4  2**0
+ 11 .debug_abbrev 00006267  00000000  00000000  000371b1  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_line   0000b950  00000000  00000000  0003d41b  2**0
+ 12 .debug_line   0000b950  00000000  00000000  0003d418  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_frame  00002ae8  00000000  00000000  00048d6c  2**2
+ 13 .debug_frame  00002ae8  00000000  00000000  00048d68  2**2
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_str    0000691f  00000000  00000000  0004b854  2**0
+ 14 .debug_str    0000691f  00000000  00000000  0004b850  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_loc    0000c35f  00000000  00000000  00052173  2**0
+ 15 .debug_loc    0000c35f  00000000  00000000  0005216f  2**0
                   CONTENTS, READONLY, DEBUGGING
  16 .stack        00001000  00017000  00017000  00000400  2**0
                   ALLOC
- 17 .debug_ranges 00001148  00000000  00000000  0005e4d8  2**3
+ 17 .debug_ranges 00001148  00000000  00000000  0005e4d0  2**3
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .reset:
@@ -5119,10 +5119,8 @@ void ssc_init(void)
 80003cc8:	e0 6b 01 01 	mov	r11,257
 80003ccc:	fe 7a 34 00 	mov	r10,-52224
 80003cd0:	95 0b       	st.w	r10[0x0],r11
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = 
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = AVR32_PDCA_RCZ_MASK;
 80003cd2:	93 88       	st.w	r9[0x20],r8
-	//(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->ier = 
-                                                            AVR32_PDCA_RCZ_MASK;
 															
 	Enable_global_interrupt();
 80003cd4:	d5 03       	csrf	0x10
@@ -7177,7 +7175,6 @@ void local_start_timer(void)
 80004618:	48 8c       	lddpc	r12,80004638 <local_start_timer+0x24>
 8000461a:	f0 1f 00 09 	mcall	8000463c <local_start_timer+0x28>
 
-	//(&AVR32_TC)->bmr = 4;
 	(&AVR32_TC)->channel[0].cmr =
 8000461e:	fe 78 38 00 	mov	r8,-51200
 80004622:	e0 69 91 0d 	mov	r9,37133

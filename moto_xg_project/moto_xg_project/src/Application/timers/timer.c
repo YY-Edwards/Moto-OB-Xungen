@@ -66,7 +66,6 @@ void local_start_timer(void)
 	};
 	gpio_enable_module(TC_GPIO_MAP, sizeof(TC_GPIO_MAP) / sizeof(TC_GPIO_MAP[0]));
 
-	//(&AVR32_TC)->bmr = 4;
 	(&AVR32_TC)->channel[0].cmr =
 	AVR32_TC_BSWTRG_NONE       << AVR32_TC_BSWTRG_OFFSET   |
 	AVR32_TC_BEEVT_NONE        << AVR32_TC_BEEVT_OFFSET    |
