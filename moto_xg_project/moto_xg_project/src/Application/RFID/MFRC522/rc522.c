@@ -133,7 +133,7 @@ void RC522_SPI_SetSpeed(U16 SPI_BaudRatePrescaler)
 }
 void RC522_SPI_SetSpeedLow(void)
 {
-	RC522_SPI_SetSpeed(0x0400);//baudDiv=4
+	RC522_SPI_SetSpeed(0xFF00);//baudDiv=4
 	
 }
 void RC522_SPI_SetSpeedHi(void)
@@ -161,7 +161,7 @@ void static spi_init()
 	spi_options_t spiOptions =
 	{
 		.reg          = DF_SPI_FIRST_NPCS,   // PCS0
-		.baudrate     = DF_SPI_MASTER_SPEED, // 24MHz
+		.baudrate     = DF_SPI_MASTER_SPEED/2, // 24MHz
 		.bits         = DF_SPI_BITS,         // 8 bit per transfer
 		.spck_delay   = 0,
 		.trans_delay  = 0,
@@ -191,7 +191,7 @@ void static spi_init()
 	spi_enable(spi);
 
 	// Initialize RC522 with SPI clock PBA.
-	if (spi_setupChipReg(spi, &spiOptions, 2*12000000) != SPI_OK)
+	if (spi_setupChipReg(spi, &spiOptions, 2*12000000/2) != SPI_OK)
 	{
 		
 		rc522_init_failure = FATAL_ERROR_RC522_SPI_INIT;

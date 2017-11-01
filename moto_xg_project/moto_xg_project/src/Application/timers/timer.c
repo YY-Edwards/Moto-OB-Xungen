@@ -4,7 +4,8 @@
  * Created: 2016/3/15 14:06:41
  *  Author: JHDEV2
  */ 
-
+#include "timer.h"
+#include "gpio.h"
 #include <stdbool.h>
 
 #include "conf_example.h"
@@ -48,16 +49,24 @@ static void _tc_interrupt(void)
 //
 void local_start_timer(void)
 {
-	//Route CLK to Timer
-	AVR32_GPIO.port[0].pmr0s = 0x00100000;
-	AVR32_GPIO.port[0].pmr1c = 0x00100000;
-	AVR32_GPIO.port[0].gperc = 0x00100000;
-	//Route FS and Tri-State to Timer.
-	AVR32_GPIO.port[1].pmr0c = 0x00000003;
-	AVR32_GPIO.port[1].pmr1c = 0x00000003;
-	AVR32_GPIO.port[1].gperc = 0x00000003;
+	////Route CLK to Timer
+	//AVR32_GPIO.port[0].pmr0s = 0x00100000;
+	//AVR32_GPIO.port[0].pmr1c = 0x00100000;
+	//AVR32_GPIO.port[0].gperc = 0x00100000;
+	////Route FS and Tri-State to Timer.
+	//AVR32_GPIO.port[1].pmr0c = 0x00000003;
+	//AVR32_GPIO.port[1].pmr1c = 0x00000003;
+	//AVR32_GPIO.port[1].gperc = 0x00000003;
+	
+	static const gpio_map_t TC_GPIO_MAP =
+	{
+		{TIMER_TC_CLK_PIN,      TIMER_TC_CLK_FUNCTION     },
+		{TIMER_TC_FS_PIN,       TIMER_TC_FS_FUNCTION      },
+		{TIMER_EN_CLK_PIN,      TIMER_EN_CLK_FUNCTION     }
+	};
+	gpio_enable_module(TC_GPIO_MAP, sizeof(TC_GPIO_MAP) / sizeof(TC_GPIO_MAP[0]));
 
-	(&AVR32_TC)->bmr = 4;
+	//(&AVR32_TC)->bmr = 4;
 	(&AVR32_TC)->channel[0].cmr =
 	AVR32_TC_BSWTRG_NONE       << AVR32_TC_BSWTRG_OFFSET   |
 	AVR32_TC_BEEVT_NONE        << AVR32_TC_BEEVT_OFFSET    |

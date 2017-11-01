@@ -107,50 +107,52 @@ void local_start_SSC(void)
 
     /*For Slave*/
     (&AVR32_SSC)->tcmr =
-          AVR32_SSC_TCMR_CKS_RK_CLOCK << AVR32_SSC_TCMR_CKS_OFFSET
-        | AVR32_SSC_TCMR_CKS_RK_CLOCK << AVR32_SSC_TCMR_CKS_OFFSET
-	    | AVR32_SSC_TCMR_CKO_INPUT_ONLY << AVR32_SSC_TCMR_CKO_OFFSET
-	    | 1 << AVR32_SSC_TCMR_CKI_OFFSET
-	    | AVR32_SSC_TCMR_CKG_NONE << AVR32_SSC_TCMR_CKG_OFFSET
+          AVR32_SSC_TCMR_CKS_RK_CLOCK		<< AVR32_SSC_TCMR_CKS_OFFSET	| 
+		  AVR32_SSC_TCMR_CKO_INPUT_ONLY		<< AVR32_SSC_TCMR_CKO_OFFSET	| 
+		  1									<< AVR32_SSC_TCMR_CKI_OFFSET	| 
+		  AVR32_SSC_TCMR_CKG_NONE			<< AVR32_SSC_TCMR_CKG_OFFSET	|	
 
         /*Detection of a falling edge on TX_FRAME_SYNC signal*/
-	    | 4 << AVR32_SSC_TCMR_START_OFFSET
-	    | 32 << AVR32_SSC_TCMR_STTDLY_OFFSET
-	    | 63 << AVR32_SSC_TCMR_PERIOD_OFFSET;
+		  4									<< AVR32_SSC_TCMR_START_OFFSET	|
+	      32								<< AVR32_SSC_TCMR_STTDLY_OFFSET	|
+	      63								<< AVR32_SSC_TCMR_PERIOD_OFFSET;
 
 
     /*For Slave*/
-    (&AVR32_SSC)->tfmr = 31 << AVR32_SSC_TFMR_DATLEN_OFFSET 
-        | 0 << AVR32_SSC_TFMR_DATDEF_OFFSET
-	    | 1 << AVR32_SSC_TFMR_MSBF_OFFSET
+    (&AVR32_SSC)->tfmr = 
+		31									<< AVR32_SSC_TFMR_DATLEN_OFFSET	|
+        0									<< AVR32_SSC_TFMR_DATDEF_OFFSET	|
+	    1									<< AVR32_SSC_TFMR_MSBF_OFFSET	|
 
         /*This field defines the number of data words to be transferred after 
         each transfer start, which is equal to (DATNB + 1).*/
-	    | 2 << AVR32_SSC_TFMR_DATNB_OFFSET
-	    | 0 << AVR32_SSC_TFMR_FSLEN_OFFSET
-	    | AVR32_SSC_TFMR_FSOS_INPUT_ONLY << AVR32_SSC_TFMR_FSOS_OFFSET
-	    | 0 << AVR32_SSC_TFMR_FSDEN_OFFSET
-	    | 1 << AVR32_SSC_TFMR_FSEDGE_OFFSET;
+	     2									<< AVR32_SSC_TFMR_DATNB_OFFSET	|
+	     0									<< AVR32_SSC_TFMR_FSLEN_OFFSET	|
+	     AVR32_SSC_TFMR_FSOS_INPUT_ONLY		<< AVR32_SSC_TFMR_FSOS_OFFSET	|
+	     0									<< AVR32_SSC_TFMR_FSDEN_OFFSET	|
+	     1									<< AVR32_SSC_TFMR_FSEDGE_OFFSET;
 
 	/*For Slave*/
 
-	(&AVR32_SSC)->rcmr = AVR32_SSC_RCMR_CKS_RK_PIN << AVR32_SSC_RCMR_CKS_OFFSET
-	    | AVR32_SSC_RCMR_CKO_INPUT_ONLY << AVR32_SSC_RCMR_CKO_OFFSET
-	    | 0 << AVR32_SSC_RCMR_CKI_OFFSET
-	    | AVR32_SSC_RCMR_CKG_NONE << AVR32_SSC_RCMR_CKG_OFFSET
-	    | AVR32_SSC_RCMR_START_DETECT_FALLING_RF << AVR32_SSC_RCMR_START_OFFSET
-	    | 0 << AVR32_SSC_RCMR_STOP_OFFSET
-	    | 32 << AVR32_SSC_RCMR_STTDLY_OFFSET
-	    | 63 << AVR32_SSC_RCMR_PERIOD_OFFSET;
+	(&AVR32_SSC)->rcmr = 
+		 AVR32_SSC_RCMR_CKS_RK_PIN			<< AVR32_SSC_RCMR_CKS_OFFSET	|
+	     AVR32_SSC_RCMR_CKO_INPUT_ONLY		<< AVR32_SSC_RCMR_CKO_OFFSET	|
+	     0									<< AVR32_SSC_RCMR_CKI_OFFSET	|
+	     AVR32_SSC_RCMR_CKG_NONE			<< AVR32_SSC_RCMR_CKG_OFFSET	|
+	     AVR32_SSC_RCMR_START_DETECT_FALLING_RF << AVR32_SSC_RCMR_START_OFFSET|
+	     0									<< AVR32_SSC_RCMR_STOP_OFFSET	|
+	     32									<< AVR32_SSC_RCMR_STTDLY_OFFSET	|
+	     63									<< AVR32_SSC_RCMR_PERIOD_OFFSET;
 
 	/*For Slave*/
-	(&AVR32_SSC)->rfmr = 31 << AVR32_SSC_RFMR_DATLEN_OFFSET
-	    | 0 << AVR32_SSC_RFMR_LOOP_OFFSET
-	    | 1 << AVR32_SSC_RFMR_MSBF_OFFSET
-	    | 2 << AVR32_SSC_RFMR_DATNB_OFFSET
-	    | 0 << AVR32_SSC_RFMR_FSLEN_OFFSET
-	    | AVR32_SSC_RFMR_FSOS_INPUT_ONLY << AVR32_SSC_RFMR_FSOS_OFFSET
-	    | 1 << AVR32_SSC_RFMR_FSEDGE_OFFSET;
+	(&AVR32_SSC)->rfmr = 
+		31									<< AVR32_SSC_RFMR_DATLEN_OFFSET	|
+	    0									<< AVR32_SSC_RFMR_LOOP_OFFSET	|
+	    1									<< AVR32_SSC_RFMR_MSBF_OFFSET	|
+	    2									<< AVR32_SSC_RFMR_DATNB_OFFSET	|
+	    0									<< AVR32_SSC_RFMR_FSLEN_OFFSET	|
+	    AVR32_SSC_RFMR_FSOS_INPUT_ONLY		<< AVR32_SSC_RFMR_FSOS_OFFSET	|
+	    1									<< AVR32_SSC_RFMR_FSEDGE_OFFSET;
 }/*End of local_start_SSC.*/
 
 /*
@@ -207,19 +209,23 @@ Called By: phy_init -- physical.c
 */
 void ssc_init(void)
 {		
-    /*Set up PB03 to watch FS.*/
+    /*Set up PB01 to watch FS.*/
     AVR32_GPIO.port[1].oderc = 0x00000002;
     AVR32_GPIO.port[1].gpers = 0x00000002;
-
+	
+	INTC_register_interrupt (
+	&pdca_int_handler
+	, AVR32_PDCA_IRQ_0
+	, AVR32_INTC_INT3
+	);
+	
+	Enable_global_interrupt();
+	
     /*Waits for radio to start making FSYNC.*/
     while ((AVR32_GPIO.port[1].pvr & 0x00000002) == 0); //Wait for FS High.
     while ((AVR32_GPIO.port[1].pvr & 0x00000002) != 0); //Wait for FS Low.
-				
-    INTC_register_interrupt (
-          &pdca_int_handler
-        , AVR32_PDCA_IRQ_0
-        , AVR32_INTC_INT3
-    );
+			
+	Disable_global_interrupt(); // resume to before
 				
     /*config the SSC*/
     local_start_SSC();
@@ -232,8 +238,12 @@ void ssc_init(void)
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
     (&AVR32_SSC)->cr = AVR32_SSC_CR_RXEN_MASK | AVR32_SSC_CR_TXEN_MASK;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = 
+    //(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = 
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->ier = 
                                                             AVR32_PDCA_RCZ_MASK;
+															
+	Enable_global_interrupt();
+															
 }/*End of ssc_init.*/
 
 /*

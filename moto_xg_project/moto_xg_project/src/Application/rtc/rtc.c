@@ -21,6 +21,7 @@ History:
 #include "pm.h"
 #include "twi.h"
 #include "gpio.h"
+#include "flashc.h"
 
 static volatile date_time_t date_time;
 
@@ -46,6 +47,8 @@ Return:rtc_err_t
 //start PLL0 and switch main clock to PLL0 output
 void local_start_pll0(void)
 {
+/****/
+	
 	//pm_switch_to_osc0(pm, 12000000, 3);
 	//    pm_enable_osc0_crystal(pm, 12000000);
 	//         pm_set_osc0_mode(pm,AVR32_PM_OSCCTRL0_MODE_CRYSTAL_G3);  0x00000007
@@ -91,6 +94,40 @@ void local_start_pll0(void)
 
 
 	AVR32_HMATRIX.mcfg[AVR32_HMATRIX_MASTER_CPU_INSTRUCTION] = 0x1;
+	
+/***/
+	
+/*****	
+	pm_switch_to_osc0(&AVR32_PM, 12000000, 3);
+
+	pm_pll_setup(&AVR32_PM,
+	               0,   // use PLL0
+	               7,   // MUL=7 in the formula
+	               1,   // DIV=1 in the formula
+	               0,   // Sel Osc0/PLL0 or Osc1/PLL1
+	               16); // lockcount in main clock for the PLL wait lock
+	pm_pll_set_option(&AVR32_PM, 0, //PLL number 0
+	                        1, //freq Set to 1 for VCO frequency range 80-180MHz
+	                        1, //div2 Divide the PLL output frequency by 2
+	                        0);//0 to enable the Wide-Bandith Mode
+	pm_pll_enable(&AVR32_PM,0);
+
+
+	pm_wait_for_pll0_locked(&AVR32_PM);
+
+
+	pm_cksel(&AVR32_PM, 1,  //Bus A clock divisor enable = 1
+	             0,  //Bus A select = 0 (PBA clock = 48MHz/2 = 24MHz).
+	             0,  //B clock divisor enable = 0
+	             0,  //Bus B select = 0
+	             0,  //HS Bus clock divisor enable = 0
+	             0); //HS Bus select = 0
+				 
+	flashc_set_wait_state(1);
+	//AVR32_FLASHC.fcr = 0x00000040;
+
+	pm_switch_to_clock(&AVR32_PM, AVR32_PM_MCSEL_PLL0);
+****/
 }
 
 

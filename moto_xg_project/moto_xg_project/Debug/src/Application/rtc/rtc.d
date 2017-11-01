@@ -68,7 +68,8 @@ src/Application/rtc/rtc.d src/Application/rtc/rtc.o \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/Application/rtc/rtc.h ../src/ASF/avr32/drivers/pm/pm.h \
  ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
- ../src/ASF/avr32/drivers/gpio/gpio.h
+ ../src/ASF/avr32/drivers/gpio/gpio.h \
+ ../src/ASF/avr32/drivers/flashc/flashc.h
 
 E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/io.h:
 
@@ -213,3 +214,5 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/config/conf_twi.h:
 
 ../src/ASF/avr32/drivers/gpio/gpio.h:
+
+../src/ASF/avr32/drivers/flashc/flashc.h:
