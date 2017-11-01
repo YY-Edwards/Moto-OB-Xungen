@@ -5109,19 +5109,19 @@ void ssc_init(void)
     /*Start the SSC Physical Layer.*/
 
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
-80003cba:	30 18       	mov	r8,1
-80003cbc:	fe 79 00 00 	mov	r9,-65536
+80003cba:	fe 79 00 00 	mov	r9,-65536
+80003cbe:	30 18       	mov	r8,1
 80003cc0:	93 58       	st.w	r9[0x14],r8
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
-80003cc2:	fe 79 00 40 	mov	r9,-65472
-80003cc6:	93 58       	st.w	r9[0x14],r8
+80003cc2:	fe 7a 00 40 	mov	r10,-65472
+80003cc6:	95 58       	st.w	r10[0x14],r8
     (&AVR32_SSC)->cr = AVR32_SSC_CR_RXEN_MASK | AVR32_SSC_CR_TXEN_MASK;
 80003cc8:	e0 6b 01 01 	mov	r11,257
 80003ccc:	fe 7a 34 00 	mov	r10,-52224
 80003cd0:	95 0b       	st.w	r10[0x0],r11
-    //(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = 
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->ier = 
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = 
 80003cd2:	93 88       	st.w	r9[0x20],r8
+	//(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->ier = 
                                                             AVR32_PDCA_RCZ_MASK;
 															
 	Enable_global_interrupt();

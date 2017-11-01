@@ -238,8 +238,8 @@ void ssc_init(void)
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
     (&AVR32_SSC)->cr = AVR32_SSC_CR_RXEN_MASK | AVR32_SSC_CR_TXEN_MASK;
-    //(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = 
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->ier = 
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = 
+	//(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->ier = 
                                                             AVR32_PDCA_RCZ_MASK;
 															
 	Enable_global_interrupt();
