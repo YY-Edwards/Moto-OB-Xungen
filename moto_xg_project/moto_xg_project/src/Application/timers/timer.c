@@ -186,3 +186,28 @@ void tc_init()
 	// Start the timer/counter.
 	tc_start(tc, EXAMPLE_TC_CHANNEL);
 }
+
+void delay_ns(U32 ns)
+{
+	U32 i;
+	for(i=0;i<ns;i++)
+	{
+		nop();
+		nop();
+		nop();
+	}
+}
+void delay_us(U32 us)
+{
+	for(int i =0; i<us; i++){
+		delay_ns(1000);
+	}
+
+}
+void delay_ms(U32 ms)
+{
+	for(int i =0; i<ms; i++){
+		delay_us(1000);
+	}
+	
+}

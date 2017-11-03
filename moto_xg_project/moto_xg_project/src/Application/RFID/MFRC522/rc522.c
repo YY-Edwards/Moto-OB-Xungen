@@ -14,32 +14,6 @@ volatile avr32_spi_t *spi;
 
 U8 rc522_init_failure =0;
 
-void delay_ns(U32 ns)
-{
-	U32 i;
-	for(i=0;i<ns;i++)
-	{
-		nop();
-		nop();
-		nop();
-	}
-}
-void delay_us(U32 us)
-{
-	for(int i =0; i<us; i++){
-		delay_ns(1000);
-	}
-
-}
-void delay_ms(U32 ms)
-{
-	for(int i =0; i<ms; i++){
-		delay_us(1000);
-	}
-	
-}
-
-
 U8 RC522_WriteByte(U8 Data)
 {
 	U8 temp =0;

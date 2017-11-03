@@ -8,6 +8,7 @@
 
 #ifndef TIMER_H_
 #define TIMER_H_
+#include "compiler.h"
 
 //Timer mappings for GOB
 #define TIMER_TC_CHANNEL_ID         0
@@ -20,5 +21,11 @@
 
 void tc_init(void);
 void local_start_timer(void);
+void delay_ns(U32 ns);
+void delay_us(U32 us);
+void delay_ms(U32 ms);
+
+
+
 
 #endif /* TIMER_H_ */

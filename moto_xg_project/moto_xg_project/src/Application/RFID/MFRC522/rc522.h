@@ -11,6 +11,7 @@
 #include "spi.h"
 #include "string.h"
 #include "gpio.h"
+#include "timer.h"
 
 
 #define FATAL_ERROR_DMA_TX_OVERFLOW     0x01

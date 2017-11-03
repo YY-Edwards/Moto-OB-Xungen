@@ -1,6 +1,12 @@
 src/Application/timers/timer.d src/Application/timers/timer.o \
  src/Application/timers/timer.o: ../src/Application/timers/timer.c \
- ../src/Application/timers/timer.h ../src/ASF/avr32/drivers/gpio/gpio.h \
+ ../src/Application/timers/timer.h ../src/ASF/avr32/utils/compiler.h \
+ ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
+ ../src/ASF/avr32/utils/preprocessor/tpaste.h \
+ ../src/ASF/avr32/utils/preprocessor/stringz.h \
+ ../src/ASF/avr32/utils/preprocessor/mrepeat.h \
+ ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
+ ../src/ASF/common/utils/parts.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/io.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/uc3b0512.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/core_sc0_143.h \
@@ -25,13 +31,6 @@ src/Application/timers/timer.d src/Application/timers/timer.o \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/usart_400.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/usbb_3101.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/wdt_2311.h \
- ../src/ASF/avr32/utils/compiler.h \
- ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
- ../src/ASF/avr32/utils/preprocessor/tpaste.h \
- ../src/ASF/avr32/utils/preprocessor/stringz.h \
- ../src/ASF/avr32/utils/preprocessor/mrepeat.h \
- ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
- ../src/ASF/common/utils/parts.h \
  ../src/ASF/avr32/utils/header_files/uc3d_defines_fix.h \
  ../src/ASF/avr32/utils/header_files/uc3l3_l4_defines_fix.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/include/stddef.h \
@@ -55,6 +54,7 @@ src/Application/timers/timer.d src/Application/timers/timer.o \
  ../src/ASF/common/utils/interrupt/interrupt_avr32.h \
  ../src/ASF/avr32/utils/preprocessor/tpaste.h \
  ../src/ASF/avr32/drivers/intc/intc.h \
+ ../src/ASF/avr32/drivers/gpio/gpio.h \
  ../src/Application/timers/conf_example.h \
  ../src/ASF/avr32/drivers/tc/tc.h ../src/config/../log/log.h \
  ../src/ASF/avr32/drivers/usart/usart.h \
@@ -70,7 +70,19 @@ src/Application/timers/timer.d src/Application/timers/timer.o \
 
 ../src/Application/timers/timer.h:
 
-../src/ASF/avr32/drivers/gpio/gpio.h:
+../src/ASF/avr32/utils/compiler.h:
+
+../src/ASF/avr32/utils/preprocessor/preprocessor.h:
+
+../src/ASF/avr32/utils/preprocessor/tpaste.h:
+
+../src/ASF/avr32/utils/preprocessor/stringz.h:
+
+../src/ASF/avr32/utils/preprocessor/mrepeat.h:
+
+../src/ASF/avr32/utils/preprocessor/preprocessor.h:
+
+../src/ASF/common/utils/parts.h:
 
 E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/io.h:
 
@@ -120,20 +132,6 @@ E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B051
 
 E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/wdt_2311.h:
 
-../src/ASF/avr32/utils/compiler.h:
-
-../src/ASF/avr32/utils/preprocessor/preprocessor.h:
-
-../src/ASF/avr32/utils/preprocessor/tpaste.h:
-
-../src/ASF/avr32/utils/preprocessor/stringz.h:
-
-../src/ASF/avr32/utils/preprocessor/mrepeat.h:
-
-../src/ASF/avr32/utils/preprocessor/preprocessor.h:
-
-../src/ASF/common/utils/parts.h:
-
 ../src/ASF/avr32/utils/header_files/uc3d_defines_fix.h:
 
 ../src/ASF/avr32/utils/header_files/uc3l3_l4_defines_fix.h:
@@ -179,6 +177,8 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/avr32/utils/preprocessor/tpaste.h:
 
 ../src/ASF/avr32/drivers/intc/intc.h:
+
+../src/ASF/avr32/drivers/gpio/gpio.h:
 
 ../src/Application/timers/conf_example.h:
 

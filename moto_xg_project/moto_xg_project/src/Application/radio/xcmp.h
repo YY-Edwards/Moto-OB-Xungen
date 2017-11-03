@@ -567,7 +567,7 @@ Tone Identifier
 #define Tone_Reserved 0x0000
 #define Talk_Permit 0x0003
 #define Good_Key_Chirp 0x0005
-#define Bad_Key_Chirp0x0006
+#define Bad_Key_Chirp 0x0006
 #define Priority_Beep 0x000C
 #define Power_Up_Beep 0X000D
 #define No_ACK_Tone 0X0012

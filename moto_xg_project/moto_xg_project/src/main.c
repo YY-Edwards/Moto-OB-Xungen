@@ -38,21 +38,17 @@ int main (void)
 	log_init();
 	log("----start debug----");
 		
-	voc_init();
+	//voc_init();
 
 	//tc_init();
 	
-	//rfid_init();
+	rfid_init();
 		
 	app_init();
 		
 	xcmp_init();
-	
-	//while ((AVR32_GPIO.port[1].pvr & 0x00000002) == 0); //Wait for FS High.
-	//while ((AVR32_GPIO.port[1].pvr & 0x00000002) != 0); //Wait for FS Low.
+
 	local_start_timer();
-		
-	//Enable_global_interrupt();
 		
 	vTaskStartScheduler();
 	return 0;

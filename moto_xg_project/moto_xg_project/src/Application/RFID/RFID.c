@@ -94,7 +94,7 @@ U8 rfid_sendID_message()
 	if(return_err == 0){
 		
 		log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
-		xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to noticy okay!!!		 
+		xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate scan rfid success!!!		 
 		for(int i = 0; i<4; i++){//将Unicode码转换为大端模式	
 		
 			 temp = ((SN[i] & 0xF0) >> 4);//取字节高四位
@@ -130,6 +130,7 @@ U8 rfid_sendID_message()
 	}
 	else
 	{
+		xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate scan rfid failure!!!
 		log("no card find...\n");
 	}
 	

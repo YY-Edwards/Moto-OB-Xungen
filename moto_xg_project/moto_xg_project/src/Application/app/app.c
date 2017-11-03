@@ -486,7 +486,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
 			log("data transmit failure\n");
-			xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to noticy failure!!!
+			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
 		Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];
 			
@@ -545,8 +545,12 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 	log("PhysicalUserInput_broadcast  \n\r"  );
 	
 	if((PUI_ID == 0x0060) && (PUI_State = 0x02) && (connect_flag == 1)){
-		log("send message\n");
-		//rfid_sendID_message();//send message		
+		//log("send message\n");
+		xcmp_IdleTestTone(Tone_Start, ACK_Received_Tone);//set tone to indicate the scan!!!
+			
+		vTaskDelay(400*2 / portTICK_RATE_MS);//延迟400ms
+		//delay_ms(200);
+		rfid_sendID_message();//send message		
 	}
 	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
 	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);
@@ -856,6 +860,8 @@ static __app_Thread_(app_cfg)
 		if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
 		{	
 			connect_flag=1;	
+			xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
+
 		}
 		else if(connect_flag)
 		{
@@ -869,6 +875,7 @@ static __app_Thread_(app_cfg)
 				//{
 					//log("no find card...\n");
 				//}
+				nop();
 				
 		}
 		else
@@ -876,6 +883,7 @@ static __app_Thread_(app_cfg)
 			nop();
 			nop();
 			nop();
+			xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
 		}
 		
 		//{
