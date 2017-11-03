@@ -478,10 +478,15 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	else
 	{
 		//log("\n\r State: 0x %X \n\r", xcmp->u8[0]);
-		log("State: 0x %X \n", ptr->State);
-		if (ptr->State)
+		log("State: %X \n", ptr->State);
+		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
 			log("data transmit success\n");
+		}
+		else if(ptr->State == DATA_SESSION_TX_Fail)
+		{
+			log("data transmit failure\n");
+			xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to noticy failure!!!
 		}
 		Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];
 			
@@ -489,13 +494,13 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 
 		log("\n\r Session_ID: %x \n\r",Session_number );
 		log("\n\r paylaod_length: %d \n\r",data_length );
-		for(i=0; i<data_length; i++)
-		{
-				
+		//for(i=0; i<data_length; i++)
+		//{
+				//
 			//log("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
-			log("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
-				
-		}
+			//log("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
+				//
+		//}
 		
 	}
 	
@@ -850,7 +855,6 @@ static __app_Thread_(app_cfg)
 	{
 		if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
 		{	
-			xcmp_IdleTestTone(Priority_Beep);
 			connect_flag=1;	
 		}
 		else if(connect_flag)
@@ -858,7 +862,7 @@ static __app_Thread_(app_cfg)
 				
 				//rfid_sendID_message();
 				//if(rfid_auto_reader(card_id) == 0){
-					//log("card_id : %X, %X, %X, %X\n", card_id[0], card_id[1], card_id[2], card_id[3]);
+					//log("card_id : %x, %x, %x, %x\n", card_id[0], card_id[1], card_id[2], card_id[3]);
 					//memset(card_id,0x00,4);	
 				//}
 				//else

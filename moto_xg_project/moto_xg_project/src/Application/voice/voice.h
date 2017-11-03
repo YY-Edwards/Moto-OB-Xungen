@@ -13,6 +13,10 @@
 #include "xcmp.h"
 #include "rtc.h"
 
+
+#define TRUE 1
+#define FALSE 0
+
 /**
 
 label:			"MOTOREC"(7bytes)

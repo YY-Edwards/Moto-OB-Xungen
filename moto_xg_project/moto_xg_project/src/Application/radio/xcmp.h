@@ -114,6 +114,8 @@ radio.
 
 #define CSBK_DATA_RX_Suc			0x24
 
+#define DATA_SESSION_TX_Suc			0x03
+#define DATA_SESSION_TX_Fail		0x04
 
 
 
@@ -1551,7 +1553,7 @@ void xcmp_DeviceInitializationStatus_request(void);
 void xcmp_opcode_not_supported(void);
 
 /*send tone to test*/
-void xcmp_IdleTestTone(U16 type);
+void xcmp_IdleTestTone(U8 type, U16 toneID);
 
 void xcmp_audio_route_mic(void);
 void xcmp_audio_route_speaker(void);

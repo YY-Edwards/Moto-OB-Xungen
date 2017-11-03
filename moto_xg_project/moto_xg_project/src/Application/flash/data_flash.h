@@ -37,7 +37,11 @@
 #include "../Log/log.h"
 #include "string.h"
 
+
 //#include "utility.h"
+
+#define TRUE 1
+#define FALSE 0
 
 #define FATAL_ERROR_DMA_TX_OVERFLOW     0x01
 #define FATAL_ERROR_DATA_FLASH_SPI_INIT 0x02
