@@ -18,7 +18,7 @@ History:
 #include "timer.h"
 #include "log.h"
 #include "xcmp.h"
-#include "rtc.h"
+#include "xgrtc.h"
 #include "app.h"
 
 
@@ -49,6 +49,8 @@ int main (void)
 	xcmp_init();
 
 	local_start_timer();
+	
+	xg_rtc_init();
 		
 	vTaskStartScheduler();
 	return 0;

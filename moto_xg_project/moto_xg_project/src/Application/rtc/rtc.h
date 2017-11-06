@@ -66,5 +66,4 @@ rtc_err_t rtc_read_time(date_time_t * t);
 
 
 date_time_t * getTime(void);
-void local_start_pll0(void);
 #endif /* RTC_H_ */
