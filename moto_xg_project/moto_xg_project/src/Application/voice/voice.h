@@ -11,7 +11,7 @@
 
 #include "data_flash.h"
 #include "xcmp.h"
-#include "rtc.h"
+#include "xgrtc.h"
 
 
 #define TRUE 1

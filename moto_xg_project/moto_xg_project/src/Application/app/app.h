@@ -14,6 +14,7 @@
 #include "queue.h"
 #include "timer.h"
 #include "RFID.h"
+#include "xgrtc.h"
 //#include "voice.h"
 
 #include <xnl.h>
