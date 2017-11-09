@@ -30,7 +30,7 @@ typedef struct
 	U8 Hour;			//时
 	U8 Minute;			//分
 	U8 Second;			//秒
-}DateTime;
+}DateTime_t;
 
 #pragma  pack(1)
 typedef struct{ //8bytes
@@ -44,16 +44,16 @@ typedef struct{ //8bytes
 }date_time_t;
 #pragma  pack()
 
-volatile DateTime Current_time;
-static volatile DateTime temp_time;
+volatile DateTime_t Current_time;
+static volatile DateTime_t temp_time;
 
 char *print_i(char *str, unsigned int n);
 void xg_rtc_init(void);
 /*
 Note: 本方法时间起点从2000-1-1 0:0:0开始,向后编码150年
 */
-U32 RTC_EncodeTime(DateTime *DT);
-void RTC_DecodeTime(U32 TimeData, DateTime *DT);
+U32 RTC_EncodeTime(DateTime_t *DT);
+void RTC_DecodeTime(U32 TimeData, DateTime_t *DT);
 
 
 

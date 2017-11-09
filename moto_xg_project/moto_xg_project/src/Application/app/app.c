@@ -843,7 +843,7 @@ void app_init(void)
 
 extern  char AudioData[];
 extern U32 tc_tick;
-extern volatile DateTime Current_time;
+extern volatile DateTime_t Current_time;
 static __app_Thread_(app_cfg)
 {
 	static int coun=0;

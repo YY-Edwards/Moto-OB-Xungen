@@ -171,7 +171,7 @@ void xg_rtc_init(void)
 
 }
 
-U32 RTC_EncodeTime(DateTime *DT)
+U32 RTC_EncodeTime(DateTime_t *DT)
 {
 	   volatile U8 T,K;
 	   volatile U32 T32,TimeData=0;
@@ -193,7 +193,7 @@ U32 RTC_EncodeTime(DateTime *DT)
 	
 }
 
-void RTC_DecodeTime(U32 TimeData, DateTime *DT)
+void RTC_DecodeTime(U32 TimeData, DateTime_t *DT)
 {
 	    U8 T,K;
 	    U32 T16,K16;

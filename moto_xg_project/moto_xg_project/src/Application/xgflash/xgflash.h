@@ -11,6 +11,8 @@
 
 #include "compiler.h"
 #include "xgrtc.h"
+#include "flashc.h"
+#include "string.h"
 
 /**
 
@@ -29,13 +31,15 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 **/
 
 
-//#define PROGRAM_START_ADDRESS         (AVR32_FLASH_ADDRESS + PROGRAM_START_OFFSET)
-//#define PROGRAM_START_OFFSET          0x00014020
+#define TRUE 1
+#define FALSE 0
+
+#define PageSize 512
 
 #define FLASH_PAGE_SIZE 80 //Kbyte
 
-#define XG_MESSAGE_LISTINFO_START_ADD		(AVR32_FLASH_ADDRESS + 0x00000020)
-#define XG_MESSAGE_LISTINFO_BOUNDARY_ADD	0x8000501A
+#define XG_MESSAGE_LISTINFO_START_ADD		(AVR32_FLASH_ADDRESS + 0x0004B000)
+#define XG_MESSAGE_LISTINFO_BOUNDARY_ADD	0x80050000//20k
 
 #define LABEL_ADDRESS						XG_MESSAGE_LISTINFO_START_ADD
 #define LABEL_LENGTH						0x08//8bytes:"XUNGENG"
@@ -47,8 +51,8 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 //#define VOICE_INFO_LENGTH	0x08//8bytes:list_number(2bytes) + address(4bytes) + length(2bytes)
 #define XG_MESSAGE_INFO_HEADER_LENGTH		0x08
 
-#define XG_MESSAGE_DATA_START_ADD			0x80005020
-#define XG_MESSAGE_DATA_BOUNDARY_ADD		0x8001401A
+#define XG_MESSAGE_DATA_START_ADD			0x80050000
+#define XG_MESSAGE_DATA_BOUNDARY_ADD		0x8005F000//60k
 
 
 #pragma pack(1)
@@ -82,7 +86,23 @@ typedef const struct {
 } nvram_data_t;
 
 
+typedef enum
+{
+	DF_BLOCK_4KB = 1,
+	DF_BLOCK_32KB = 2,
+	DF_BLOCK_64KB = 3,
+	DF_BLOCK_ALL = 4,
+} df_block_size_t;
+
+
+
 void flash_rw_example(const char *caption, nvram_data_t *nvram_data);
 void xg_flashc_init(void);
+
+static Bool xgflash_list_info_init(U8 *xg_message_count_ptr);
+Bool get_xgflash_info(unsigned int index,  MessageList_Info_t * m_info_data);
+Bool resend_xg_data(U32 message_index);
+Bool xg_message_data_save(MessageData_t *data_ptr, U16 data_len, U8 list_end_flag);
+Bool xg_message_info_save(MessageList_Info_t * m_info_data);
 
 #endif /* XGFLASH_H_ */

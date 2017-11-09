@@ -71,9 +71,11 @@ src/main.d src/main.o src/main.o: ../src/main.c \
  ../src/ASF/avr32/drivers/gpio/gpio.h ../src/ASF/avr32/drivers/pm/pm.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
- ../src/Application/app/app.h ../src/Application/RFID/RFID.h \
+ ../src/Application/xgflash/xgflash.h \
+ ../src/ASF/avr32/drivers/flashc/flashc.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h \
+ ../src/Application/app/app.h ../src/Application/RFID/RFID.h \
  ../src/Application/RFID/MFRC522/rc522.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/Application/radio/xnl.h
 
@@ -231,13 +233,17 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
-../src/Application/app/app.h:
+../src/Application/xgflash/xgflash.h:
 
-../src/Application/RFID/RFID.h:
+../src/ASF/avr32/drivers/flashc/flashc.h:
 
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
 
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h:
+
+../src/Application/app/app.h:
+
+../src/Application/RFID/RFID.h:
 
 ../src/Application/RFID/MFRC522/rc522.h:
 

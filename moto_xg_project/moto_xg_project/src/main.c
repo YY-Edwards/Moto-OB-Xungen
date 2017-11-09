@@ -19,6 +19,7 @@ History:
 #include "log.h"
 #include "xcmp.h"
 #include "xgrtc.h"
+#include "xgflash.h"
 #include "app.h"
 
 
@@ -37,6 +38,8 @@ int main (void)
 		
 	log_init();
 	log("----start debug----");
+	
+	xg_flashc_init();
 		
 	//voc_init();
 
