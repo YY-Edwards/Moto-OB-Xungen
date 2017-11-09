@@ -173,18 +173,18 @@ Discarded input sections
                 0x00000000       0x2c src/Application/flash/data_flash.o
  .text.data_flash_init
                 0x00000000      0x148 src/Application/flash/data_flash.o
- .rodata.C.48.11267
-                0x00000000       0x10 src/Application/flash/data_flash.o
- .rodata.C.51.11280
+ .rodata.C.61.11377
                 0x00000000        0x4 src/Application/flash/data_flash.o
- .rodata.DF_SPI_GPIO_MAP.11265
+ .rodata.DF_SPI_GPIO_MAP.11266
                 0x00000000       0x20 src/Application/flash/data_flash.o
- .bss.xLastWakeTime.11409
+ .bss.xLastWakeTime.11410
+                0x00000000        0x4 src/Application/flash/data_flash.o
+ .rodata.C.49.11268
+                0x00000000       0x10 src/Application/flash/data_flash.o
+ .rodata.C.52.11281
                 0x00000000        0x4 src/Application/flash/data_flash.o
  .rodata.str1.4
                 0x00000000       0x60 src/Application/flash/data_flash.o
- .rodata.C.60.11376
-                0x00000000        0x4 src/Application/flash/data_flash.o
  .bss.data_flash_failure
                 0x00000000        0x1 src/Application/flash/data_flash.o
  .text          0x00000000        0x0 src/Application/myrtc/xgrtc.o
@@ -321,11 +321,11 @@ Discarded input sections
  .text.tc_init  0x00000000       0x60 src/Application/timers/timer.o
  .text._tc_interrupt
                 0x00000000       0x20 src/Application/timers/timer.o
- .rodata.tc_interrupt.10369
-                0x00000000        0x4 src/Application/timers/timer.o
- .rodata.waveform_opt.10368
+ .rodata.waveform_opt.10369
                 0x00000000        0x8 src/Application/timers/timer.o
  .bss.tc_tick   0x00000000        0x4 src/Application/timers/timer.o
+ .rodata.tc_interrupt.10370
+                0x00000000        0x4 src/Application/timers/timer.o
  .text          0x00000000        0x0 src/Application/voice/voice.o
  .data          0x00000000        0x0 src/Application/voice/voice.o
  .bss           0x00000000        0x0 src/Application/voice/voice.o
@@ -502,7 +502,7 @@ Discarded input sections
                 0x00000000       0xfc src/ASF/avr32/drivers/flashc/flashc.o
  .text.flashc_set_bootloader_protected_size
                 0x00000000       0x54 src/ASF/avr32/drivers/flashc/flashc.o
- .rodata.C.34.9833
+ .rodata.C.35.9834
                 0x00000000       0x10 src/ASF/avr32/drivers/flashc/flashc.o
  .data.flashc_wait_until_ready
                 0x00000000        0x4 src/ASF/avr32/drivers/flashc/flashc.o
@@ -795,9 +795,9 @@ Discarded input sections
  .text          0x00000000        0x0 src/ASF/avr32/drivers/twi/twi.o
  .data          0x00000000        0x0 src/ASF/avr32/drivers/twi/twi.o
  .bss           0x00000000        0x0 src/ASF/avr32/drivers/twi/twi.o
- .debug_abbrev  0x00000000      0x2d0 src/ASF/avr32/drivers/twi/twi.o
- .debug_info    0x00000000      0xfb2 src/ASF/avr32/drivers/twi/twi.o
- .debug_line    0x00000000      0x349 src/ASF/avr32/drivers/twi/twi.o
+ .debug_abbrev  0x00000000      0x2c9 src/ASF/avr32/drivers/twi/twi.o
+ .debug_info    0x00000000      0xfd1 src/ASF/avr32/drivers/twi/twi.o
+ .debug_line    0x00000000      0x34c src/ASF/avr32/drivers/twi/twi.o
  .text.twi_master_interrupt_handler
                 0x00000000       0xbc src/ASF/avr32/drivers/twi/twi.o
  .text.twi_slave_interrupt_handler
@@ -815,11 +815,11 @@ Discarded input sections
  .text.twi_master_read
                 0x00000000       0xb8 src/ASF/avr32/drivers/twi/twi.o
  .text.twi_disable_interrupt
-                0x00000000       0x16 src/ASF/avr32/drivers/twi/twi.o
+                0x00000000       0x1e src/ASF/avr32/drivers/twi/twi.o
  .text.twi_slave_init
-                0x00000000       0x80 src/ASF/avr32/drivers/twi/twi.o
+                0x00000000       0x88 src/ASF/avr32/drivers/twi/twi.o
  .text.twi_master_init
-                0x00000000       0x94 src/ASF/avr32/drivers/twi/twi.o
+                0x00000000       0x9c src/ASF/avr32/drivers/twi/twi.o
  .bss.twi_busy  0x00000000        0x1 src/ASF/avr32/drivers/twi/twi.o
  .bss.twi_slave_fct
                 0x00000000        0xc src/ASF/avr32/drivers/twi/twi.o
@@ -835,8 +835,8 @@ Discarded input sections
                 0x00000000        0x4 src/ASF/avr32/drivers/twi/twi.o
  .bss.twi_rx_data
                 0x00000000        0x4 src/ASF/avr32/drivers/twi/twi.o
- .debug_frame   0x00000000      0x124 src/ASF/avr32/drivers/twi/twi.o
- .debug_loc     0x00000000      0x35e src/ASF/avr32/drivers/twi/twi.o
+ .debug_frame   0x00000000      0x130 src/ASF/avr32/drivers/twi/twi.o
+ .debug_loc     0x00000000      0x42e src/ASF/avr32/drivers/twi/twi.o
  .debug_pubnames
                 0x00000000       0xb2 src/ASF/avr32/drivers/twi/twi.o
  .debug_aranges
@@ -909,29 +909,33 @@ Discarded input sections
  .text          0x00000000        0x0 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .data          0x00000000        0x0 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .bss           0x00000000        0x0 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .debug_abbrev  0x00000000      0x215 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .debug_info    0x00000000     0x10fa src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .debug_line    0x00000000      0x24f src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .debug_abbrev  0x00000000      0x2b9 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .debug_info    0x00000000     0x16a1 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .debug_line    0x00000000      0x336 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .text.sysclk_init
                 0x00000000        0x2 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .text.sysclk_priv_disable_module
-                0x00000000       0x32 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+                0x00000000       0x3a src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .text.sysclk_disable_pbb_module
-                0x00000000       0x3c src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .text.sysclk_priv_enable_module
-                0x00000000       0x30 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .text.sysclk_enable_pbb_module
                 0x00000000       0x44 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .text.sysclk_disable_usb
+                0x00000000       0x24 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .text.sysclk_priv_enable_module
+                0x00000000       0x38 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .text.sysclk_enable_pbb_module
+                0x00000000       0x4c src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .text.sysclk_enable_usb
+                0x00000000       0x94 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .bss.sysclk_pbb_refcount
                 0x00000000        0x1 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .debug_frame   0x00000000       0x78 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .debug_loc     0x00000000       0xe4 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .debug_frame   0x00000000       0xb8 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .debug_loc     0x00000000      0x270 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .debug_pubnames
-                0x00000000       0x9a src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+                0x00000000       0xc7 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .debug_aranges
-                0x00000000       0x40 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .debug_ranges  0x00000000       0x38 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
- .debug_str     0x00000000      0x5c7 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+                0x00000000       0x50 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .debug_ranges  0x00000000       0x48 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
+ .debug_str     0x00000000      0x7e9 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .comment       0x00000000       0x31 src/ASF/common/services/clock/uc3b0_b1/sysclk.o
  .text          0x00000000        0x0 src/ASF/common/services/spi/uc3_spi/spi_master.o
  .data          0x00000000        0x0 src/ASF/common/services/spi/uc3_spi/spi_master.o
@@ -2344,7 +2348,7 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
                 0x8000d4cc       0x1d src/Application/myrtc/xgrtc.o
                                  0x20 (size before relaxing)
  *fill*         0x8000d4e9        0x3 
- .rodata.CSWTCH.35
+ .rodata.CSWTCH.36
                 0x8000d4ec       0x48 src/Application/radio/ambe.o
  .rodata.str1.4
                 0x8000d534        0xb src/Application/radio/payload.o
@@ -2358,19 +2362,19 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
                 0x8000d590        0x7 src/Application/radio/xnl.o
                                  0x10 (size before relaxing)
  *fill*         0x8000d597        0x1 
- .rodata.RC522_SPI_GPIO_MAP.10476
+ .rodata.RC522_SPI_GPIO_MAP.10477
                 0x8000d598       0x20 src/Application/RFID/MFRC522/rc522.o
- .rodata.CSWTCH.74
-                0x8000d5b8        0x4 src/Application/RFID/MFRC522/rc522.o
  .rodata.CSWTCH.75
+                0x8000d5b8        0x4 src/Application/RFID/MFRC522/rc522.o
+ .rodata.CSWTCH.76
                 0x8000d5bc        0x4 src/Application/RFID/MFRC522/rc522.o
- .rodata.C.51.10478
+ .rodata.C.52.10479
                 0x8000d5c0       0x10 src/Application/RFID/MFRC522/rc522.o
  .rodata.str1.4
                 0x8000d5d0       0x85 src/Application/RFID/RFID.o
                                  0x88 (size before relaxing)
  *fill*         0x8000d655        0x3 
- .rodata.TC_GPIO_MAP.10363
+ .rodata.TC_GPIO_MAP.10364
                 0x8000d658       0x18 src/Application/timers/timer.o
  .rodata._int_handler_table
                 0x8000d670       0x98 src/ASF/avr32/drivers/intc/intc.o
@@ -2381,11 +2385,11 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
  .rodata.log    0x8000d710      0x150 src/Log/log.o
  .rodata.logFromISR
                 0x8000d860      0x150 src/Log/log.o
- .rodata.USART_OPTIONS.11277
+ .rodata.USART_OPTIONS.11278
                 0x8000d9b0        0xc src/Log/log.o
  .rodata.str1.4
                 0x8000d9bc       0x3c src/Log/log.o
- .rodata.USART_GPIO_MAP.11276
+ .rodata.USART_GPIO_MAP.11277
                 0x8000d9f8       0x10 src/Log/log.o
  .rodata.str1.4
                 0x8000da08       0x14 src/main.o
@@ -2524,7 +2528,7 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
  .data.unsure_data
                 0x00000528        0x8 src/Application/RFID/RFID.o
                 0x00000528                unsure_data
- .data.start_session.11219
+ .data.start_session.11220
                 0x00000530        0x1 src/Application/RFID/RFID.o
  *fill*         0x00000531        0x3 
  .data.ulCriticalNesting
@@ -2568,12 +2572,12 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
                 0x00000a41        0x1 src/Application/app/app.o
                 0x00000a41                AMBE_rx_flag
  *fill*         0x00000a42        0x2 
- .bss.xLastWakeTime.12003
+ .bss.xLastWakeTime.12004
                 0x00000a44        0x4 src/Application/app/app.o
  .bss.VF_SN     0x00000a48        0x1 src/Application/app/app.o
                 0x00000a48                VF_SN
  *fill*         0x00000a49        0x3 
- .bss.res.11992
+ .bss.res.11993
                 0x00000a4c        0x4 src/Application/app/app.o
  .bss.AMBE_tx_flag
                 0x00000a50        0x1 src/Application/app/app.o
@@ -2587,13 +2591,13 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
  .bss.AMBE_Media
                 0x00000a53        0x1 src/Application/app/app.o
                 0x00000a53                AMBE_Media
- .bss.times_counter.12035
-                0x00000a54        0x1 src/Application/app/app.o
  .bss.connect_flag
-                0x00000a55        0x1 src/Application/app/app.o
+                0x00000a54        0x1 src/Application/app/app.o
  .bss.Mic_is_Enabled
+                0x00000a55        0x1 src/Application/app/app.o
+                0x00000a55                Mic_is_Enabled
+ .bss.times_counter.12036
                 0x00000a56        0x1 src/Application/app/app.o
-                0x00000a56                Mic_is_Enabled
  .bss.Terminator_Flag
                 0x00000a57        0x1 src/Application/app/app.o
                 0x00000a57                Terminator_Flag
@@ -2606,119 +2610,119 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
  .bss.payload_tx_exec
                 0x00000a60        0x4 src/Application/radio/payload.o
                 0x00000a60                payload_tx_exec
- .bss.phy_tx_index.10646
-                0x00000a64        0x1 src/Application/radio/physical.o
- *fill*         0x00000a65        0x3 
- .bss.m_RxBurstType
-                0x00000a68        0x4 src/Application/radio/physical.o
- .bss.phy_check_sum.10690
-                0x00000a6c        0x2 src/Application/radio/physical.o
- *fill*         0x00000a6e        0x2 
- .bss.payload_store_idle
-                0x00000a70        0x4 src/Application/radio/physical.o
-                0x00000a70                payload_store_idle
- .bss.phy_rx_length.10689
-                0x00000a74        0x2 src/Application/radio/physical.o
- *fill*         0x00000a76        0x2 
- .bss.RxBytesWaiting.10966
-                0x00000a78        0x4 src/Application/radio/physical.o
- .bss.phy_rx_expexted_length.10688
-                0x00000a7c        0x2 src/Application/radio/physical.o
- *fill*         0x00000a7e        0x2 
- .bss.phy_tx_state.10644
-                0x00000a80        0x4 src/Application/radio/physical.o
- .bss.Item_ID.10971
-                0x00000a84        0x1 src/Application/radio/physical.o
- .bss.is_first.10970
-                0x00000a85        0x1 src/Application/radio/physical.o
- *fill*         0x00000a86        0x2 
- .bss.phy_frame_ptr.10687
-                0x00000a88        0x4 src/Application/radio/physical.o
- .bss.phy_payload_frame_rx
+ .bss.ArrayDiscLength.10968
+                0x00000a64        0x4 src/Application/radio/physical.o
+ .bss.phy_tx_index.10647
+                0x00000a68        0x1 src/Application/radio/physical.o
+ *fill*         0x00000a69        0x3 
+ .bss.Item_Length.10973
+                0x00000a6c        0x4 src/Application/radio/physical.o
+ .bss.phy_rx_length.10690
+                0x00000a70        0x2 src/Application/radio/physical.o
+ *fill*         0x00000a72        0x2 
+ .bss.AMBE_HT   0x00000a74        0x8 src/Application/radio/physical.o
+ .bss.RxBytesWaiting.10967
+                0x00000a7c        0x4 src/Application/radio/physical.o
+ .bss.phy_rx_expexted_length.10689
+                0x00000a80        0x2 src/Application/radio/physical.o
+ *fill*         0x00000a82        0x2 
+ .bss.phy_tx_state.10645
+                0x00000a84        0x4 src/Application/radio/physical.o
+ .bss.Item_ID.10972
+                0x00000a88        0x1 src/Application/radio/physical.o
+ *fill*         0x00000a89        0x3 
+ .bss.AMBE_payload_ptr.10970
                 0x00000a8c        0x4 src/Application/radio/physical.o
-                0x00000a8c                phy_payload_frame_rx
- .bss.Item_Length.10972
+ .bss.phy_payload_frame_rx
                 0x00000a90        0x4 src/Application/radio/physical.o
- .bss.AMBE_payload_ptr.10969
-                0x00000a94        0x4 src/Application/radio/physical.o
- .bss.RxMedia_IsFillingNext16.10963
-                0x00000a98        0x4 src/Application/radio/physical.o
- .bss.payload_ptr.10968
-                0x00000a9c        0x4 src/Application/radio/physical.o
- .bss.phy_rx_state.10691
-                0x00000aa0        0x4 src/Application/radio/physical.o
- .bss.RxAMBE_IsFillingNext8.10964
-                0x00000aa4        0x4 src/Application/radio/physical.o
- .bss.phy_tx_expexted_length.10645
-                0x00000aa8        0x2 src/Application/radio/physical.o
- *fill*         0x00000aaa        0x2 
- .bss.phy_payload_frame_tx
-                0x00000aac        0x4 src/Application/radio/physical.o
-                0x00000aac                phy_payload_frame_tx
- .bss.ArrayDiscLength.10967
-                0x00000ab0        0x4 src/Application/radio/physical.o
+                0x00000a90                phy_payload_frame_rx
  .bss.xnl_store_idle
-                0x00000ab4        0x4 src/Application/radio/physical.o
-                0x00000ab4                xnl_store_idle
+                0x00000a94        0x4 src/Application/radio/physical.o
+                0x00000a94                xnl_store_idle
+ .bss.RxMedia_IsFillingNext16.10964
+                0x00000a98        0x4 src/Application/radio/physical.o
+ .bss.payload_store_idle
+                0x00000a9c        0x4 src/Application/radio/physical.o
+                0x00000a9c                payload_store_idle
+ .bss.phy_rx_state.10692
+                0x00000aa0        0x4 src/Application/radio/physical.o
+ .bss.phy_check_sum.10691
+                0x00000aa4        0x2 src/Application/radio/physical.o
+ *fill*         0x00000aa6        0x2 
  .bss.phy_xnl_frame_rx
+                0x00000aa8        0x4 src/Application/radio/physical.o
+                0x00000aa8                phy_xnl_frame_rx
+ .bss.phy_tx_expexted_length.10646
+                0x00000aac        0x2 src/Application/radio/physical.o
+ *fill*         0x00000aae        0x2 
+ .bss.RxData_IsFillingNext16.10966
+                0x00000ab0        0x4 src/Application/radio/physical.o
+ .bss.m_RxBurstType
+                0x00000ab4        0x4 src/Application/radio/physical.o
+ .bss.payload_ptr.10969
                 0x00000ab8        0x4 src/Application/radio/physical.o
-                0x00000ab8                phy_xnl_frame_rx
- .bss.phy_rx_count.10692
+ .bss.phy_payload_frame_tx
                 0x00000abc        0x4 src/Application/radio/physical.o
- .bss.RxData_IsFillingNext16.10965
-                0x00000ac0        0x4 src/Application/radio/physical.o
- .bss.phy_xnl_frame_tx
+                0x00000abc                phy_payload_frame_tx
+ .bss.SDV_Index.10975
+                0x00000ac0        0x1 src/Application/radio/physical.o
+ *fill*         0x00000ac1        0x3 
+ .bss.phy_rx_count.10693
                 0x00000ac4        0x4 src/Application/radio/physical.o
-                0x00000ac4                phy_xnl_frame_tx
- .bss.SDV_Index.10974
-                0x00000ac8        0x1 src/Application/radio/physical.o
- *fill*         0x00000ac9        0x3 
- .bss.phy_ptr.10643
+ .bss.phy_frame_ptr.10688
+                0x00000ac8        0x4 src/Application/radio/physical.o
+ .bss.phy_xnl_frame_tx
                 0x00000acc        0x4 src/Application/radio/physical.o
- .bss.RxMediaState.10962
+                0x00000acc                phy_xnl_frame_tx
+ .bss.RxAMBE_IsFillingNext8.10965
                 0x00000ad0        0x4 src/Application/radio/physical.o
- .bss.AMBE_HT   0x00000ad4        0x8 src/Application/radio/physical.o
+ .bss.is_first.10971
+                0x00000ad4        0x1 src/Application/radio/physical.o
+ *fill*         0x00000ad5        0x3 
+ .bss.phy_ptr.10644
+                0x00000ad8        0x4 src/Application/radio/physical.o
+ .bss.RxMediaState.10963
+                0x00000adc        0x4 src/Application/radio/physical.o
  .bss.phy_rx_exec
-                0x00000adc        0x4 src/Application/radio/ssc.o
-                0x00000adc                phy_rx_exec
- .bss.phy_tx_exec
                 0x00000ae0        0x4 src/Application/radio/ssc.o
-                0x00000ae0                phy_tx_exec
+                0x00000ae0                phy_rx_exec
+ .bss.phy_tx_exec
+                0x00000ae4        0x4 src/Application/radio/ssc.o
+                0x00000ae4                phy_tx_exec
  .bss.version_information
-                0x00000ae4        0xc src/Application/radio/xcmp.o
-                0x00000ae4                version_information
+                0x00000ae8        0xc src/Application/radio/xcmp.o
+                0x00000ae8                version_information
  .bss.clone_read
-                0x00000af0        0xc src/Application/radio/xcmp.o
-                0x00000af0                clone_read
+                0x00000af4        0xc src/Application/radio/xcmp.o
+                0x00000af4                clone_read
  .bss.xcmp_frame_rx
-                0x00000afc        0x4 src/Application/radio/xcmp.o
+                0x00000b00        0x4 src/Application/radio/xcmp.o
  .bss.clone_write
-                0x00000b00        0xc src/Application/radio/xcmp.o
-                0x00000b00                clone_write
+                0x00000b04        0xc src/Application/radio/xcmp.o
+                0x00000b04                clone_write
  .bss.automatic_frequency_correction_control
-                0x00000b0c        0xc src/Application/radio/xcmp.o
-                0x00000b0c                automatic_frequency_correction_control
+                0x00000b10        0xc src/Application/radio/xcmp.o
+                0x00000b10                automatic_frequency_correction_control
  .bss.language_pack_information
-                0x00000b18        0xc src/Application/radio/xcmp.o
-                0x00000b18                language_pack_information
+                0x00000b1c        0xc src/Application/radio/xcmp.o
+                0x00000b1c                language_pack_information
  .bss.radio_status
-                0x00000b24        0xc src/Application/radio/xcmp.o
-                0x00000b24                radio_status
+                0x00000b28        0xc src/Application/radio/xcmp.o
+                0x00000b28                radio_status
  .bss.xnl_timeout_semphr
-                0x00000b30        0x4 src/Application/radio/xnl.o
+                0x00000b34        0x4 src/Application/radio/xnl.o
+ .bss.flags.10672
+                0x00000b38        0x1 src/Application/radio/xnl.o
+ *fill*         0x00000b39        0x1 
  .bss.xnl_information
-                0x00000b34        0xa src/Application/radio/xnl.o
- *fill*         0x00000b3e        0x2 
- .bss.xnl_frame_tx
-                0x00000b40        0x4 src/Application/radio/xnl.o
- .bss.xnl_send_times.10716
+                0x00000b3a        0xa src/Application/radio/xnl.o
+ .bss.xnl_tx_state.10716
                 0x00000b44        0x4 src/Application/radio/xnl.o
- .bss.ptr.10717
+ .bss.xnl_frame_tx
                 0x00000b48        0x4 src/Application/radio/xnl.o
- .bss.flags.10671
-                0x00000b4c        0x1 src/Application/radio/xnl.o
- *fill*         0x00000b4d        0x3 
- .bss.xnl_tx_state.10715
+ .bss.xnl_send_times.10717
+                0x00000b4c        0x4 src/Application/radio/xnl.o
+ .bss.ptr.10718
                 0x00000b50        0x4 src/Application/radio/xnl.o
  .bss.xcmp_exec
                 0x00000b54        0x4 src/Application/radio/xnl.o
@@ -2806,9 +2810,9 @@ LOAD e:/program x86/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../
                 0x00000d28       0x14 src/ASF/thirdparty/freertos/freertos-7.0.0/source/tasks.o
  .bss.uxTopReadyPriority
                 0x00000d3c        0x4 src/ASF/thirdparty/freertos/freertos-7.0.0/source/tasks.o
- .bss.lench.11293
+ .bss.lench.11294
                 0x00000d40        0x1 src/Log/log.o
- .bss.lench.11363
+ .bss.lench.11364
                 0x00000d41        0x1 src/Log/log.o
  *fill*         0x00000d42        0x2 
  .bss.__malloc_max_total_mem

@@ -252,7 +252,7 @@ static void app_payload_rx_proc(void  * payload)
 }
 800020c6:	d8 02       	popm	pc
 800020c8:	00 00       	add	r0,r0
-800020ca:	0a 54       	eor	r4,r5
+800020ca:	0a 56       	eor	r6,r5
 800020cc:	80 00       	ld.sh	r0,r0[0x0]
 800020ce:	ce 0c       	rcall	8000228e <ButtonConfig_brdcst_func+0xda>
 800020d0:	80 00       	ld.sh	r0,r0[0x0]
@@ -1284,7 +1284,7 @@ void mic_brdcst_func(xcmp_fragment_t * xcmp)
 8000265c:	80 00       	ld.sh	r0,r0[0x0]
 8000265e:	6d 14       	ld.w	r4,r6[0x44]
 80002660:	00 00       	add	r0,r0
-80002662:	0a 56       	eor	r6,r5
+80002662:	0a 55       	eor	r5,r5
 80002664:	80 00       	ld.sh	r0,r0[0x0]
 80002666:	d2 f8       	*unknown*
 80002668:	00 00       	add	r0,r0
@@ -1708,7 +1708,7 @@ static __app_Thread_(app_cfg)
 8000285c:	00 00       	add	r0,r0
 8000285e:	0d 7c       	ld.ub	r12,--r6
 80002860:	00 00       	add	r0,r0
-80002862:	0a 55       	eor	r5,r5
+80002862:	0a 54       	eor	r4,r5
 80002864:	00 00       	add	r0,r0
 80002866:	0d 80       	ld.ub	r0,r6[0x0]
 80002868:	80 00       	ld.sh	r0,r0[0x0]
@@ -1773,7 +1773,7 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 800028bc:	80 00       	ld.sh	r0,r0[0x0]
 800028be:	6d 14       	ld.w	r4,r6[0x44]
 800028c0:	00 00       	add	r0,r0
-800028c2:	0a 55       	eor	r5,r5
+800028c2:	0a 54       	eor	r4,r5
 800028c4:	80 00       	ld.sh	r0,r0[0x0]
 800028c6:	40 20       	lddsp	r0,sp[0x8]
 800028c8:	80 00       	ld.sh	r0,r0[0x0]
@@ -2197,7 +2197,7 @@ static void payload_rx_process(void * pvParameters)
 80002b04:	cf 5b       	rjmp	80002aee <payload_rx_process+0x22>
 80002b06:	00 00       	add	r0,r0
 80002b08:	00 00       	add	r0,r0
-80002b0a:	0a 8c       	andn	r12,r5
+80002b0a:	0a 90       	mov	r0,r5
 80002b0c:	80 00       	ld.sh	r0,r0[0x0]
 80002b0e:	62 34       	ld.w	r4,r1[0xc]
 80002b10:	00 00       	add	r0,r0
@@ -2285,7 +2285,7 @@ void phy_rx(phy_fragment_t * phy_ptr)
 80002b60:	d8 02       	popm	pc
 80002b62:	00 00       	add	r0,r0
 80002b64:	00 00       	add	r0,r0
-80002b66:	0a b8       	st.h	r5++,r8
+80002b66:	0a a8       	st.w	r5++,r8
 80002b68:	80 00       	ld.sh	r0,r0[0x0]
 80002b6a:	60 e4       	ld.w	r4,r0[0x38]
 
@@ -2380,11 +2380,11 @@ void phy_tx(phy_fragment_t * phy)
 80002bd8:	2f fd       	sub	sp,-4
 80002bda:	d8 02       	popm	pc
 80002bdc:	00 00       	add	r0,r0
-80002bde:	0a c4       	st.b	r5++,r4
+80002bde:	0a cc       	st.b	r5++,r12
 80002be0:	80 00       	ld.sh	r0,r0[0x0]
 80002be2:	61 34       	ld.w	r4,r0[0x4c]
 80002be4:	00 00       	add	r0,r0
-80002be6:	0a ac       	st.w	r5++,r12
+80002be6:	0a bc       	st.h	r5++,r12
 
 80002be8 <get_idle_store_isr>:
 		return NULL;
@@ -2627,17 +2627,17 @@ static void phy_xnl_tx(xnl_channel_t * xnl_tx_channel)
 80002cfa:	e3 cd 80 c0 	ldm	sp++,r6-r7,pc
 80002cfe:	00 00       	add	r0,r0
 80002d00:	00 00       	add	r0,r0
-80002d02:	0a c4       	st.b	r5++,r4
+80002d02:	0a cc       	st.b	r5++,r12
 80002d04:	00 00       	add	r0,r0
-80002d06:	0a 80       	andn	r0,r5
+80002d06:	0a 84       	andn	r4,r5
 80002d08:	00 00       	add	r0,r0
-80002d0a:	0a cc       	st.b	r5++,r12
+80002d0a:	0a d8       	st.w	--r5,r8
 80002d0c:	80 00       	ld.sh	r0,r0[0x0]
 80002d0e:	5e 38       	retlo	r8
 80002d10:	00 00       	add	r0,r0
-80002d12:	0a a8       	st.w	r5++,r8
+80002d12:	0a ac       	st.w	r5++,r12
 80002d14:	00 00       	add	r0,r0
-80002d16:	0a 64       	and	r4,r5
+80002d16:	0a 68       	and	r8,r5
 
 80002d18 <get_idle_store>:
 	}//End of RxMedia Phy Handler.
@@ -2764,13 +2764,13 @@ static void payload_rx(void * payload)
 80002da8:	2f ed       	sub	sp,-8
 80002daa:	d8 02       	popm	pc
 80002dac:	00 00       	add	r0,r0
-80002dae:	0a 8c       	andn	r12,r5
+80002dae:	0a 90       	mov	r0,r5
 80002db0:	80 00       	ld.sh	r0,r0[0x0]
 80002db2:	62 34       	ld.w	r4,r1[0xc]
 80002db4:	80 00       	ld.sh	r0,r0[0x0]
 80002db6:	60 e4       	ld.w	r4,r0[0x38]
 80002db8:	00 00       	add	r0,r0
-80002dba:	0a 70       	tst	r0,r5
+80002dba:	0a 9c       	mov	r12,r5
 80002dbc:	80 00       	ld.sh	r0,r0[0x0]
 80002dbe:	2b 18       	sub	r8,-79
 80002dc0:	80 00       	ld.sh	r0,r0[0x0]
@@ -4977,41 +4977,41 @@ static void phy_rx_func( void * ssc)
 80003c42:	e3 cd 80 e0 	ldm	sp++,r5-r7,pc
 80003c46:	00 00       	add	r0,r0
 80003c48:	00 00       	add	r0,r0
-80003c4a:	0a b8       	st.h	r5++,r8
+80003c4a:	0a a8       	st.w	r5++,r8
 80003c4c:	00 00       	add	r0,r0
-80003c4e:	0a bc       	st.h	r5++,r12
+80003c4e:	0a c4       	st.b	r5++,r4
 80003c50:	00 00       	add	r0,r0
 80003c52:	0a a0       	st.w	r5++,r0
 80003c54:	00 00       	add	r0,r0
-80003c56:	0a 7c       	tst	r12,r5
+80003c56:	0a 80       	andn	r0,r5
 80003c58:	00 00       	add	r0,r0
-80003c5a:	0a 74       	tst	r4,r5
+80003c5a:	0a 70       	tst	r0,r5
 80003c5c:	00 00       	add	r0,r0
-80003c5e:	0a b4       	st.h	r5++,r4
+80003c5e:	0a 94       	mov	r4,r5
 80003c60:	80 00       	ld.sh	r0,r0[0x0]
 80003c62:	2b e8       	sub	r8,-66
 80003c64:	00 00       	add	r0,r0
-80003c66:	0a 88       	andn	r8,r5
+80003c66:	0a c8       	st.b	r5++,r8
 80003c68:	80 00       	ld.sh	r0,r0[0x0]
 80003c6a:	2b 18       	sub	r8,-79
 80003c6c:	00 00       	add	r0,r0
-80003c6e:	0a 6c       	and	r12,r5
+80003c6e:	0a a4       	st.w	r5++,r4
 80003c70:	80 00       	ld.sh	r0,r0[0x0]
 80003c72:	2b 34       	sub	r4,-77
 80003c74:	00 00       	add	r0,r0
-80003c76:	0a 85       	andn	r5,r5
+80003c76:	0a d4       	st.w	--r5,r4
 80003c78:	00 00       	add	r0,r0
-80003c7a:	0a 70       	tst	r0,r5
+80003c7a:	0a 9c       	mov	r12,r5
 80003c7c:	00 00       	add	r0,r0
-80003c7e:	0a 9c       	mov	r12,r5
+80003c7e:	0a b8       	st.h	r5++,r8
 80003c80:	00 00       	add	r0,r0
-80003c82:	0a 94       	mov	r4,r5
+80003c82:	0a 8c       	andn	r12,r5
 80003c84:	00 00       	add	r0,r0
-80003c86:	0a d0       	st.w	--r5,r0
+80003c86:	0a dc       	st.w	--r5,r12
 80003c88:	00 00       	add	r0,r0
-80003c8a:	0a 68       	and	r8,r5
+80003c8a:	0a b4       	st.h	r5++,r4
 80003c8c:	00 00       	add	r0,r0
-80003c8e:	0a 78       	tst	r8,r5
+80003c8e:	0a 7c       	tst	r12,r5
 80003c90:	00 00       	add	r0,r0
 80003c92:	0a 53       	eor	r3,r5
 80003c94:	80 00       	ld.sh	r0,r0[0x0]
@@ -5019,11 +5019,11 @@ static void phy_rx_func( void * ssc)
 80003c98:	80 00       	ld.sh	r0,r0[0x0]
 80003c9a:	6e a0       	ld.w	r0,r7[0x28]
 80003c9c:	00 00       	add	r0,r0
-80003c9e:	0a 84       	andn	r4,r5
+80003c9e:	0a 88       	andn	r8,r5
 80003ca0:	00 00       	add	r0,r0
-80003ca2:	0a 90       	mov	r0,r5
+80003ca2:	0a 6c       	and	r12,r5
 80003ca4:	00 00       	add	r0,r0
-80003ca6:	0a a4       	st.w	r5++,r4
+80003ca6:	0a d0       	st.w	--r5,r0
 80003ca8:	80 00       	ld.sh	r0,r0[0x0]
 80003caa:	76 dc       	ld.w	r12,r11[0x34]
 80003cac:	80 00       	ld.sh	r0,r0[0x0]
@@ -5035,17 +5035,17 @@ static void phy_rx_func( void * ssc)
 80003cb8:	80 00       	ld.sh	r0,r0[0x0]
 80003cba:	2a 78       	sub	r8,-89
 80003cbc:	00 00       	add	r0,r0
-80003cbe:	0a c0       	st.b	r5++,r0
+80003cbe:	0a b0       	st.h	r5++,r0
 80003cc0:	00 00       	add	r0,r0
 80003cc2:	1d 94       	ld.ub	r4,lr[0x1]
 80003cc4:	00 00       	add	r0,r0
-80003cc6:	0a d4       	st.w	--r5,r4
+80003cc6:	0a 74       	tst	r4,r5
 80003cc8:	00 00       	add	r0,r0
 80003cca:	0a 50       	eor	r0,r5
 80003ccc:	00 00       	add	r0,r0
 80003cce:	0a 41       	or	r1,r5
 80003cd0:	00 00       	add	r0,r0
-80003cd2:	0a b0       	st.h	r5++,r0
+80003cd2:	0a 64       	and	r4,r5
 80003cd4:	00 00       	add	r0,r0
 80003cd6:	0a 98       	mov	r8,r5
 80003cd8:	00 00       	add	r0,r0
@@ -5053,7 +5053,7 @@ static void phy_rx_func( void * ssc)
 80003cdc:	00 00       	add	r0,r0
 80003cde:	1d 8c       	ld.ub	r12,lr[0x0]
 80003ce0:	00 00       	add	r0,r0
-80003ce2:	0a c8       	st.b	r5++,r8
+80003ce2:	0a c0       	st.b	r5++,r0
 80003ce4:	00 00       	add	r0,r0
 80003ce6:	1e 94       	mov	r4,pc
 80003ce8:	80 00       	ld.sh	r0,r0[0x0]
@@ -5164,9 +5164,9 @@ static void pdca_int_handler(void)
 80003d54:	00 00       	add	r0,r0
 80003d56:	50 bc       	stdsp	sp[0x2c],r12
 80003d58:	00 00       	add	r0,r0
-80003d5a:	0a dc       	st.w	--r5,r12
+80003d5a:	0a e0       	st.h	--r5,r0
 80003d5c:	00 00       	add	r0,r0
-80003d5e:	0a e0       	st.h	--r5,r0
+80003d5e:	0a e4       	st.h	--r5,r4
 
 80003d60 <local_start_SSC>:
 void local_start_SSC(void)
@@ -5367,9 +5367,9 @@ void register_rx_tx_func(void (*rx_exec)(void *),  void ( *tx_exec)(void *))
 80003e18:	5e fc       	retal	r12
 80003e1a:	00 00       	add	r0,r0
 80003e1c:	00 00       	add	r0,r0
-80003e1e:	0a dc       	st.w	--r5,r12
+80003e1e:	0a e0       	st.h	--r5,r0
 80003e20:	00 00       	add	r0,r0
-80003e22:	0a e0       	st.h	--r5,r0
+80003e22:	0a e4       	st.h	--r5,r4
 
 80003e24 <ssc_init>:
     local_start_SSC -- ssc.c
@@ -5943,7 +5943,7 @@ void xcmp_init(void)
 800040bc:	80 00       	ld.sh	r0,r0[0x0]
 800040be:	62 34       	ld.w	r4,r1[0xc]
 800040c0:	00 00       	add	r0,r0
-800040c2:	0a fc       	st.b	--r5,r12
+800040c2:	0b 00       	ld.w	r0,r5++
 800040c4:	80 00       	ld.sh	r0,r0[0x0]
 800040c6:	d5 88       	*unknown*
 800040c8:	80 00       	ld.sh	r0,r0[0x0]
@@ -6128,25 +6128,25 @@ static void xcmp_rx_process(void * pvParameters)
 80004198:	ca 7b       	rjmp	800040e6 <xcmp_rx_process+0x12>
 8000419a:	00 00       	add	r0,r0
 8000419c:	00 00       	add	r0,r0
-8000419e:	0a fc       	st.b	--r5,r12
+8000419e:	0b 00       	ld.w	r0,r5++
 800041a0:	00 00       	add	r0,r0
-800041a2:	0a b4       	st.h	r5++,r4
+800041a2:	0a 94       	mov	r4,r5
 800041a4:	00 00       	add	r0,r0
-800041a6:	0b 0c       	ld.w	r12,r5++
+800041a6:	0b 10       	ld.sh	r0,r5++
 800041a8:	00 00       	add	r0,r0
-800041aa:	0b 00       	ld.w	r0,r5++
+800041aa:	0b 04       	ld.w	r4,r5++
 800041ac:	00 00       	add	r0,r0
-800041ae:	0a f0       	st.b	--r5,r0
+800041ae:	0a f4       	st.b	--r5,r4
 800041b0:	80 00       	ld.sh	r0,r0[0x0]
 800041b2:	5f 28       	srhs	r8
 800041b4:	00 00       	add	r0,r0
-800041b6:	0b 24       	ld.uh	r4,r5++
+800041b6:	0b 28       	ld.uh	r8,r5++
 800041b8:	80 00       	ld.sh	r0,r0[0x0]
 800041ba:	3f d8       	mov	r8,-3
 800041bc:	00 00       	add	r0,r0
-800041be:	0a e4       	st.h	--r5,r4
+800041be:	0a e8       	st.h	--r5,r8
 800041c0:	00 00       	add	r0,r0
-800041c2:	0b 18       	ld.sh	r8,r5++
+800041c2:	0b 1c       	ld.sh	r12,r5++
 800041c4:	80 00       	ld.sh	r0,r0[0x0]
 800041c6:	3f b4       	mov	r4,-5
 800041c8:	00 00       	add	r0,r0
@@ -6201,13 +6201,13 @@ static void xcmp_rx(xcmp_fragment_t xcmp)
 80004202:	2f fd       	sub	sp,-4
 80004204:	e3 cd 80 90 	ldm	sp++,r4,r7,pc
 80004208:	00 00       	add	r0,r0
-8000420a:	0a b4       	st.h	r5++,r4
+8000420a:	0a 94       	mov	r4,r5
 8000420c:	80 00       	ld.sh	r0,r0[0x0]
 8000420e:	2d 18       	sub	r8,-47
 80004210:	80 00       	ld.sh	r0,r0[0x0]
 80004212:	75 94       	ld.w	r4,r10[0x64]
 80004214:	00 00       	add	r0,r0
-80004216:	0a fc       	st.b	--r5,r12
+80004216:	0b 00       	ld.w	r0,r5++
 80004218:	80 00       	ld.sh	r0,r0[0x0]
 8000421a:	61 34       	ld.w	r4,r0[0x4c]
 
@@ -6266,9 +6266,9 @@ void xnl_get_msg_ack_func(xnl_fragment_t * xnl)
 80004244:	d8 02       	popm	pc
 80004246:	00 00       	add	r0,r0
 80004248:	00 00       	add	r0,r0
-8000424a:	0b 34       	ld.ub	r4,r5++
+8000424a:	0b 3a       	ld.ub	r10,r5++
 8000424c:	00 00       	add	r0,r0
-8000424e:	0b 30       	ld.ub	r0,r5++
+8000424e:	0b 34       	ld.ub	r4,r5++
 80004250:	80 00       	ld.sh	r0,r0[0x0]
 80004252:	61 34       	ld.w	r4,r0[0x4c]
 
@@ -6433,31 +6433,31 @@ void xnl_init(void)
 8000432e:	e3 cd 80 e0 	ldm	sp++,r5-r7,pc
 80004332:	00 00       	add	r0,r0
 80004334:	00 00       	add	r0,r0
-80004336:	0b 34       	ld.ub	r4,r5++
+80004336:	0b 3a       	ld.ub	r10,r5++
 80004338:	80 00       	ld.sh	r0,r0[0x0]
 8000433a:	62 34       	ld.w	r4,r1[0xc]
 8000433c:	00 00       	add	r0,r0
-8000433e:	0b 30       	ld.ub	r0,r5++
+8000433e:	0b 34       	ld.ub	r4,r5++
 80004340:	80 00       	ld.sh	r0,r0[0x0]
 80004342:	61 34       	ld.w	r4,r0[0x4c]
 80004344:	00 00       	add	r0,r0
-80004346:	0b 40       	ld.w	r0,--r5
+80004346:	0b 48       	ld.w	r8,--r5
 80004348:	00 00       	add	r0,r0
-8000434a:	0a b4       	st.h	r5++,r4
+8000434a:	0a 94       	mov	r4,r5
 8000434c:	00 00       	add	r0,r0
 8000434e:	32 ae       	mov	lr,42
 80004350:	80 00       	ld.sh	r0,r0[0x0]
 80004352:	2b 6c       	sub	r12,-74
 80004354:	00 00       	add	r0,r0
-80004356:	0a c4       	st.b	r5++,r4
+80004356:	0a cc       	st.b	r5++,r12
 80004358:	00 00       	add	r0,r0
-8000435a:	0a b8       	st.h	r5++,r8
+8000435a:	0a a8       	st.w	r5++,r8
 8000435c:	00 00       	add	r0,r0
-8000435e:	0a 70       	tst	r0,r5
+8000435e:	0a 9c       	mov	r12,r5
 80004360:	00 00       	add	r0,r0
 80004362:	1e ae       	st.w	pc++,lr
 80004364:	00 00       	add	r0,r0
-80004366:	0a 8c       	andn	r12,r5
+80004366:	0a 90       	mov	r0,r5
 80004368:	80 00       	ld.sh	r0,r0[0x0]
 8000436a:	d5 90       	acall	0x59
 8000436c:	80 00       	ld.sh	r0,r0[0x0]
@@ -6565,9 +6565,9 @@ static void xnl_rx(xnl_fragment_t * xnl)
 800043c6:	f0 1f 00 06 	mcall	800043dc <xnl_rx_process+0x5c>
 800043ca:	ce 4b       	rjmp	80004392 <xnl_rx_process+0x12>
 800043cc:	00 00       	add	r0,r0
-800043ce:	0a b8       	st.h	r5++,r8
+800043ce:	0a a8       	st.w	r5++,r8
 800043d0:	00 00       	add	r0,r0
-800043d2:	0a b4       	st.h	r5++,r4
+800043d2:	0a 94       	mov	r4,r5
 800043d4:	00 00       	add	r0,r0
 800043d6:	04 f4       	st.b	--r2,r4
 800043d8:	80 00       	ld.sh	r0,r0[0x0]
@@ -6739,19 +6739,19 @@ static void xnl_tx_process(void * pvParameters)
 80004484:	cb 7b       	rjmp	800043f2 <xnl_tx_process+0x12>
 80004486:	00 00       	add	r0,r0
 80004488:	00 00       	add	r0,r0
-8000448a:	0b 50       	ld.sh	r0,--r5
+8000448a:	0b 44       	ld.w	r4,--r5
 8000448c:	00 00       	add	r0,r0
-8000448e:	0b 40       	ld.w	r0,--r5
+8000448e:	0b 48       	ld.w	r8,--r5
 80004490:	00 00       	add	r0,r0
-80004492:	0b 48       	ld.w	r8,--r5
+80004492:	0b 50       	ld.sh	r0,--r5
 80004494:	00 00       	add	r0,r0
-80004496:	0b 44       	ld.w	r4,--r5
+80004496:	0b 4c       	ld.w	r12,--r5
 80004498:	00 00       	add	r0,r0
-8000449a:	0b 30       	ld.ub	r0,r5++
+8000449a:	0b 34       	ld.ub	r4,r5++
 8000449c:	80 00       	ld.sh	r0,r0[0x0]
 8000449e:	5f 28       	srhs	r8
 800044a0:	00 00       	add	r0,r0
-800044a2:	0a b4       	st.h	r5++,r4
+800044a2:	0a 94       	mov	r4,r5
 800044a4:	80 00       	ld.sh	r0,r0[0x0]
 800044a6:	2b 6c       	sub	r12,-74
 800044a8:	80 00       	ld.sh	r0,r0[0x0]
@@ -6948,17 +6948,17 @@ void xnl_tx(xnl_fragment_t * xnl)
 8000456e:	2f fd       	sub	sp,-4
 80004570:	e3 cd 80 c0 	ldm	sp++,r6-r7,pc
 80004574:	00 00       	add	r0,r0
-80004576:	0b 4c       	ld.w	r12,--r5
+80004576:	0b 38       	ld.ub	r8,r5++
 80004578:	00 00       	add	r0,r0
-8000457a:	0b 34       	ld.ub	r4,r5++
+8000457a:	0b 3a       	ld.ub	r10,r5++
 8000457c:	00 00       	add	r0,r0
-8000457e:	0a b4       	st.h	r5++,r4
+8000457e:	0a 94       	mov	r4,r5
 80004580:	80 00       	ld.sh	r0,r0[0x0]
 80004582:	2d 18       	sub	r8,-47
 80004584:	80 00       	ld.sh	r0,r0[0x0]
 80004586:	75 94       	ld.w	r4,r10[0x64]
 80004588:	00 00       	add	r0,r0
-8000458a:	0b 40       	ld.w	r0,--r5
+8000458a:	0b 48       	ld.w	r8,--r5
 8000458c:	80 00       	ld.sh	r0,r0[0x0]
 8000458e:	61 34       	ld.w	r4,r0[0x4c]
 
@@ -7253,9 +7253,9 @@ void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 800046fc:	2c 0d       	sub	sp,-256
 800046fe:	d8 22       	popm	r4-r7,pc
 80004700:	00 00       	add	r0,r0
-80004702:	0b 34       	ld.ub	r4,r5++
+80004702:	0b 3a       	ld.ub	r10,r5++
 80004704:	00 00       	add	r0,r0
-80004706:	0b 30       	ld.ub	r0,r5++
+80004706:	0b 34       	ld.ub	r4,r5++
 80004708:	80 00       	ld.sh	r0,r0[0x0]
 8000470a:	61 34       	ld.w	r4,r0[0x4c]
 8000470c:	80 00       	ld.sh	r0,r0[0x0]
@@ -7350,9 +7350,9 @@ void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 8000475a:	e3 cd 80 80 	ldm	sp++,r7,pc
 8000475e:	00 00       	add	r0,r0
 80004760:	00 00       	add	r0,r0
-80004762:	0b 34       	ld.ub	r4,r5++
+80004762:	0b 3a       	ld.ub	r10,r5++
 80004764:	00 00       	add	r0,r0
-80004766:	0b 30       	ld.ub	r0,r5++
+80004766:	0b 34       	ld.ub	r4,r5++
 80004768:	80 00       	ld.sh	r0,r0[0x0]
 8000476a:	61 34       	ld.w	r4,r0[0x4c]
 8000476c:	80 00       	ld.sh	r0,r0[0x0]
@@ -7441,13 +7441,13 @@ void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 800047b6:	b0 89       	st.b	r8[0x0],r9
 800047b8:	e3 cd 80 80 	ldm	sp++,r7,pc
 800047bc:	00 00       	add	r0,r0
-800047be:	0b 30       	ld.ub	r0,r5++
+800047be:	0b 34       	ld.ub	r4,r5++
 800047c0:	80 00       	ld.sh	r0,r0[0x0]
 800047c2:	61 34       	ld.w	r4,r0[0x4c]
 800047c4:	80 00       	ld.sh	r0,r0[0x0]
 800047c6:	47 10       	lddsp	r0,sp[0x1c4]
 800047c8:	00 00       	add	r0,r0
-800047ca:	0b 34       	ld.ub	r4,r5++
+800047ca:	0b 3a       	ld.ub	r10,r5++
 
 800047cc <xnl_send_device_master_query>:
 Description: send device_master_query to connect radio.

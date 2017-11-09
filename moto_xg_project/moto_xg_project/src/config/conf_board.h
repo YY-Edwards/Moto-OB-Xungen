@@ -20,6 +20,13 @@
 #define FOSC0           12000000                              //!< Osc0 frequency: Hz.
 #define OSC0_STARTUP    AVR32_PM_OSCCTRL0_STARTUP_2048_RCOSC  //!< Osc0 startup time: RCOsc periods.
 
+/* These are documented in services/basic/clock/uc3b0_b1/osc.h */
+#define BOARD_OSC0_HZ           12000000
+#define BOARD_OSC0_STARTUP_US   17000
+#define BOARD_OSC0_IS_XTAL      true
+#define BOARD_OSC32_HZ          32768
+#define BOARD_OSC32_STARTUP_US  71000
+#define BOARD_OSC32_IS_XTAL     true
 
 
 

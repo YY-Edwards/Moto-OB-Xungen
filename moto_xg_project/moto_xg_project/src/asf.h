@@ -84,12 +84,15 @@
 // From module: Part identification macros
 #include <parts.h>
 
+// From module: RTC - Real Time Counter
+#include <rtc.h>
+
 // From module: SPI - Serial Peripheral Interface
 #include <spi.h>
 
 // From module: SPI - UC3 implementation
-#include <usart_spi.h>
-#include <usart_spi.h>
+#include <spi_master.h>
+#include <spi_master.h>
 
 // From module: System Clock Control - UC3 B0 implementation
 #include <sysclk.h>
