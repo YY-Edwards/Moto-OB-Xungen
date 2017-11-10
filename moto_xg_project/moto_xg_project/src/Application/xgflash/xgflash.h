@@ -13,6 +13,7 @@
 #include "xgrtc.h"
 #include "flashc.h"
 #include "string.h"
+#include "log.h"
 
 /**
 
@@ -42,7 +43,7 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 #define XG_MESSAGE_LISTINFO_BOUNDARY_ADD	0x80050000//20k
 
 #define LABEL_ADDRESS						XG_MESSAGE_LISTINFO_START_ADD
-#define LABEL_LENGTH						0x08//8bytes:"XUNGENG"
+#define LABEL_LENGTH						0x07//7bytes:"XUNGENG"
 
 #define MESSAGE_NUMBERS_ADD					(XG_MESSAGE_LISTINFO_START_ADD + LABEL_LENGTH)
 #define MESSAGE_NUMBERS_LENGTH				0x02//2bytes:0x xxxx  
@@ -102,7 +103,7 @@ void xg_flashc_init(void);
 static Bool xgflash_list_info_init(U8 *xg_message_count_ptr);
 Bool get_xgflash_info(unsigned int index,  MessageList_Info_t * m_info_data);
 Bool resend_xg_data(U32 message_index);
-Bool xg_message_data_save(MessageData_t *data_ptr, U16 data_len, U8 list_end_flag);
+Bool xg_message_data_save(MessageData_t *data_ptr, U16 data_len, U8 data_end_flag);
 Bool xg_message_info_save(MessageList_Info_t * m_info_data);
 
 #endif /* XGFLASH_H_ */

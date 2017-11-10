@@ -135,6 +135,16 @@
       <ToolOptions>
         <InterfaceProperties>
           <JtagDbgClock>7500000</JtagDbgClock>
+          <JtagEnableExtResetOnStartSession>true</JtagEnableExtResetOnStartSession>
+          <JtagInChain>false</JtagInChain>
+          <JtagDevicesBefore>0</JtagDevicesBefore>
+          <JtagDevicesAfter>0</JtagDevicesAfter>
+          <JtagInstrBitsBefore>0</JtagInstrBitsBefore>
+          <JtagInstrBitsAfter>0</JtagInstrBitsAfter>
+          <JtagSelectedDeviceIndexInChain>
+          </JtagSelectedDeviceIndexInChain>
+          <JtagDaisyChainDevices>
+          </JtagDaisyChainDevices>
         </InterfaceProperties>
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
@@ -552,9 +562,6 @@
     <None Include="src\ASF\avr32\drivers\cpu\cycle_counter\cycle_counter.h">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="src\Application\voice\voice.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\Application\voice\voice.h">
       <SubType>compile</SubType>
     </Compile>

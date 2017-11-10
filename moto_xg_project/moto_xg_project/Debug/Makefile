@@ -104,7 +104,6 @@ C_SRCS +=  \
 ../src/Application/RFID/MFRC522/rc522.c \
 ../src/Application/RFID/RFID.c \
 ../src/Application/timers/timer.c \
-../src/Application/voice/voice.c \
 ../src/Application/xgflash/xgflash.c \
 ../src/ASF/avr32/drivers/flashc/flashc.c \
 ../src/ASF/avr32/drivers/gpio/gpio.c \
@@ -158,7 +157,6 @@ src/Application/radio/xnl.o \
 src/Application/RFID/MFRC522/rc522.o \
 src/Application/RFID/RFID.o \
 src/Application/timers/timer.o \
-src/Application/voice/voice.o \
 src/Application/xgflash/xgflash.o \
 src/ASF/avr32/drivers/flashc/flashc.o \
 src/ASF/avr32/drivers/gpio/gpio.o \
@@ -205,7 +203,6 @@ src/Application/radio/xnl.o \
 src/Application/RFID/MFRC522/rc522.o \
 src/Application/RFID/RFID.o \
 src/Application/timers/timer.o \
-src/Application/voice/voice.o \
 src/Application/xgflash/xgflash.o \
 src/ASF/avr32/drivers/flashc/flashc.o \
 src/ASF/avr32/drivers/gpio/gpio.o \
@@ -252,7 +249,6 @@ src/Application/radio/xnl.d \
 src/Application/RFID/MFRC522/rc522.d \
 src/Application/RFID/RFID.d \
 src/Application/timers/timer.d \
-src/Application/voice/voice.d \
 src/Application/xgflash/xgflash.d \
 src/ASF/avr32/drivers/flashc/flashc.d \
 src/ASF/avr32/drivers/gpio/gpio.d \
@@ -299,7 +295,6 @@ src/Application/radio/xnl.d \
 src/Application/RFID/MFRC522/rc522.d \
 src/Application/RFID/RFID.d \
 src/Application/timers/timer.d \
-src/Application/voice/voice.d \
 src/Application/xgflash/xgflash.d \
 src/ASF/avr32/drivers/flashc/flashc.d \
 src/ASF/avr32/drivers/gpio/gpio.d \
@@ -427,8 +422,6 @@ LINKER_SCRIPT_DEP+=
 
 
 
-
-
 src/Application/app/%.o: ../src/Application/app/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
@@ -472,13 +465,6 @@ src/Application/RFID/%.o: ../src/Application/RFID/%.c
 	
 
 src/Application/timers/%.o: ../src/Application/timers/%.c
-	@echo Building file: $<
-	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)E:\Program x86\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -funsigned-char -DDEBUG -DFREERTOS_USED -DBOARD=USER_BOARD  -I"../common/applications/user_application/user_board/config" -I"../src/config" -I"../src" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/usart" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/services/clock" -I"../src/ASF/common/services/spi/uc3_spi" -I"../src/ASF/common/services/spi" -I"../src/ASF/common/services/spi/uc3_usart_spi" -I"../src/Application/app" -I"../src/Application/flash" -I"../src/Application/radio" -I"../src/Application/timers" -I"../src/Application/voice" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0" -I"../src/Log" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/twi" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers" -I"../src/Application/RFID" -I"../src/Application/RFID/MFRC522" -I"E:\Program x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512" -I"../src/ASF/avr32/drivers/rtc" -I"../src/Application/myrtc" -I"../src/ASF/common/boards/user_board" -I"../src/ASF/common/boards" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/avr32/utils" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/Application/xgflash"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g2 -Wall -mpart=uc3b0512 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-src/Application/voice/%.o: ../src/Application/voice/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
 	$(QUOTE)E:\Program x86\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -funsigned-char -DDEBUG -DFREERTOS_USED -DBOARD=USER_BOARD  -I"../common/applications/user_application/user_board/config" -I"../src/config" -I"../src" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/usart" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/services/clock" -I"../src/ASF/common/services/spi/uc3_spi" -I"../src/ASF/common/services/spi" -I"../src/ASF/common/services/spi/uc3_usart_spi" -I"../src/Application/app" -I"../src/Application/flash" -I"../src/Application/radio" -I"../src/Application/timers" -I"../src/Application/voice" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0" -I"../src/Log" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable" -I"../src/ASF/thirdparty/freertos/freertos-7.0.0/source" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/twi" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers" -I"../src/Application/RFID" -I"../src/Application/RFID/MFRC522" -I"E:\Program x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512" -I"../src/ASF/avr32/drivers/rtc" -I"../src/Application/myrtc" -I"../src/ASF/common/boards/user_board" -I"../src/ASF/common/boards" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/avr32/utils" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/Application/xgflash"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g2 -Wall -mpart=uc3b0512 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

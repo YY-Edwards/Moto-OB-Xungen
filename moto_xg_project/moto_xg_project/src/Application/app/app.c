@@ -876,9 +876,9 @@ static __app_Thread_(app_cfg)
 					//log("no find card...\n");
 				//}
 				nop();
-				log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n", 
-				Current_time.Year, Current_time.Month, Current_time.Day, 
-				Current_time.Hour, Current_time.Minute, Current_time.Second);
+				//log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n", 
+				//Current_time.Year, Current_time.Month, Current_time.Day, 
+				//Current_time.Hour, Current_time.Minute, Current_time.Second);
 				
 		}
 		else
