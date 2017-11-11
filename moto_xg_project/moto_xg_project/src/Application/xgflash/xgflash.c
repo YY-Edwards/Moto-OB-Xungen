@@ -65,20 +65,21 @@ start:
 	{
 		if(memcmp(XGFlashLabel, str, sizeof(XGFlashLabel)-1) != 0)//compare label
 		{
-			ERASE://这种flash操作不需要单独的擦除功能
-			//erase:40pages		
-			//for(i=0; i < ((XG_MESSAGE_LISTINFO_BOUNDARY_ADD - XG_MESSAGE_LISTINFO_START_ADD)/(PageSize)); i++)//20k
-			//{
-				//current_page_number+=i;
-				////flashc_erase_page(current_page_number, true);
-			//}
+			ERASE:
+			//erase:160pages		
+			//for(i=0; i < ((XG_MESSAGE_DATA_BOUNDARY_ADD - XG_MESSAGE_LISTINFO_START_ADD)/(PageSize)); i++)//80k
+			for(i=0; i <25; i++)//擦除太多页程序运行不正常。
+			{
+				current_page_number+=i;
+				flashc_erase_page(current_page_number, true);
+			}
 			//set label
 			flashc_memcpy((void *)LABEL_ADDRESS, (void *)XGFlashLabel, LABEL_LENGTH,  true);
 			
 			//set current_voice_index
 			memset(str, 0x00, sizeof(str));
 			
-			flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)str, MESSAGE_NUMBERS_LENGTH,  false);
+			flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)str, MESSAGE_NUMBERS_LENGTH,  true);
 			if (flashc_is_lock_error() || flashc_is_programming_error())
 			{
 				return false;
@@ -169,7 +170,7 @@ Bool xg_message_data_save(MessageData_t *data_ptr, U16 data_len, U8 data_end_fla
 	}
 	
 	Disable_interrupt_level(1);
-	flashc_memcpy((void *)current_save_message_offset, (void *)data_ptr, data_len,  false);
+	flashc_memcpy((void *)current_save_message_offset, (void *)data_ptr, data_len,  true);
 	Enable_interrupt_level(1);
 	if (flashc_is_lock_error() || flashc_is_programming_error())
 	{
@@ -194,12 +195,12 @@ Bool xg_message_data_save(MessageData_t *data_ptr, U16 data_len, U8 data_end_fla
 		}
 		//set a message info by current_message_index		
 		Disable_interrupt_level(1);
-		flashc_memcpy((void *)address, (void *)&ptr, XG_MESSAGE_INFO_HEADER_LENGTH,  false);
+		flashc_memcpy((void *)address, (void *)&ptr, XG_MESSAGE_INFO_HEADER_LENGTH,  true);
 		Enable_interrupt_level(1);
 		
 		//set message numbers
 		Disable_interrupt_level(1);
-		flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)&current_message_index, MESSAGE_NUMBERS_LENGTH,  false);
+		flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)&current_message_index, MESSAGE_NUMBERS_LENGTH,  true);
 		Enable_interrupt_level(1);
 
 		if (flashc_is_lock_error() || flashc_is_programming_error())
