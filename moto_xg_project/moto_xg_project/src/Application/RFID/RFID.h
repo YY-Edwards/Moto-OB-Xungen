@@ -13,6 +13,8 @@
 #include "timer.h"
 #include "xcmp.h"
 #include "log.h"
+#include "xgrtc.h"
+
 
 
 #define DEST 9;//目的ID
@@ -26,6 +28,27 @@ typedef struct
 	
 }Message_Header_t;
 #pragma pack()
+
+#pragma pack(1)
+typedef struct
+{
+	//unsigned char	RFID_ID[4];
+	unsigned char	RFID_ID[16];//Unicode码,大端模式
+	DateTime_t		XG_Time;
+
+}Message_Data_t;//22bytes
+#pragma pack()
+
+#pragma pack(1)
+typedef struct
+{
+
+	Message_Header_t	header;
+	Message_Data_t		data;
+
+}Message_Protocol_t;//10+22bytes
+#pragma pack()
+
 
 void rfid_init();
 U8 rfid_sendID_message();

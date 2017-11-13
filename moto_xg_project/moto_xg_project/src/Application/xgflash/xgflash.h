@@ -10,10 +10,10 @@
 #define XGFLASH_H_
 
 #include "compiler.h"
-#include "xgrtc.h"
 #include "flashc.h"
 #include "string.h"
 #include "log.h"
+#include "RFID.h"
 
 /**
 
@@ -55,6 +55,15 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 #define XG_MESSAGE_DATA_START_ADD			0x80050000
 #define XG_MESSAGE_DATA_BOUNDARY_ADD		0x8005F000//60k
 
+#define MAX_MESSAGE_STORE 20
+
+volatile Message_Protocol_t message_store[MAX_MESSAGE_STORE];
+
+extern void * get_idle_store(xQueueHandle store);
+extern void set_idle_store(xQueueHandle store, void * ptr);
+
+#define get_message_store()			get_idle_store(message_storage_queue)
+#define set_message_store(ptr)		set_idle_store(message_storage_queue, ptr)
 
 #pragma pack(1)
 typedef struct
@@ -65,16 +74,6 @@ typedef struct
 
 }MessageList_Info_t;//8bytes
 #pragma pack()
-
-#pragma pack(1)
-typedef struct
-{
-	unsigned char	RFID_ID[4];
-	DateTime_t		XG_Time;
-
-}MessageData_t;//10bytes
-#pragma pack()
-
 
 
 //! Structure type containing variables to store in NVRAM using a specific
@@ -89,21 +88,26 @@ typedef const struct {
 
 typedef enum
 {
-	DF_BLOCK_4KB = 1,
-	DF_BLOCK_32KB = 2,
-	DF_BLOCK_64KB = 3,
-	DF_BLOCK_ALL = 4,
-} df_block_size_t;
-
+	XG_ERROR = -1,
+	XG_OK = 0,
+	XG_INVALID_PARAM = 1,
+	XG_FLASH_FULL = 2,
+	XG_OUT_BOUNDARY = 3,
+	XG_ERASE_FAIL = 4,
+	XG_ERASE_COMPLETED = 5,
+	XG_FLASH_ACTION_FAIL = 6,
+	
+} xgflash_status_t;
 
 
 void flash_rw_example(const char *caption, nvram_data_t *nvram_data);
 void xg_flashc_init(void);
 
-static Bool xgflash_list_info_init(U8 *xg_message_count_ptr);
-Bool get_xgflash_info(unsigned int index,  MessageList_Info_t * m_info_data);
-Bool resend_xg_data(U32 message_index);
-Bool xg_message_data_save(MessageData_t *data_ptr, U16 data_len, U8 data_end_flag);
-Bool xg_message_info_save(MessageList_Info_t * m_info_data);
+static xgflash_status_t xgflash_list_info_init(void);
+U16 xgflash_get_message_count(void);
+xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_flag);
+xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr);
+xgflash_status_t xgflash_erase_info_region(void);
+
 
 #endif /* XGFLASH_H_ */

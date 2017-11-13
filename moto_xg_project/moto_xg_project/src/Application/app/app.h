@@ -11,10 +11,12 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "string.h"
 #include "queue.h"
 #include "timer.h"
 #include "RFID.h"
 #include "xgrtc.h"
+#include "xgflash.h"
 //#include "voice.h"
 
 #include <xnl.h>

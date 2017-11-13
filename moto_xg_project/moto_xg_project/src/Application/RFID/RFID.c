@@ -73,19 +73,20 @@ U8 rfid_auto_reader(void *card_id)
 	
 }
 
-
+extern volatile DateTime_t Current_time;
 U8 rfid_sendID_message()
 {
 	char SN[10];
-	char data_buffer[16];
+	//char data_buffer[16];
 	char message[80];
 	U8 return_err =0;
 	U8 temp =0;
 	U8 destination = DEST;
 	static U8 start_session = 0x80;
 	Message_Header_t header;
+	Message_Data_t data_buffer;//22bytes
 	
-	memset(data_buffer, 0x00, 16);
+	//memset(data_buffer, 0x00, 16);
 	memset(SN, 0x00, 10);
 	memset(message, 0x00, 80);
 
@@ -98,22 +99,23 @@ U8 rfid_sendID_message()
 		for(int i = 0; i<4; i++){//将Unicode码转换为大端模式	
 		
 			 temp = ((SN[i] & 0xF0) >> 4);//取字节高四位
-			 if((temp >= 0) && (temp <= 9))data_buffer[i*4] = temp+0x30;
+			 if((temp >= 0) && (temp <= 9))data_buffer.RFID_ID[i*4] = temp+0x30;
 			 else 
-				data_buffer[i*4] = ((temp - 0x0a)+0x61);
+				data_buffer.RFID_ID[i*4] = ((temp - 0x0a)+0x61);
 			
-			 data_buffer[i*4+1] = 0x00; 
+			 data_buffer.RFID_ID[i*4+1] = 0x00;
 		 
 			 temp = (SN[i] & 0x0F);//取字节低四位
-			 if((temp >= 0) && (temp <= 9))data_buffer[i*4+2] = temp+0x30;
+			 if((temp >= 0) && (temp <= 9))data_buffer.RFID_ID[i*4+2] = temp+0x30;
 			 else
-				data_buffer[i*4+2] = ((temp - 0x0a)+0x61);
+				data_buffer.RFID_ID[i*4+2] = ((temp - 0x0a)+0x61);
 
-		 
-			 data_buffer[i*4+3] = 0x00; 
+			 data_buffer.RFID_ID[i*4+3] = 0x00; 
 		}
+		
+		memcpy(&data_buffer.XG_Time.Year, &Current_time.Year, sizeof(DateTime_t))	;
 	
-		header.length = (0x0008 + sizeof(data_buffer));
+		header.length = (0x0008 + sizeof(Message_Data_t));
 	
 		if(start_session > 0x9f)start_session = 0x80;
 	
@@ -123,9 +125,9 @@ U8 rfid_sendID_message()
 		header.type = 0xe000;
 	
 		memcpy(message, &header, sizeof(Message_Header_t));//拷贝header数据
-		memcpy(&message[sizeof(Message_Header_t)], data_buffer, sizeof(data_buffer));//拷贝短信内容数据
+		memcpy(&message[sizeof(Message_Header_t)], &data_buffer, sizeof(Message_Data_t));//拷贝短信内容数据
 	
-		xcmp_data_session_req(message, (sizeof(Message_Header_t)+sizeof(data_buffer)), destination);
+		xcmp_data_session_req(message, (sizeof(Message_Header_t)+sizeof(Message_Data_t)), destination);
 		
 	}
 	else

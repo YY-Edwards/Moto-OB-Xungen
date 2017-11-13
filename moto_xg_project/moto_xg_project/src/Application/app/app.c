@@ -40,6 +40,12 @@ static volatile U8 connect_flag =0;
 static void app_payload_rx_proc(void  * payload);
 static void app_payload_tx_proc(void  * payload);
 
+/*the queue is used to storage failure-send message*/
+extern volatile xQueueHandle message_storage_queue ;
+
+/*the queue is used to receive failure-send message*/
+extern volatile xQueueHandle xg_resend_queue ;
+
 //app func--list
 
 void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
@@ -452,10 +458,13 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 Session_number = 0;
 	U16 data_length = 0;
+	U32 card_id =0;
 	U8 i = 0;
+	xgflash_status_t return_value = XG_ERROR;
+	
 	/*point to xcmp payload*/
 	DataSession_brdcst_t *ptr = (DataSession_brdcst_t* )xcmp->u8;
-
+	
 	if (ptr->State == CSBK_DATA_RX_Suc)
 	{
 		
@@ -478,6 +487,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	else
 	{
 		//log("\n\r State: 0x %X \n\r", xcmp->u8[0]);
+		Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];				
+		data_length = (ptr->DataPayload.DataPayload_Length[0]<<8) | (ptr->DataPayload.DataPayload_Length[1]);//( xcmp->u8[2]<<8) | (xcmp->u8[3]);
 		log("State: %X \n", ptr->State);
 		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
@@ -485,19 +496,34 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
+			//Message_Protocol_t  *xgmessage = (Message_Protocol_t  *)ptr->DataPayload.DataPayload;
+			Message_Protocol_t  xgmessage;
+			memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
 			log("data transmit failure\n");
+			log("xgmessage.XG_Time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+			xgmessage.data.XG_Time.Year, xgmessage.data.XG_Time.Month, xgmessage.data.XG_Time.Day,
+			xgmessage.data.XG_Time.Hour, xgmessage.data.XG_Time.Minute, xgmessage.data.XG_Time.Second);
+
+			//return_value = xgflash_message_save(&xgmessage, sizeof(Message_Protocol_t), TRUE);
+
+			Message_Protocol_t * myptr = get_message_store();	
+			if(NULL != myptr)
+			{
+				memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));			
+				xQueueSend(xg_resend_queue, &myptr, 0);
+			}
+			else
+			{
+				log("myptr: err\n\r" );
+			}
 			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
-		Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];
-			
-		data_length = (ptr->DataPayload.DataPayload_Length[0]<<8) | (ptr->DataPayload.DataPayload_Length[1]);//( xcmp->u8[2]<<8) | (xcmp->u8[3]);
-
-		log("\n\r Session_ID: %x \n\r",Session_number );
-		log("\n\r paylaod_length: %d \n\r",data_length );
+		//log("Session_ID: %x \n\r",Session_number );
+		log("paylaod_length: %d \n\r",data_length );
 		//for(i=0; i<data_length; i++)
 		//{
 				//
-			//log("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
+			////log("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
 			//log("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
 				//
 		//}
@@ -848,10 +874,12 @@ static __app_Thread_(app_cfg)
 {
 	static int coun=0;
 	static U32 isAudioRouting = 0;
+	static U16 Current_total_message_count =0;
 	static  portTickType xLastWakeTime;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
 	char card_id[4]={0};
+	U16  * data_ptr;
 	
 	 xLastWakeTime = xTaskGetTickCount();
 		
@@ -865,7 +893,18 @@ static __app_Thread_(app_cfg)
 		}
 		else if(connect_flag)
 		{
-				
+				if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+				{
+					
+					xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+					set_message_store(data_ptr);
+					log("receive okay!\n");			
+				}
+				//Current_total_message_count = xgflash_get_message_count();
+				//if(Current_total_message_count!=0)//有缓存，需重发
+				//{	
+					//log("Current_total_message_count: %d\n", Current_total_message_count);
+				//}
 				//rfid_sendID_message();
 				//if(rfid_auto_reader(card_id) == 0){
 					//log("card_id : %x, %x, %x, %x\n", card_id[0], card_id[1], card_id[2], card_id[3]);
