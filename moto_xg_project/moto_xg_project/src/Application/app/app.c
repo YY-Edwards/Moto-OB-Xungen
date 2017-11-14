@@ -859,8 +859,8 @@ void app_init(void)
 	static portBASE_TYPE res = 0;
 	 res = xTaskCreate(
 	app_cfg
-	,  (const signed portCHAR *)"XNL_TX"
-	,  384
+	,  (const signed portCHAR *)"USER_P"
+	,  384//1024//800//384
 	,  NULL
 	,  1
 	,  NULL );
@@ -870,16 +870,21 @@ void app_init(void)
 extern  char AudioData[];
 extern U32 tc_tick;
 extern volatile DateTime_t Current_time;
+//extern portTickType water_value;
+//extern portTickType tx_water_value;
+//extern portTickType log_water_value;
 static __app_Thread_(app_cfg)
 {
 	static int coun=0;
 	static U32 isAudioRouting = 0;
 	static U16 Current_total_message_count =0;
 	static  portTickType xLastWakeTime;
+	static  portTickType water_value;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
 	char card_id[4]={0};
 	U16  * data_ptr;
+	static const uint8_t test_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
 	
 	 xLastWakeTime = xTaskGetTickCount();
 		
@@ -896,10 +901,14 @@ static __app_Thread_(app_cfg)
 				if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
 				{
 					
-					xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+					//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+					//flashc_memcpy((void *)0x80061234, (void *)test_data, 7,  true);
 					set_message_store(data_ptr);
-					log("receive okay!\n");			
+					log("receive okay!\n");	
+					water_value = uxTaskGetStackHighWaterMark(NULL);
+					log("water_value: %d\n", water_value);		
 				}
+				
 				//Current_total_message_count = xgflash_get_message_count();
 				//if(Current_total_message_count!=0)//有缓存，需重发
 				//{	

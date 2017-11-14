@@ -1521,8 +1521,10 @@ static void payload_tx(void * payload)
 
 static void payload_rx(void * payload)
 {
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    set_payload_idle_isr(payload);
 	
+	#if 0
+	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	if(NULL == phy_payload_frame_rx)
 	{
 		phy_payload_frame_rx = xQueueCreate(RX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t *));		
@@ -1538,6 +1540,7 @@ static void payload_rx(void * payload)
 	{
 		//logFromISR("ss");
 	}
+	#endif
 }
 /**
 Function: phy_payload_rx

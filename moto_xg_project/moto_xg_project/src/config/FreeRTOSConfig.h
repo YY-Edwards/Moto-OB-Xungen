@@ -129,7 +129,7 @@ to exclude the API function. */
 // #define configGENERATE_RUN_TIME_STATS       0
 
 // #define INCLUDE_vResumeFromISR              1
-// #define INCLUDE_uxTaskGetStackHighWaterMark 0
+#define INCLUDE_uxTaskGetStackHighWaterMark 1
 
 #define tskPHY_PRIORITY		(tskIDLE_PRIORITY + 3)
 #define tskXNL_PRIORITY		(tskIDLE_PRIORITY + 3)

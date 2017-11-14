@@ -138,7 +138,7 @@ void log_init(void)
 	xTaskCreate(
 	task_log
 	,  (const signed portCHAR *)"LOG"
-	,  384
+	,  100//384
 	,  NULL
 	,  tskLOG_PRIORITY
 	,  NULL );
@@ -389,13 +389,14 @@ int logFromISR(char * content, ...)
 			////taskYIELD();
 		//}
 	}
-	
+//portTickType log_water_value =0;	
 static void task_log(void * pvParameters)
 {
 	char * str;
 	//char str[MAX_LOG_LINE_SIZE];
 	for(;;)
 	{
+		//log_water_value = uxTaskGetStackHighWaterMark(NULL);
 		if(xQueueReceive( logQueue, &str, portMAX_DELAY ) == pdTRUE )
 		{
 			if( NULL != str)

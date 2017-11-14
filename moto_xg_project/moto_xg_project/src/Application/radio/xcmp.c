@@ -176,6 +176,7 @@ static void xcmp_rx_process(void * pvParameters)
 	/*To store the elements in the queue*/
 	xcmp_fragment_t xcmp;
 	xcmp_fragment_t * ptr;
+	//static  portTickType water_value;
 		
 	for(;;)
 	{
@@ -187,7 +188,9 @@ static void xcmp_rx_process(void * pvParameters)
 			}
 			
 			//log("\n\r R_xcmp : %4x \n\r",ptr->xcmp_opcode);//log:R_xcmpÖ¸Áî	
-						
+			//static  portTickType water_value;
+			//water_value = uxTaskGetStackHighWaterMark(NULL);
+			//log("water_value: %d\n", water_value);			
 			switch(ptr->xcmp_opcode & 0x0FFF)
 			{
 				case RADIO_STATUS:				
@@ -268,7 +271,7 @@ void xcmp_init(void)
 	xTaskCreate(
 	xcmp_rx_process
 	,  (const signed portCHAR *)"XCMP_RX"
-	,  384
+	,  750//1024//800//384
 	,  NULL
 	,  tskXCMP_PRIORITY
 	,  NULL

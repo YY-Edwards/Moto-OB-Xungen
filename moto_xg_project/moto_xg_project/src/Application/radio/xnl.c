@@ -631,6 +631,7 @@ Calls: xQueueReceive--freertos
 	phy_tx -- physical.c
 Called By: task
 */
+//portTickType tx_water_value =0;
 static void xnl_tx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
@@ -648,6 +649,7 @@ static void xnl_tx_process(void * pvParameters)
 	
 	for(;;)
 	{		
+		//tx_water_value = uxTaskGetStackHighWaterMark(NULL);
 		switch(xnl_tx_state)
 		{
 			case WAITING_FOR_TX:
@@ -740,10 +742,12 @@ Description: Receive the XNL
 Calls: 
 Called By:task
 */
+//portTickType water_value =0;
 static void xnl_rx_process(void * pvParameters)
 {
 	/*To ptr the elements in the queue*/
 	xnl_fragment_t * xnl_ptr;
+	//static  portTickType water_value;
 		
 	for(;;)
 	{
@@ -755,6 +759,7 @@ static void xnl_rx_process(void * pvParameters)
 			{
 				xnl_rx(xnl_ptr);
 				set_xnl_idle(xnl_ptr);
+				//water_value = uxTaskGetStackHighWaterMark(NULL);
 				
 			}			
 		}
@@ -819,7 +824,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_rx_process
 	,  (const signed portCHAR *)"XNL_RX"
-	,  512
+	,  220//512
 	,  NULL
 	,  tskXNL_PRIORITY //+ 1
 	,  NULL
@@ -829,7 +834,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_tx_process
 	,  (const signed portCHAR *)"XNL_TX"
-	,  800
+	,  130//800
 	,  NULL
 	,  tskXNL_PRIORITY//+1
 	,  NULL

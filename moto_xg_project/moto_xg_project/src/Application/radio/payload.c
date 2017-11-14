@@ -97,15 +97,15 @@ void payload_init(void ( *payload_rx_func)(void * ), void ( *payload_tx_func)(vo
 	
 	/*create task*/	
 	/*this task is used to receive xnl message*/
-	xTaskCreate(
-	payload_rx_process
-	,  (const signed portCHAR *)"PAYLOAD_RX"
-	,  1024
-	,  NULL
-	,  2
-	,  NULL
-	);
-	
+	//xTaskCreate(
+	//payload_rx_process
+	//,  (const signed portCHAR *)"PAYLOAD_RX"
+	//,  1024
+	//,  NULL
+	//,  2
+	//,  NULL
+	//);
+	//
 	///*this task is used to transmit  payload message*/
 	//xTaskCreate(
 	//payload_tx_process
