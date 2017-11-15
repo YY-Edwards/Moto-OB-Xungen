@@ -9,6 +9,8 @@
 #ifndef XGFLASH_H_
 #define XGFLASH_H_
 
+#include "FreeRTOS.h"
+#include "task.h"
 #include "compiler.h"
 #include "flashc.h"
 #include "string.h"
@@ -99,14 +101,14 @@ typedef enum
 	
 } xgflash_status_t;
 
-
+void create_xg_flash_test_task(void);
 void flash_rw_example(const char *caption, nvram_data_t *nvram_data);
 void xg_flashc_init(void);
 
 static xgflash_status_t xgflash_list_info_init(void);
 U16 xgflash_get_message_count(void);
 xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_flag);
-xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr);
+xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, bool erase);//read+erase
 xgflash_status_t xgflash_erase_info_region(void);
 
 

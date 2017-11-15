@@ -22,6 +22,11 @@ static U8 list_init_success_flag = 0;
 //U8 TEMP_BUF[4096];
 static volatile xSemaphoreHandle xgflash_mutex = NULL;
 
+void runXGFlashTestSAVE( void *pvParameters );
+void runXGFlashTestREAD( void *pvParameters );
+volatile  xTaskHandle save_handle;  
+
+
 /*! \brief This is an example demonstrating flash read / write data accesses
  *         using the FLASHC driver.
  *
@@ -239,7 +244,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 
 }
 
-xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr)
+xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, bool erase)
 {
 	if(!list_init_success_flag)return XG_ERROR;
 	
@@ -250,31 +255,43 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr)
 		return XG_INVALID_PARAM;
 	}
 	
-	U32 address =0x00000000;
+	U32 info_address =0x00000000;
+	U32 data_address =0x00000000;
 	char str[XG_MESSAGE_INFO_HEADER_LENGTH];
 	memset(str, 0x00, sizeof(str));
 	
 	//find the message storage info by message_index
-	address = XG_MESSAGE_INFO_HEADER_START_ADD + ((message_index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
-	flashc_memcpy((void *)str, (void *)address, XG_MESSAGE_INFO_HEADER_LENGTH,  false);
+	info_address = XG_MESSAGE_INFO_HEADER_START_ADD + ((message_index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
+	flashc_memcpy((void *)str, (void *)info_address, XG_MESSAGE_INFO_HEADER_LENGTH,  false);
 
 	U16 bytes_remained;
 	MessageList_Info_t *ptr = (MessageList_Info_t *)str;
 	if(ptr->numb == message_index)
 	{
 		bytes_remained = ptr->offset;
-		address = ptr->address;		
-		flashc_memcpy((void *)buff_ptr, (void *)address, bytes_remained,  false);
+		data_address = ptr->address;		
+		flashc_memcpy((void *)buff_ptr, (void *)data_address, bytes_remained,  false);
 		if (flashc_is_lock_error() || flashc_is_programming_error())
 		{
 			xSemaphoreGive(xgflash_mutex );//unlock
 			return XG_FLASH_ACTION_FAIL;
 		}
+		if(erase)//erase the message
+		{
+			//erase data and reset:current_save_message_offset
+			flashc_memset8((void *)data_address, 0x00, bytes_remained, true);
+			current_save_message_offset-=bytes_remained;
+			//erase info and reset:current_message_index
+			current_message_index-=1;
+			flashc_memset8((void *)info_address, 0x00, XG_MESSAGE_INFO_HEADER_LENGTH, true);
+			flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)&current_message_index, MESSAGE_NUMBERS_LENGTH,  true);
+		}
+		
 		xSemaphoreGive(xgflash_mutex );//unlock
 		return XG_OK;
 	}
 	xSemaphoreGive(xgflash_mutex );//unlock
-	return XG_ERROR;
+	return XG_INVALID_PARAM;
 		
 }
 xgflash_status_t xgflash_erase_info_region(void)
@@ -295,6 +312,117 @@ xgflash_status_t xgflash_erase_info_region(void)
 	return status;
 		
 }
+
+void runXGFlashTestSAVE( void *pvParameters )
+{
+	Bool firstTest = TRUE;
+	static  portTickType xLastWakeTime;
+	static xgflash_status_t status = XG_ERROR;
+	const portTickType xFrequency = 3000;//2s,定时问题已经修正。2s x  2000hz = 4000
+	Message_Protocol_t data_ptr;
+	static const uint8_t write_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+	static  portTickType water_value;
+	
+	xLastWakeTime = xTaskGetTickCount();
+	
+	while(1)
+	{
+		vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+
+		//Disable_interrupt_level(1);
+		//taskENTER_CRITICAL();
+		//flashc_memcpy((void *)0x80061234, (void *)write_data, 7,  true);
+		//taskEXIT_CRITICAL();
+		//data_ptr.data.XG_Time.Second+=1;
+		//Enable_interrupt_level(1);
+		//if (flashc_is_lock_error() || flashc_is_programming_error())
+		//{
+		//log("XG flashc_memcpy err...\n");
+		//}
+		//else
+		nop();
+		nop();
+		nop();
+		//water_value = uxTaskGetStackHighWaterMark(NULL);
+		//log("water_value: %d\n", water_value);
+		log("XG save okay!\n");
+		//memset(&data_ptr.data.XG_Time.Minute, 0x01, 1);
+		//status = xgflash_message_save(&data_ptr, sizeof(Message_Protocol_t), TRUE);
+		//if(status == XG_OK)
+		//{
+		//log("XG save okay!\n");
+		//data_ptr.data.XG_Time.Second+=1;
+		//}
+		//else
+		//{
+		//log("save message err : %d\n", status);
+		//}
+	}
+	
+}
+void runXGFlashTestREAD( void *pvParameters )
+{
+	Bool firstTest = TRUE;
+	static  portTickType xLastWakeTime;
+	static xgflash_status_t status = XG_ERROR;
+	const portTickType xFrequency = 3500;//2s,定时问题已经修正。1.5s x  2000hz = 3000
+	Message_Protocol_t *data_ptr = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
+	static U16 message_count = 0;
+	
+	xLastWakeTime = xTaskGetTickCount();
+	
+	while(1)
+	{
+		vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		if(data_ptr == NULL)break;
+		message_count = xgflash_get_message_count();
+		if(message_count != 0)
+		{
+			log("message_count : %d\n", message_count);
+			status = xgflash_get_message_data(message_count, data_ptr, true);
+			if(status == XG_OK)
+			{
+				log("read out data : %d\n", data_ptr->data.XG_Time.Second);
+			}
+			else
+			{
+				log("get message err : %d\n", status);
+			}
+		}
+		else
+		continue;
+		
+	}
+	vPortFree(data_ptr);
+	log("data_ptr == NULL,exit runXGFlashTestREAD\n");
+	
+}
+
+void create_xg_flash_test_task(void)
+{
+	
+	xTaskCreate(
+	runXGFlashTestSAVE
+	,  (const signed portCHAR *)"XG_SAVE"
+	,  550
+	,  NULL
+	,  tskFLASH_PRIORITY
+	//, NULL);
+	,  &save_handle);
+	
+	vTaskSuspend(save_handle);
+	
+	//xTaskCreate(
+	//runXGFlashTestREAD
+	//,  (const signed portCHAR *)"XG_READ"
+	//,  configMINIMAL_STACK_SIZE
+	//,  NULL
+	//,  tskFLASH_PRIORITY
+	//,  NULL );
+	//
+}
+
+
 
 //U16	Current_total_message_count=0;
 void xg_flashc_init(void)
