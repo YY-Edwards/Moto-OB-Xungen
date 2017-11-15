@@ -13,6 +13,8 @@ History:
 #include "conf_board.h"
 #include "ssc.h"
 #include "ambe.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
 
 volatile U32 intStartCount;
 volatile U32 intDuration;
@@ -28,7 +30,7 @@ Defines the interface function (callback function) is used to send/receive SSC
 data*/
 volatile void (*phy_rx_exec)(void *) = NULL;
 volatile void (*phy_tx_exec)(void *) = NULL;
-
+extern volatile  xSemaphoreHandle xBinarySemaphore;
 
 
 /**
@@ -43,6 +45,8 @@ __attribute__((__interrupt__))
 static void pdca_int_handler(void)
 {
     
+	static portBASE_TYPE xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE;
 	//intStartCount = Get_system_register(AVR32_COUNT);
 	
 	/*Toggle Index*/
@@ -70,6 +74,8 @@ static void pdca_int_handler(void)
 	if(phy_tx_exec != NULL)phy_tx_exec((void *)&TxBuffer[BufferIndex]);//phy_tx_func, phy_rx_func
 
 	
+	/* 'Give' the semaphore to unblock the task. */
+	xSemaphoreGiveFromISR(xBinarySemaphore, &xHigherPriorityTaskWoken );
 	
 		///*****测试：payload通道上把payload-RX数据直接回发*******/
 		//TxBuffer[BufferIndex].payload_channel.dword[0] = RxBuffer[BufferIndex].payload_channel.dword[0];

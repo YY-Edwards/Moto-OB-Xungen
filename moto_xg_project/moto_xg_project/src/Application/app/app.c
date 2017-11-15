@@ -870,6 +870,7 @@ void app_init(void)
 extern  char AudioData[];
 extern U32 tc_tick;
 extern volatile DateTime_t Current_time;
+extern volatile  xTaskHandle save_handle; 
 //extern portTickType water_value;
 //extern portTickType tx_water_value;
 //extern portTickType log_water_value;
@@ -894,7 +895,7 @@ static __app_Thread_(app_cfg)
 		{	
 			connect_flag=1;	
 			xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
-
+			vTaskResume(save_handle);
 		}
 		else if(connect_flag)
 		{
@@ -946,7 +947,7 @@ static __app_Thread_(app_cfg)
 		//}
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		
+		log("app pthread run...\n");	
 		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 }
