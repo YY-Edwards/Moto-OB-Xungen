@@ -68,7 +68,17 @@ src/Application/app/app.d src/Application/app/app.o \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
- ../src/Application/timers/timer.h ../src/Application/RFID/RFID.h \
+ ../src/Application/timers/timer.h \
+ ../src/ASF/common/services/clock/sysclk.h ../src/config/conf_clock.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/sysclk.h \
+ ../src/ASF/common/services/clock/osc.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/osc.h \
+ ../src/ASF/common/services/clock/pll.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/pll.h \
+ ../src/ASF/common/services/clock/genclk.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/genclk.h \
+ ../src/ASF/avr32/drivers/pm/pm.h \
+ ../src/ASF/avr32/drivers/flashc/flashc.h ../src/Application/RFID/RFID.h \
  ../src/Application/RFID/MFRC522/rc522.h \
  ../src/ASF/avr32/drivers/spi/spi.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
@@ -76,12 +86,10 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/ASF/avr32/drivers/gpio/gpio.h ../src/Application/radio/xcmp.h \
  ../src/Application/radio/xnl.h ../src/Log/log.h \
  ../src/ASF/avr32/drivers/usart/usart.h ../src/Application/myrtc/xgrtc.h \
- ../src/ASF/avr32/drivers/rtc/rtc.h ../src/ASF/avr32/drivers/pm/pm.h \
- ../src/Application/xgflash/xgflash.h \
- ../src/ASF/avr32/drivers/flashc/flashc.h ../src/Application/radio/xnl.h \
- ../src/config/../Log/log.h ../src/Application/radio/payload.h \
- ../src/ASF/avr32/drivers/rtc/rtc.h ../src/Application/radio/physical.h \
- ../src/Application/radio/payload.h
+ ../src/ASF/avr32/drivers/rtc/rtc.h ../src/Application/xgflash/xgflash.h \
+ ../src/Application/radio/xnl.h ../src/config/../Log/log.h \
+ ../src/Application/radio/payload.h ../src/ASF/avr32/drivers/rtc/rtc.h \
+ ../src/Application/radio/physical.h ../src/Application/radio/payload.h
 
 ../src/Application/app/app.h:
 
@@ -223,6 +231,28 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/Application/timers/timer.h:
 
+../src/ASF/common/services/clock/sysclk.h:
+
+../src/config/conf_clock.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/sysclk.h:
+
+../src/ASF/common/services/clock/osc.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/osc.h:
+
+../src/ASF/common/services/clock/pll.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/pll.h:
+
+../src/ASF/common/services/clock/genclk.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/genclk.h:
+
+../src/ASF/avr32/drivers/pm/pm.h:
+
+../src/ASF/avr32/drivers/flashc/flashc.h:
+
 ../src/Application/RFID/RFID.h:
 
 ../src/Application/RFID/MFRC522/rc522.h:
@@ -247,11 +277,7 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/ASF/avr32/drivers/rtc/rtc.h:
 
-../src/ASF/avr32/drivers/pm/pm.h:
-
 ../src/Application/xgflash/xgflash.h:
-
-../src/ASF/avr32/drivers/flashc/flashc.h:
 
 ../src/Application/radio/xnl.h:
 

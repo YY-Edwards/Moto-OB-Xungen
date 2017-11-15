@@ -54,15 +54,25 @@ src/Application/timers/timer.d src/Application/timers/timer.o \
  ../src/ASF/common/utils/interrupt/interrupt_avr32.h \
  ../src/ASF/avr32/utils/preprocessor/tpaste.h \
  ../src/ASF/avr32/drivers/intc/intc.h \
+ ../src/ASF/common/services/clock/sysclk.h ../src/config/conf_clock.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/sysclk.h \
+ ../src/ASF/common/boards/board.h \
+ ../src/ASF/common/boards/user_board/user_board.h \
+ ../src/config/conf_board.h ../src/ASF/common/services/clock/osc.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/osc.h \
+ ../src/ASF/common/services/clock/pll.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/pll.h \
+ ../src/ASF/common/services/clock/genclk.h \
+ ../src/ASF/common/services/clock/uc3b0_b1/genclk.h \
+ ../src/ASF/avr32/drivers/pm/pm.h \
+ ../src/ASF/avr32/drivers/flashc/flashc.h \
  ../src/ASF/avr32/drivers/gpio/gpio.h \
  ../src/Application/timers/conf_example.h \
  ../src/ASF/avr32/drivers/tc/tc.h ../src/config/../log/log.h \
  ../src/ASF/avr32/drivers/usart/usart.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h \
- ../src/config/FreeRTOSConfig.h ../src/ASF/common/boards/board.h \
- ../src/ASF/common/boards/user_board/user_board.h \
- ../src/config/conf_board.h \
+ ../src/config/FreeRTOSConfig.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h \
@@ -178,6 +188,34 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/ASF/avr32/drivers/intc/intc.h:
 
+../src/ASF/common/services/clock/sysclk.h:
+
+../src/config/conf_clock.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/sysclk.h:
+
+../src/ASF/common/boards/board.h:
+
+../src/ASF/common/boards/user_board/user_board.h:
+
+../src/config/conf_board.h:
+
+../src/ASF/common/services/clock/osc.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/osc.h:
+
+../src/ASF/common/services/clock/pll.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/pll.h:
+
+../src/ASF/common/services/clock/genclk.h:
+
+../src/ASF/common/services/clock/uc3b0_b1/genclk.h:
+
+../src/ASF/avr32/drivers/pm/pm.h:
+
+../src/ASF/avr32/drivers/flashc/flashc.h:
+
 ../src/ASF/avr32/drivers/gpio/gpio.h:
 
 ../src/Application/timers/conf_example.h:
@@ -193,12 +231,6 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h:
 
 ../src/config/FreeRTOSConfig.h:
-
-../src/ASF/common/boards/board.h:
-
-../src/ASF/common/boards/user_board/user_board.h:
-
-../src/config/conf_board.h:
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h:
 

@@ -47,7 +47,7 @@ static void _tc_interrupt(void)
 //start PLL0 and switch main clock to PLL0 output
 void local_start_pll0(void)
 {
-/****/
+/****
 	
 	//pm_switch_to_osc0(pm, 12000000, 3);
 	//    pm_enable_osc0_crystal(pm, 12000000);
@@ -95,10 +95,10 @@ void local_start_pll0(void)
 
 	AVR32_HMATRIX.mcfg[AVR32_HMATRIX_MASTER_CPU_INSTRUCTION] = 0x1;
 	
-/***/
+***/
 	
-/*****	
-	pm_switch_to_osc0(&AVR32_PM, 12000000, 3);
+/*****/
+	pm_switch_to_osc0(&AVR32_PM, 12000000, OSC0_STARTUP);
 
 	pm_pll_setup(&AVR32_PM,
 	               0,   // use PLL0
@@ -127,7 +127,7 @@ void local_start_pll0(void)
 	//AVR32_FLASHC.fcr = 0x00000040;
 
 	pm_switch_to_clock(&AVR32_PM, AVR32_PM_MCSEL_PLL0);
-****/
+/****/
 }
 
 
@@ -266,16 +266,12 @@ void tc_init()
 
 	/*
 	 * Set the compare triggers.
-	 * We configure it to count every 10 milliseconds.
-	 * We want: (1 / (fPBA / 8)) * RC = 10 ms, hence RC = (fPBA / 8) / 100
+	 * We configure it to count every 1 milliseconds.
+	 * We want: (1 / (fPBA / 8)) * RC = 1 ms, hence RC = (fPBA / 8) / 1000
 	 * to get an interrupt every 10 ms.
 	 */
-	//tc_write_rc(tc, EXAMPLE_TC_CHANNEL, (sysclk_get_pba_hz() / 8 / 100));
 	
-	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2) / 8 / 2000));//200ms
-	
-	//tc_write_rc(tc, EXAMPLE_TC_CHANNEL, (FOSC0 / 8 / 100000));
-	
+	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2)/8/100));//10ms
 	
 	// configure the timer interrupt
 	tc_configure_interrupts(tc, EXAMPLE_TC_CHANNEL, &tc_interrupt);

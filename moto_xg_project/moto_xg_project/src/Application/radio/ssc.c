@@ -213,10 +213,12 @@ void ssc_init(void)
     AVR32_GPIO.port[1].oderc = 0x00000002;
     AVR32_GPIO.port[1].gpers = 0x00000002;
 	
+	Disable_global_interrupt();
+	
 	INTC_register_interrupt (
 	&pdca_int_handler
-	, AVR32_PDCA_IRQ_0
-	, AVR32_INTC_INT3
+	, AVR32_PDCA_IRQ_0 //PDCA_CHANNEL_SSCRX_EXAMPLE = 0
+	, AVR32_INTC_INT3 //highest priority.
 	);
 	
 	Enable_global_interrupt();

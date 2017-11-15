@@ -9,6 +9,10 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 #include "compiler.h"
+#include "sysclk.h"
+#include "pll.h"
+#include "pm.h"
+#include "flashc.h"
 
 //Timer mappings for GOB
 #define TIMER_TC_CHANNEL_ID         0
