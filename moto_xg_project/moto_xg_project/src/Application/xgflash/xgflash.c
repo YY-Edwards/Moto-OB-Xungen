@@ -325,17 +325,16 @@ void runXGFlashTestSAVE( void *pvParameters )
 	static  portTickType water_value;
 	
 	xLastWakeTime = xTaskGetTickCount();
-	
 	while(1)
 	{
 		vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 
-		xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
+		//xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
 		
 		//xgflash_get_message_count();
 		//Disable_interrupt_level(1);
 		//taskENTER_CRITICAL();
-		flashc_memcpy((void *)0x80061234, (void *)write_data, 7,  true);
+		//flashc_memcpy((void *)0x80061234, (void *)write_data, 7,  true);
 		//taskEXIT_CRITICAL();
 		//data_ptr.data.XG_Time.Second+=1;
 		//Enable_interrupt_level(1);
@@ -426,8 +425,6 @@ void create_xg_flash_test_task(void)
 	//
 }
 
-
-
 //U16	Current_total_message_count=0;
 void xg_flashc_init(void)
 {
@@ -450,10 +447,10 @@ void xg_flashc_init(void)
 	{
 		set_message_store(&message_store[i]);//push <message_store> address to the message_storage_queue;
 	}
-	
+		
 	//flashc_lock_all_regions(false);
-	xgflash_list_info_init();
-	create_xg_flash_test_task();
+	//xgflash_list_info_init();
+	//create_xg_flash_test_task();
 	
 	//Message_Protocol_t  xgmessage;
 	//DateTime_t temp_time;

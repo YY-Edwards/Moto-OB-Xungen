@@ -32,6 +32,8 @@ src\Application\RFID\RFID.c
 
 src\Application\timers\timer.c
 
+src\Application\voice\voice.c
+
 src\Application\xgflash\xgflash.c
 
 src\ASF\avr32\drivers\flashc\flashc.c

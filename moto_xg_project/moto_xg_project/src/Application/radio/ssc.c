@@ -47,8 +47,11 @@ static void pdca_int_handler(void)
     
 	static portBASE_TYPE xHigherPriorityTaskWoken;
 	xHigherPriorityTaskWoken = pdFALSE;
+	
+	static U32 count=0;
 	//intStartCount = Get_system_register(AVR32_COUNT);
 	
+	count++;
 	/*Toggle Index*/
     BufferIndex ^= 0x01;
 	
@@ -73,9 +76,11 @@ static void pdca_int_handler(void)
 
 	if(phy_tx_exec != NULL)phy_tx_exec((void *)&TxBuffer[BufferIndex]);//phy_tx_func, phy_rx_func
 
-	
-	/* 'Give' the semaphore to unblock the task. */
-	xSemaphoreGiveFromISR(xBinarySemaphore, &xHigherPriorityTaskWoken );
+	if(count%20000 == 0)
+	{
+		/* 'Give' the semaphore to unblock the task. */
+		//xSemaphoreGiveFromISR(xBinarySemaphore, &xHigherPriorityTaskWoken );
+	}
 	
 		///*****测试：payload通道上把payload-RX数据直接回发*******/
 		//TxBuffer[BufferIndex].payload_channel.dword[0] = RxBuffer[BufferIndex].payload_channel.dword[0];

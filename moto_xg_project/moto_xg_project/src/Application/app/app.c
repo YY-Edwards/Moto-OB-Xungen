@@ -895,19 +895,23 @@ static __app_Thread_(app_cfg)
 		{	
 			connect_flag=1;	
 			xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
-			vTaskResume(save_handle);
+			//vTaskResume(save_handle);
 		}
 		else if(connect_flag)
 		{
 				if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
 				{
-					
-					//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
-					//flashc_memcpy((void *)0x80061234, (void *)test_data, 7,  true);
-					set_message_store(data_ptr);
-					log("receive okay!\n");	
-					water_value = uxTaskGetStackHighWaterMark(NULL);
-					log("water_value: %d\n", water_value);		
+					if(data_ptr!=NULL){//Resend message
+						
+						Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
+						//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+						log("receive data : %d", ptr->data.XG_Time.Second);
+						xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);
+						set_message_store(data_ptr);
+						//log("receive okay!\n");	
+						
+					}
+	
 				}
 				
 				//Current_total_message_count = xgflash_get_message_count();
@@ -935,16 +939,8 @@ static __app_Thread_(app_cfg)
 			nop();
 			nop();
 			nop();
-			xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
+			//xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
 		}
-		
-		//{
-			//xcmp_IdleTestTone();						
-				//
-			////xcmp_data_session_req(message, 12, 9);	
-		//}
-			
-		//}
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//ясЁы300ms
 		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		log("app pthread run...\n");	

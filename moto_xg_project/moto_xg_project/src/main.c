@@ -53,7 +53,7 @@ int main (void)
 
 	local_start_timer();
 	
-	//xg_rtc_init();
+	xg_rtc_init();
 		
 	vTaskStartScheduler();
 	return 0;

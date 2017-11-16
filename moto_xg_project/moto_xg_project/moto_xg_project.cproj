@@ -562,6 +562,9 @@
     <None Include="src\ASF\avr32\drivers\cpu\cycle_counter\cycle_counter.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\Application\voice\voice.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\Application\voice\voice.h">
       <SubType>compile</SubType>
     </Compile>
