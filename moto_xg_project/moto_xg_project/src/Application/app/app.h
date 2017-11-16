@@ -41,6 +41,13 @@ typedef struct
 	xTaskHandle controlPrg;
 }xTaskHandle_t;
 
+typedef enum {
+	OB_UNCONNECTEDWAITINGSTATUS,
+	OB_CONNECTED,
+	OB_CONNECTEDWAITTINGSYNTIME,
+	OB_WAITINGAPPTASK
+} OB_States;
+
 extern xQueueHandle_t x_queue_list;
 
 void app_init( void );

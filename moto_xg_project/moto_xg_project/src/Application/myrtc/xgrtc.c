@@ -122,36 +122,24 @@ void RTC_Test()
 void xg_rtc_init(void)
 {
 	
-	  /* Create the mutex semaphore to guard a shared RTC.*/
-	  //rtc_mutex = xSemaphoreCreateMutex();
-	//if(NULL != rtc_mutex)
-	//{
-		///*See if we can obtain the semaphore. If the semaphore is not available wait aways to see if it becomes free*/
-		//xSemaphoreTake( rtc_mutex, portMAX_DELAY);
-	//}
-	//else
-	//{
-		//return 3;
-	//}
-	  	
-	  // Disable all interrupts. */
-	  Disable_global_interrupt();
+	// Disable all interrupts. */
+	Disable_global_interrupt();
 	  
-	  // Register the RTC interrupt handler to the interrupt controller.
-	  INTC_register_interrupt(&rtc_irq, AVR32_RTC_IRQ, AVR32_INTC_INT0);
+	// Register the RTC interrupt handler to the interrupt controller.
+	INTC_register_interrupt(&rtc_irq, AVR32_RTC_IRQ, AVR32_INTC_INT0);
 
-	  // Initialize the RTC
-	  if (!rtc_init(&AVR32_RTC, RTC_OSC_RC, RTC_PSEL_RC_1_76HZ))
-	  //if (!rtc_init(&AVR32_RTC, RTC_OSC_32KHZ, RTC_PSEL_32KHZ_1HZ))
-	  {
-		  log("Error initializing the RTC\r\n");
-	  }
-	  // Set top value to 0 to generate an interrupt every seconds */
-	  rtc_set_top_value(&AVR32_RTC, 0);
-	  // Enable the interrupts
-	  rtc_enable_interrupt(&AVR32_RTC);
-	  // Enable the RTC
-	  rtc_enable(&AVR32_RTC);
+	// Initialize the RTC
+	if (!rtc_init(&AVR32_RTC, RTC_OSC_RC, RTC_PSEL_RC_1_76HZ))
+	//if (!rtc_init(&AVR32_RTC, RTC_OSC_32KHZ, RTC_PSEL_32KHZ_1HZ))
+	{
+		log("Error initializing the RTC\r\n");
+	}
+	// Set top value to 0 to generate an interrupt every seconds */
+	rtc_set_top_value(&AVR32_RTC, 0);
+	// Enable the interrupts
+	rtc_enable_interrupt(&AVR32_RTC);
+	// Enable the RTC
+	rtc_enable(&AVR32_RTC);
 
 	Current_time.Year		= 16;
 	Current_time.Month		= 2;
@@ -160,10 +148,6 @@ void xg_rtc_init(void)
 	Current_time.Minute		= 59;
 	Current_time.Second		= 40;
 	
-	/*finished accessing the shared resource.Release the semaphore.*/
-	//xSemaphoreGive(rtc_mutex);
-	
-	//sec = Current_time.Second;
 	// Enable global interrupts
 	Enable_global_interrupt();
 	  

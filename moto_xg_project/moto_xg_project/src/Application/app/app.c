@@ -34,6 +34,7 @@ unsigned long ulIdleCycleCount = 0UL;
 
 volatile U8  allocated_session_ID =0;
 static volatile U8 connect_flag =0; 
+static volatile U8 get_time_okay =TRUE; 
 
 
 /*until receive/transmit payload data*/
@@ -499,10 +500,10 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//Message_Protocol_t  *xgmessage = (Message_Protocol_t  *)ptr->DataPayload.DataPayload;
 			Message_Protocol_t  xgmessage;
 			memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
-			log("data transmit failure\n");
-			log("xgmessage.XG_Time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
-			xgmessage.data.XG_Time.Year, xgmessage.data.XG_Time.Month, xgmessage.data.XG_Time.Day,
-			xgmessage.data.XG_Time.Hour, xgmessage.data.XG_Time.Minute, xgmessage.data.XG_Time.Second);
+			//log("data transmit failure\n");
+			//log("xgmessage.XG_Time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+			//xgmessage.data.XG_Time.Year, xgmessage.data.XG_Time.Month, xgmessage.data.XG_Time.Day,
+			//xgmessage.data.XG_Time.Hour, xgmessage.data.XG_Time.Minute, xgmessage.data.XG_Time.Second);
 
 			//return_value = xgflash_message_save(&xgmessage, sizeof(Message_Protocol_t), TRUE);
 
@@ -519,7 +520,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
 		//log("Session_ID: %x \n\r",Session_number );
-		log("paylaod_length: %d \n\r",data_length );
+		//log("paylaod_length: %d \n\r",data_length );
 		//for(i=0; i<data_length; i++)
 		//{
 				//
@@ -635,13 +636,14 @@ void SingleDetection_brdcst_func(xcmp_fragment_t * xcmp)
 	if (xcmp->u8[0] == 0x11)
 	{
 		log("\n\r DMR_CSBK OK \n\r");
+		get_time_okay = TRUE;
 		
 	}
 	//if(xcmp->u8[1] == 0x11)
 	else
 	{
-		//log("SIGBRCST error");
-		//log("\n\r Signal_type: %X \n\r", xcmp->u8[0] );
+		log("SIGBRCST error\n");
+		log("\Signal_type: %X \n\r", xcmp->u8[0] );
 	}
 	
 
@@ -877,76 +879,101 @@ extern volatile  xTaskHandle save_handle;
 static __app_Thread_(app_cfg)
 {
 	static int coun=0;
-	static U32 isAudioRouting = 0;
-	static U16 Current_total_message_count =0;
+	//static U32 isAudioRouting = 0;
+	//static U16 Current_total_message_count =0;
 	static  portTickType xLastWakeTime;
-	static  portTickType water_value;
+	//static  portTickType water_value;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
 	char card_id[4]={0};
 	U16  * data_ptr;
-	static const uint8_t test_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
-	
-	 xLastWakeTime = xTaskGetTickCount();
+	//static const uint8_t test_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
+	xLastWakeTime = xTaskGetTickCount();
 		
 	for(;;)
 	{
-		if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
-		{	
-			connect_flag=1;	
-			xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
-			//vTaskResume(save_handle);
-		}
-		else if(connect_flag)
+		switch(OB_State)
 		{
-				if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+			case OB_UNCONNECTEDWAITINGSTATUS:
+			
+				if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
 				{
-					if(data_ptr!=NULL){//Resend message
-						
-						Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-						//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
-						log("receive data : %d", ptr->data.XG_Time.Second);
-						xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);
-						set_message_store(data_ptr);
-						//log("receive okay!\n");	
+					connect_flag=1;
+					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
+					OB_State = OB_CONNECTEDWAITTINGSYNTIME;
+					//vTaskResume(save_handle);
+					log("connect OB okay!\n");
+				}
+				else
+				{
+					nop();
+					nop();
+					nop();
+					//xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
+					log("connecting...\n");
+				}
+								
+			break;
+			case OB_CONNECTEDWAITTINGSYNTIME:
+			
+						if(get_time_okay){
+							
+							OB_State = OB_WAITINGAPPTASK;
+							log("get time okay!\n");
+						}
+						else
+						{						
+							xcmp_data_session_req(0x00, sizeof(Message_Protocol_t), DEST);//request to get system time						
+						}
+			break;
+			case OB_WAITINGAPPTASK:
+			
+					if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+					{
+						if(data_ptr!=NULL){//Resend message
+							
+							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
+							//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+							//log("receive data : %d", ptr->data.XG_Time.Second);
+							xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);
+							set_message_store(data_ptr);
+							//log("receive okay!\n");
+							
+						}
 						
 					}
-	
-				}
-				
-				//Current_total_message_count = xgflash_get_message_count();
-				//if(Current_total_message_count!=0)//有缓存，需重发
-				//{	
+					//Current_total_message_count = xgflash_get_message_count();
+					//if(Current_total_message_count!=0)//有缓存，需重发
+					//{
 					//log("Current_total_message_count: %d\n", Current_total_message_count);
-				//}
-				//rfid_sendID_message();
-				//if(rfid_auto_reader(card_id) == 0){
+					//}
+					//rfid_sendID_message();
+					//if(rfid_auto_reader(card_id) == 0){
 					//log("card_id : %x, %x, %x, %x\n", card_id[0], card_id[1], card_id[2], card_id[3]);
-					//memset(card_id,0x00,4);	
-				//}
-				//else
-				//{
+					//memset(card_id,0x00,4);
+					//}
+					//else
+					//{
 					//log("no find card...\n");
-				//}
-				nop();
-				//log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n", 
-				//Current_time.Year, Current_time.Month, Current_time.Day, 
-				//Current_time.Hour, Current_time.Minute, Current_time.Second);
+					//}
+					nop();
+					//log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+					//Current_time.Year, Current_time.Month, Current_time.Day,
+					//Current_time.Hour, Current_time.Minute, Current_time.Second);
+					log("app task run!\n");
 				
-		}
-		else
-		{
-			nop();
-			nop();
-			nop();
-			//xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
-		}
+			break;
+			default:
+			break;
+				
+		} //End of switch on OB_State.
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		log("app pthread run...\n");	
 		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 }
+
 
 
 static void app_payload_rx_proc(void  * payload)
