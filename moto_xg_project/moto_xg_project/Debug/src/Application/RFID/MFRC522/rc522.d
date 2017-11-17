@@ -78,7 +78,13 @@ src/Application/RFID/MFRC522/rc522.d src/Application/RFID/MFRC522/rc522.o \
  ../src/ASF/common/services/clock/genclk.h \
  ../src/ASF/common/services/clock/uc3b0_b1/genclk.h \
  ../src/ASF/avr32/drivers/pm/pm.h \
- ../src/ASF/avr32/drivers/flashc/flashc.h
+ ../src/ASF/avr32/drivers/flashc/flashc.h \
+ ../src/Application/flash/data_flash.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/task.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/list.h \
+ ../src/Application/radio/xcmp.h ../src/Application/radio/xnl.h \
+ ../src/config/../Log/log.h ../src/ASF/avr32/drivers/usart/usart.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h
 
 ../src/Application/RFID/MFRC522/rc522.h:
 
@@ -243,3 +249,19 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/avr32/drivers/pm/pm.h:
 
 ../src/ASF/avr32/drivers/flashc/flashc.h:
+
+../src/Application/flash/data_flash.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/task.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/list.h:
+
+../src/Application/radio/xcmp.h:
+
+../src/Application/radio/xnl.h:
+
+../src/config/../Log/log.h:
+
+../src/ASF/avr32/drivers/usart/usart.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:

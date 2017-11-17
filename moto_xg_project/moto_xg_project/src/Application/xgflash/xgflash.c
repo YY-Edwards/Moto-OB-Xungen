@@ -447,11 +447,11 @@ void xg_flashc_init(void)
 	{
 		set_message_store(&message_store[i]);//push <message_store> address to the message_storage_queue;
 	}
-		
+	
 	//flashc_lock_all_regions(false);
 	//xgflash_list_info_init();
 	//create_xg_flash_test_task();
-	
+
 	//Message_Protocol_t  xgmessage;
 	//DateTime_t temp_time;
 	//static const uint8_t write_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};

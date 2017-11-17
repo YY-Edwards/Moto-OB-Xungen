@@ -12,6 +12,7 @@
 #include "string.h"
 #include "gpio.h"
 #include "timer.h"
+#include "data_flash.h"
 
 
 #define FATAL_ERROR_DMA_TX_OVERFLOW     0x01
@@ -51,19 +52,19 @@
 
 #define     UNPROTECT_ALL_SECTORS           0x00
 
-
-typedef enum
-{
-	DF_ERROR = -1,
-	DF_OK = 0,
-	DF_INVALID_PARAM = 1,
-	DF_DEVICE_BUSY = 2,
-	DF_WRITE_DISABLED = 3,
-	DF_ERASE_FAIL = 4,
-	DF_ERASE_COMPLETED = 5,
-	DF_WRITE_FAIL = 6,
-	DF_WRITE_COMPLETED = 7
-} df_status_t;
+//
+//typedef enum
+//{
+	//DF_ERROR = -1,
+	//DF_OK = 0,
+	//DF_INVALID_PARAM = 1,
+	//DF_DEVICE_BUSY = 2,
+	//DF_WRITE_DISABLED = 3,
+	//DF_ERASE_FAIL = 4,
+	//DF_ERASE_COMPLETED = 5,
+	//DF_WRITE_FAIL = 6,
+	//DF_WRITE_COMPLETED = 7
+//} df_status_t;
 
 
 

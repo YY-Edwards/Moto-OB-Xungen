@@ -48,12 +48,12 @@ int main (void)
 	rfid_init();
 		
 	app_init();
+	
+	xg_rtc_init();
 		
 	xcmp_init();
 
 	local_start_timer();
-	
-	xg_rtc_init();
 		
 	vTaskStartScheduler();
 	return 0;

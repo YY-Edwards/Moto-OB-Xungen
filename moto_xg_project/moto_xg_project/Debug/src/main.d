@@ -85,7 +85,8 @@ src/main.d src/main.o src/main.o: ../src/main.c \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h \
  ../src/Application/RFID/RFID.h ../src/Application/RFID/MFRC522/rc522.h \
- ../src/ASF/avr32/drivers/spi/spi.h ../src/Application/app/app.h \
+ ../src/ASF/avr32/drivers/spi/spi.h ../src/Application/flash/data_flash.h \
+ ../src/config/../Log/log.h ../src/Application/app/app.h \
  ../src/Application/radio/xnl.h
 
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/include/stdbool.h:
@@ -273,6 +274,10 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/Application/RFID/MFRC522/rc522.h:
 
 ../src/ASF/avr32/drivers/spi/spi.h:
+
+../src/Application/flash/data_flash.h:
+
+../src/config/../Log/log.h:
 
 ../src/Application/app/app.h:
 

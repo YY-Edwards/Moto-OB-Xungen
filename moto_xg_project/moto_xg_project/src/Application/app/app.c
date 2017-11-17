@@ -912,6 +912,9 @@ static __app_Thread_(app_cfg)
 					nop();
 					//xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
 					log("connecting...\n");
+					log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+					Current_time.Year, Current_time.Month, Current_time.Day,
+					Current_time.Hour, Current_time.Minute, Current_time.Second);
 				}
 								
 			break;
@@ -937,8 +940,11 @@ static __app_Thread_(app_cfg)
 							//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
 							//log("receive data : %d", ptr->data.XG_Time.Second);
 							xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);
+							
+							//flashc_memset8((void*)0x80038000, 0x02, 5, TRUE);
+							
 							set_message_store(data_ptr);
-							//log("receive okay!\n");
+							log("receive okay!\n");
 							
 						}
 						

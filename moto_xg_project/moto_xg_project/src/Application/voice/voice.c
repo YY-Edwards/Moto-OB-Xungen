@@ -85,6 +85,7 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 		}
 		else//success
 		{
+			log("\nLABEL: %s\n", str);
 			//Get the current voice index
 			return_code = data_flash_read_block(VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH, &current_voice_index);
 			if(return_code == DF_OK)
@@ -101,6 +102,7 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 						if(ptr->numb == current_voice_index)
 						{
 							current_save_voice_offset = ptr->address + ptr->offset;
+							log("current_save_voice_offset : %X\n", current_save_voice_offset);
 							if(current_save_voice_offset > 0x7bc000){
 								
 								log("\r\n----voice storage is full!!!----\r\n");
