@@ -22,7 +22,7 @@ void rfid_init()
 	//if(rfid_auto_reader(card_id) == 0){
 		//log("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
 	//}
-		
+		//
 }
 
 //流程：寻卡->防冲撞->选卡->发送卡号
@@ -54,8 +54,8 @@ U8 rfid_auto_reader(void *card_id)
 	{
 		xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to noticy failure!!!
 		return status;
+		//continue;
 	}
-	//continue;
 	
 	//memcpy(MLastSelectedSnr,&RevBuffer[2],4);
 	status=PcdSelect(SN);//选卡

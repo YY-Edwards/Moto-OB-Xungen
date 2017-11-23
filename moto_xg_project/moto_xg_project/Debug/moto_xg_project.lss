@@ -8782,7 +8782,7 @@ char PcdSelect(U8 *pSnr)
 80004f2e:	4b d0       	lddpc	r0,80005020 <rfid_auto_reader+0xf0>
 
 80004f30 <rfid_auto_reader>:
-		
+		//
 }
 
 //流程：寻卡->防冲撞->选卡->发送卡号
@@ -8924,8 +8924,8 @@ U8 rfid_auto_reader(void *card_id)
 80004fea:	f0 1f 00 16 	mcall	80005040 <rfid_auto_reader+0x110>
 		return status;
 80004fee:	c0 e8       	rjmp	8000500a <rfid_auto_reader+0xda>
+		//continue;
 	}
-	//continue;
 	
 	//memcpy(MLastSelectedSnr,&RevBuffer[2],4);
 	status=PcdSelect(SN);//选卡
@@ -9223,7 +9223,7 @@ void rfid_init()
 	//if(rfid_auto_reader(card_id) == 0){
 		//log("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
 	//}
-		
+		//
 }
 800051c6:	d8 02       	popm	pc
 800051c8:	80 00       	ld.sh	r0,r0[0x0]
