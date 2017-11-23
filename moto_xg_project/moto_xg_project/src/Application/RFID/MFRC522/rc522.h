@@ -28,30 +28,6 @@
 #define DF_TEST_SUCCESS 0
 #define DF_TEST_FAIL 1
 
-#define     READ_ARRAY						0x03
-#define     BLOCK_ERASE_4KB					0x20
-#define     BLOCK_ERASE_32KB				0x52
-#define     BLOCK_ERASE_64KB				0xD8
-#define     CHIP_ERASE						0x60
-#define     BYTE_PROGRAM					0x02
-#define     PAGE_PROGRAM					0x02
-#define     WRITE_ENABLE                    0x06
-#define     WRITE_DISABLE                   0x04
-#define     PROGRAM_ERASE_SUSPEND           0xB0
-#define     PROGRAM_ERASE_RESUME			0xD0
-#define     READ_STATUS_REG					0x05
-#define     WRITE_STATUS_REG_BYTE_1         0x01
-#define     WRITE_STATUS_REG_BYTE_2         0x31
-#define     READ_M_D_ID                     0x9F
-
-#define     STATUS_BUSY                     0x01
-#define     STATUS_WRITE_NOT_ENABLED        0x02
-#define     STATUS_SECTOR_PROTECTED         0x04
-#define     STATUS_WRITE_PROTECTED          0x10
-#define     STATUS_ERASE_PROG_ERROR         0x20
-
-#define     UNPROTECT_ALL_SECTORS           0x00
-
 //
 //typedef enum
 //{

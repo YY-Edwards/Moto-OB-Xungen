@@ -13,7 +13,7 @@
 *
 * The purpose of this file is to provide data flash driver.
 *
-* AT25DF641 is a 64MBIT(8MB) SPI serial flash, with address range from
+* W25Q64(AT25DF641) is a 64MBIT(8MB) SPI serial flash, with address range from
 * 0x000000 to 0x7FFFFF.
 *
 *--------------------------- DEPENDENCY COMMENTS -------------------------------
@@ -30,23 +30,12 @@
 #include "data_flash.h"
 
 volatile avr32_spi_t *spi;
-//static Bool data_list_info_init(void);
-//static Bool save_voice_data(void *data_ptr, U16 data_len, U8 voice_end_flag);
-//static U8 playback_voice_data(U16 voice_index);
-//static U32 read_voice_data(void *data_ptr, U16 voice_index, U8 *voice_end_flag);
-
 static Bool data_flash_check_device_id(void);
 static void test_data_flash(Bool bReadOnlyTest);
 void create_data_flash_test_task();
 void runDataFlashTest( void *pvParameters );
 U8 data_flash_failure = 0;
 
-//volatile const char FlashLabel[] = { "MOTOREC"};
-//static unsigned short current_voice_index = 0;
-//static unsigned int	  current_save_voice_offset = VOICE_DATA_START_ADDRESS;
-//static U8 list_init_success_flag = 0;
-//
-//extern char AMBE_AudioData[];
 U8 FLASH_BUF[4096];
 
 /*******************************************************************************
@@ -57,11 +46,11 @@ U8 FLASH_BUF[4096];
 *
 ********************************************************************************
 *
-* FUNCTION NAME: data_flashi_init
+* FUNCTION NAME: data_flash_init
 *
 *---------------------------------- PURPOSE ------------------------------------
 *
-* This function is called by main() to initialize data flash driver.
+* This function is called by xg_flashc_init() to initialize data flash driver.
 *
 *---------------------------------- SYNOPSIS -----------------------------------
 *
@@ -89,13 +78,13 @@ void data_flash_init(void)
 			{AVR32_SPI_SCK_0_1_PIN,        AVR32_SPI_SCK_0_1_FUNCTION   },  // SPI Clock. PA17 as SCK (func C)
 			{AVR32_SPI_MISO_0_2_PIN,       AVR32_SPI_MISO_0_2_FUNCTION  },  // MISO. PA28 as MISO (func C)
 			{AVR32_SPI_MOSI_0_2_PIN,       AVR32_SPI_MOSI_0_2_FUNCTION  },  // MOSI. PA29 as MOSI (func C)
-			{AVR32_SPI_NPCS_0_1_PIN,       AVR32_SPI_NPCS_0_1_FUNCTION  },  // Chip Select NPCS. PA24 as NPCS[0] (func B)
+			{AVR32_SPI_NPCS_1_1_PIN,       AVR32_SPI_NPCS_1_1_FUNCTION  },  // Chip Select NPCS. PA23 as NPCS[1] (func B)
 	};
 
 	// SPI options.
 	spi_options_t spiOptions =
 	{
-		.reg          = DF_SPI_FIRST_NPCS,   // PCS0
+		.reg          = DF_SPI_SECOND_NPCS,   // PCS1
 		.baudrate     = DF_SPI_MASTER_SPEED, // 24MHz
 		.bits         = DF_SPI_BITS,         // 8 bit per transfer
 		.spck_delay   = 0,
@@ -108,10 +97,6 @@ void data_flash_init(void)
 	// Assign I/Os to SPI.
 	gpio_enable_module(DF_SPI_GPIO_MAP, sizeof(DF_SPI_GPIO_MAP) / sizeof(DF_SPI_GPIO_MAP[0]));
 
-	// Configure PA25 as WP pin - 1: deasserted (allow write) always
-	gpio_enable_gpio_pin(AVR32_PIN_PA25);
- 	gpio_set_gpio_pin(AVR32_PIN_PA25);
-
 	spi = &AVR32_SPI;
 
 	// Initialize as master.
@@ -123,17 +108,15 @@ void data_flash_init(void)
 	// Enable SPI.
 	spi_enable(spi);
 
-	// Initialize data flash with SPI clock Osc0.
+	// Initialize data flash with SPI clock PBA.
 	if (spi_setupChipReg(spi, &spiOptions, 2*12000000) != SPI_OK)
 	{
-		//fatal_error(FATAL_ERROR_DATA_FLASH_SPI_INIT);
 		data_flash_failure = FATAL_ERROR_DATA_FLASH_SPI_INIT;
 		return;
 	}
 
-	if (data_flash_check_device_id() != TRUE)
+	if (data_flash_check_device_id() != TRUE)//check W25Q64 ID
 	{
-		//fatal_error(FATAL_ERROR_DATA_FLASH_READ_ID);
 		data_flash_failure = FATAL_ERROR_DATA_FLASH_READ_ID;
 		return;
 	}
@@ -164,7 +147,7 @@ void data_flash_init(void)
 *
 *--------------------------- DETAILED DESCRIPTION ------------------------------
 *
-* For AT25DF641, manufacturer id is 0x1F and device_id is 0x48.
+* For W25Q64, manufacturer id is 0xEF and device_id is 0x16.
 *
 *------------------------------- REVISIONS -------------------------------------
 * Date        Name      Prob#       Description
@@ -178,22 +161,27 @@ static Bool data_flash_check_device_id(void)
 
 	/* DF memory check. */
 	/* Select the DF memory to check. */
-	spi_selectChip(spi, DF_SPI_PCS_0);
+	//spi_selectChip(spi, DF_SPI_PCS_0);
+	spi_selectChip(spi, DF_SPI_PCS_1);
 
-	/* Send the Status Register Read command. */
+	/* Send the Manufacturer/Device ID Read command. */
 	spi_write(spi, READ_M_D_ID);
 
-	/* Send 2 dummy byte to read the status register. */
+	/* Send 2 dummy byte and 1 zero byte to read the status register. */
 	spi_write_dummy();
+	spi_write_dummy();
+	spi_write_zero();
+	
 	spi_read(spi, &manufacturer_device_id[0]);
-	spi_write_dummy();
+	
 	spi_read(spi, &manufacturer_device_id[1]);
 
 	/* Unselect the checked DF memory. */
-	spi_unselectChip(spi, DF_SPI_PCS_0);
+	//spi_unselectChip(spi, DF_SPI_PCS_0);
+	spi_unselectChip(spi, DF_SPI_PCS_1);
 
 	/* Unexpected device ID. */
-    if ((manufacturer_device_id[0] != 0x1F) || (manufacturer_device_id[1] != 0x48))
+    if ((manufacturer_device_id[0] != 0xEF) || (manufacturer_device_id[1] != 0x16))
     {
     	return FALSE;
     }
@@ -220,7 +208,7 @@ static Bool data_flash_check_device_id(void)
 *--------------------------- DETAILED DESCRIPTION ------------------------------
 *
 * This function is the "raw" driver, i.e, without consideration for page wrap,
-* etc. Please refer to AT25DF641 datasheet for detail.
+* etc. Please refer to W25Q64(AT25DF641) datasheet for detail.
 *
 * Caller of this function must follow below rules for input param:
 *
@@ -297,7 +285,7 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 			spi_write_byte(addr[0]);
 			for (i = 0; i < length; i++)
 			{
-				spi_write_dummy();
+				//spi_write_dummy();
 				spi_read_byte(&data_u16);
 				*data_ptr = (U8)data_u16;
 				data_ptr++;
@@ -720,11 +708,12 @@ df_status_t data_flash_erase_block(U32 address, df_block_size_t block_size)
 	else/*(block_size == DF_BLOCK_ALL)*/
 		erase_commond = CHIP_ERASE;
 
-	status = send_flash_command(READ_STATUS_REG, 0, NULL, 0);
-	if ((status & STATUS_BUSY) != 0)
-	{
-		return DF_DEVICE_BUSY;
-	}
+	while(status = send_flash_command(READ_STATUS_REG, 0, NULL, 0) == STATUS_BUSY);
+	//status = send_flash_command(READ_STATUS_REG, 0, NULL, 0);
+	//if ((status & STATUS_BUSY) != 0)
+	//{
+		//return DF_DEVICE_BUSY;
+	//}
 
 	/* send WRITE_ENABLE command */
 	send_flash_command(WRITE_ENABLE, 0, NULL, 0);
@@ -958,11 +947,11 @@ df_status_t data_flash_write_page(U8 *data_ptr, U32 address, U16 length)
 		return DF_INVALID_PARAM;
 	}
 
-	status = send_flash_command(READ_STATUS_REG, 0, NULL, 0);
-	if ((status & STATUS_BUSY) != 0)
-	{
-		return DF_DEVICE_BUSY;
-	}
+	while(status = send_flash_command(READ_STATUS_REG, 0, NULL, 0) == STATUS_BUSY);
+	//if ((status & STATUS_BUSY) != 0)
+	//{
+		//return DF_DEVICE_BUSY;
+	//}
 
 	/* send WRITE_ENABLE command */
 	send_flash_command(WRITE_ENABLE, 0, NULL, 0);

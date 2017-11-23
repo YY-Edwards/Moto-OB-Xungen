@@ -15,7 +15,7 @@ volatile xQueueHandle message_storage_queue = NULL;
 /*the queue is used to receive failure-send message*/
 volatile xQueueHandle xg_resend_queue = NULL;
 
-volatile const char XGFlashLabel[] = {"XUNGENG"};
+volatile const char XGFlashLabel[] = {"PATROL"};
 static unsigned short current_message_index = 0;
 static unsigned int	  current_save_message_offset = XG_MESSAGE_DATA_START_ADD;
 static U8 list_init_success_flag = 0;
@@ -59,7 +59,7 @@ void flash_rw_example(const char *caption, nvram_data_t *nvram_data)
 
 static xgflash_status_t xgflash_list_info_init(void)
 {
-	
+	df_status_t return_code = DF_OK;
 	static U32 current_page_number =0;
 	unsigned int i = 0;
 	unsigned int address =0x00000000;
@@ -69,35 +69,30 @@ static xgflash_status_t xgflash_list_info_init(void)
 start:
 	
 	 //bytes remained less than one page 
-	flashc_memcpy((void *)str, (void *)LABEL_ADDRESS, LABEL_LENGTH,  true);
-	flashc_memcpy((void *)LABEL_ADDRESS, (void *)LABEL_ADDRESS, LABEL_LENGTH,  false);//为了获取当前页号码
-	current_page_number = flashc_get_page_number();
-	if (flashc_is_lock_error() || flashc_is_programming_error())
-	{
-		return XG_FLASH_ACTION_FAIL;
-	}
-	else
+	return_code = data_flash_read_block(LABEL_ADDRESS, LABEL_LENGTH, str);
 	{
 		if(memcmp(XGFlashLabel, str, sizeof(XGFlashLabel)-1) != 0)//compare label
 		{
 			ERASE:
-			//erase:160pages		
-			//for(i=0; i < ((XG_MESSAGE_DATA_BOUNDARY_ADD - XG_MESSAGE_LISTINFO_START_ADD)/(PageSize)); i++)//80k
-			for(i=0; i <25; i++)//擦除太多页程序运行不正常。
+			//erase list
+			for(i; i < (XG_MESSAGE_LISTINFO_BOUNDARY_ADD/(64*1024)); i++)//2*64k
 			{
-				current_page_number+=i;
-				flashc_erase_page(current_page_number, true);
+				return_code = data_flash_erase_block(address, DF_BLOCK_64KB);
+				if(return_code != DF_ERASE_COMPLETED)
+				{
+					return FALSE;
+				}
+				address+=65536;//64k*1024=65536bytes
 			}
 			//set label
-			flashc_memcpy((void *)LABEL_ADDRESS, (void *)XGFlashLabel, LABEL_LENGTH,  true);
+			return_code = data_flash_write(XGFlashLabel, LABEL_ADDRESS, LABEL_LENGTH);
 			
 			//set current_voice_index
 			memset(str, 0x00, sizeof(str));
-			
-			flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)str, MESSAGE_NUMBERS_LENGTH,  true);
-			if (flashc_is_lock_error() || flashc_is_programming_error())
+			return_code = data_flash_write(str, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
+			if(return_code != DF_WRITE_COMPLETED)
 			{
-				return XG_FLASH_ACTION_FAIL;
+				return FALSE;
 			}
 			current_message_index = 0;
 			log("\r\n----create xg message info okay!----\r\n");
@@ -105,25 +100,17 @@ start:
 		else//success
 		{
 			log("\nLABEL: %s\n", str);
-			//Get the current voice index		
-			flashc_memcpy((void *)&current_message_index, (void *)MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH,  false);
-			if (flashc_is_lock_error() || flashc_is_programming_error())
-			{
-				return XG_FLASH_ACTION_FAIL;
-			}
-			else
+			//Get the current voice index
+			return_code = data_flash_read_block(MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH, &current_message_index);								
+			if(return_code == DF_OK)
 			{
 				//Calculates the offset address of the current stored message
 				if(current_message_index != 0){
+					
 					memset(str, 0x00, sizeof(str));	
 					address = XG_MESSAGE_INFO_HEADER_START_ADD + ((current_message_index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
-					flashc_memcpy((void *)str, (void *)address, XG_MESSAGE_INFO_HEADER_LENGTH,  false);
-					if (flashc_is_lock_error() || flashc_is_programming_error())
-					{
-						log("\r\n----message storage is err!!!----\r\n");
-						goto ERASE;
-					}
-					else
+					return_code = data_flash_read_block(address, XG_MESSAGE_INFO_HEADER_LENGTH, (U8 *)str);			
+					if(return_code == DF_OK)
 					{
 						MessageList_Info_t *ptr = (MessageList_Info_t *)str;
 						if(ptr->numb == current_message_index)
@@ -134,9 +121,11 @@ start:
 										
 								log("\r\n----message storage is full!!!----\r\n");
 								//xgflash erase
-								
-								flashc_memset64((void *)LABEL_ADDRESS, (void *)0x00, LABEL_LENGTH,  true);
-								goto start;
+
+								return_code = data_flash_erase_block(0, DF_BLOCK_ALL);
+								if(return_code == DF_ERASE_COMPLETED)goto start;
+								else
+								return FALSE;
 
 							}
 						}
@@ -149,13 +138,16 @@ start:
 				}
 				log("\r\n----xoxo read message info okay!----\r\n");
 			}
+			else
+				return FALSE;
+			
 		}
 				
-		//memcpy(xg_message_count_ptr, &current_message_index, sizeof(current_message_index));
 		list_init_success_flag = 1;
 		return XG_OK;
 			
 	}
+	return XG_ERROR;
 	
 }
 U16 xgflash_get_message_count(void)
@@ -177,6 +169,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 	if(!list_init_success_flag)return XG_ERROR;
 	U32 address = 0;
 	static U32 bytes_remained = 0;
+	df_status_t return_code = DF_WRITE_COMPLETED;
 		
 	current_bytes_remained+=data_len;//accumulate
 	/* check input parameter */
@@ -200,12 +193,14 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		return XG_OUT_BOUNDARY;
 	}
 	
-	flashc_memcpy((void *)current_save_message_offset, (void *)data_ptr, data_len,  true);
-	if (flashc_is_lock_error() || flashc_is_programming_error())
+	
+	return_code = data_flash_write((U8 *)data_ptr, current_save_message_offset, data_len);
+	if(return_code != DF_WRITE_COMPLETED)
 	{
 		xSemaphoreGive(xgflash_mutex );//unlock
 		return XG_FLASH_ACTION_FAIL;
 	}
+	
 	current_save_message_offset+=data_len;
 	//log("current_save_message_offset : %X\n", current_save_message_offset);
 		
@@ -225,13 +220,13 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 			xSemaphoreGive(xgflash_mutex );//unlock
 			return XG_OUT_BOUNDARY;
 		}
-		//set a message info by current_message_index		
-		flashc_memcpy((void *)address, (void *)&ptr, XG_MESSAGE_INFO_HEADER_LENGTH,  true);
 		
+		
+		//set a message info by current_message_index	
+		return_code = data_flash_write((U8 *)ptr, address, XG_MESSAGE_INFO_HEADER_LENGTH);
 		//set message numbers
-		flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)&current_message_index, MESSAGE_NUMBERS_LENGTH,  true);
-
-		if (flashc_is_lock_error() || flashc_is_programming_error())
+		return_code = data_flash_write(&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
+		if(return_code != DF_WRITE_COMPLETED)
 		{
 			xSemaphoreGive(xgflash_mutex );//unlock
 			return XG_FLASH_ACTION_FAIL;
@@ -253,9 +248,11 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 	/* check input parameter */
 	if (message_index > current_message_index)
 	{
+		xSemaphoreGive(xgflash_mutex);//unlock
 		return XG_INVALID_PARAM;
 	}
 	
+	df_status_t return_code = DF_OK;
 	U32 info_address =0x00000000;
 	U32 data_address =0x00000000;
 	char str[XG_MESSAGE_INFO_HEADER_LENGTH];
@@ -263,36 +260,56 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 	
 	//find the message storage info by message_index
 	info_address = XG_MESSAGE_INFO_HEADER_START_ADD + ((message_index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
-	flashc_memcpy((void *)str, (void *)info_address, XG_MESSAGE_INFO_HEADER_LENGTH,  false);
-
-	U16 bytes_remained;
-	MessageList_Info_t *ptr = (MessageList_Info_t *)str;
-	if(ptr->numb == message_index)
+	//flashc_memcpy((void *)str, (void *)info_address, XG_MESSAGE_INFO_HEADER_LENGTH,  false);
+	return_code = data_flash_read_block(info_address, XG_MESSAGE_INFO_HEADER_LENGTH, (U8 *)str);
+	if (return_code == DF_OK)
 	{
-		bytes_remained = ptr->offset;
-		data_address = ptr->address;		
-		flashc_memcpy((void *)buff_ptr, (void *)data_address, bytes_remained,  false);
-		if (flashc_is_lock_error() || flashc_is_programming_error())
+		U16 bytes_remained;
+		MessageList_Info_t *ptr = (MessageList_Info_t *)str;
+		if(ptr->numb == message_index)
 		{
-			xSemaphoreGive(xgflash_mutex );//unlock
-			return XG_FLASH_ACTION_FAIL;
-		}
-		if(erase)//erase the message
-		{
-			//erase data and reset:current_save_message_offset
-			flashc_memset8((void *)data_address, 0x00, bytes_remained, true);
-			current_save_message_offset-=bytes_remained;
-			//erase info and reset:current_message_index
-			current_message_index-=1;
-			flashc_memset8((void *)info_address, 0x00, XG_MESSAGE_INFO_HEADER_LENGTH, true);
-			flashc_memcpy((void *)MESSAGE_NUMBERS_ADD, (void *)&current_message_index, MESSAGE_NUMBERS_LENGTH,  true);
-		}
+			bytes_remained = ptr->offset;
+			data_address = ptr->address;
+			
+			while (bytes_remained >= 1 && return_code == DF_OK)
+			{
+				if(bytes_remained < DF_DATA_SPACE_SIZE)//< 512bytes
+				{
+					return_code = data_flash_read_block(data_address, bytes_remained, buff_ptr);
+					bytes_remained = 0;	/* end while loop */
+
+				}
+				else//bytes_remained > DF_DATA_SPACE_SIZE
+				{
+					return_code = data_flash_read_block(data_address, DF_DATA_SPACE_SIZE, buff_ptr);
+					bytes_remained-=DF_DATA_SPACE_SIZE;
+					data_address+=DF_DATA_SPACE_SIZE;
+						
+				}
+				//memset(PLAYBACK_BUF, 0x00, DF_DATA_SPACE_SIZE);
+			}
+			
+			if(erase)//erase the message
+			{
+				//erase data and reset:current_save_message_offset
+				memset(str, 0x00, sizeof(str));
+				return_code = data_flash_write((U8 *)str, data_address, bytes_remained);
+				current_save_message_offset-=bytes_remained;
+				//erase info and reset:current_message_index
+				current_message_index-=1;
+				return_code = data_flash_write((U8 *)str, info_address, XG_MESSAGE_INFO_HEADER_LENGTH);
+				return_code = data_flash_write((U8 *)&current_message_index, MESSAGE_NUMBERS_ADD, XG_MESSAGE_INFO_HEADER_LENGTH);
+			}
 		
-		xSemaphoreGive(xgflash_mutex );//unlock
-		return XG_OK;
+			xSemaphoreGive(xgflash_mutex);//unlock
+			return XG_OK;
+		}
+		xSemaphoreGive(xgflash_mutex);//unlock
+		return XG_INVALID_PARAM;
 	}
-	xSemaphoreGive(xgflash_mutex );//unlock
-	return XG_INVALID_PARAM;
+	
+	xSemaphoreGive(xgflash_mutex);//unlock
+	return XG_FLASH_ACTION_FAIL;
 		
 }
 xgflash_status_t xgflash_erase_info_region(void)
@@ -302,12 +319,8 @@ xgflash_status_t xgflash_erase_info_region(void)
 	
 	xSemaphoreTake(xgflash_mutex, portMAX_DELAY);//lock
 	
-	flashc_memset64((void *)LABEL_ADDRESS, (void *)0x00, LABEL_LENGTH,  true);
-	if (flashc_is_lock_error() || flashc_is_programming_error())
-	{
-		status = XG_FLASH_ACTION_FAIL;
-	}
-	status = XG_ERASE_COMPLETED;
+	if(data_flash_erase_block(XG_MESSAGE_LISTINFO_START_ADD, DF_BLOCK_4KB) == DF_ERASE_COMPLETED)
+		status = XG_ERASE_COMPLETED;
 	
 	xSemaphoreGive(xgflash_mutex );//unlock
 	return status;
@@ -425,6 +438,7 @@ void create_xg_flash_test_task(void)
 	//
 }
 
+
 //U16	Current_total_message_count=0;
 void xg_flashc_init(void)
 {
@@ -447,6 +461,9 @@ void xg_flashc_init(void)
 	{
 		set_message_store(&message_store[i]);//push <message_store> address to the message_storage_queue;
 	}
+	
+	
+	//data_flash_init();//interface
 	
 	//flashc_lock_all_regions(false);
 	//xgflash_list_info_init();

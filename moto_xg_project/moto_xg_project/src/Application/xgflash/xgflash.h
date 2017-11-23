@@ -12,14 +12,15 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "compiler.h"
-#include "flashc.h"
+#include "data_flash.h"
+//#include "flashc.h"
 #include "string.h"
 #include "log.h"
 #include "RFID.h"
 
 /**
 
-label:			"XUNGENG"(8bytes)
+label:			"PATROL"(6bytes)
 
 voice_numbers:	0x xxxx(2bytes)
 
@@ -37,15 +38,15 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 #define TRUE 1
 #define FALSE 0
 
-#define PageSize 512
+#define PageSize 256
 
-#define FLASH_PAGE_SIZE 80 //Kbyte
+//#define FLASH_PAGE_SIZE 80 //Kbyte
 
-#define XG_MESSAGE_LISTINFO_START_ADD		(AVR32_FLASH_ADDRESS + 0x0004B000)
-#define XG_MESSAGE_LISTINFO_BOUNDARY_ADD	0x80050000//20k
+#define XG_MESSAGE_LISTINFO_START_ADD		0x000000
+#define XG_MESSAGE_LISTINFO_BOUNDARY_ADD	0x020000//128k=2*64k
 
 #define LABEL_ADDRESS						XG_MESSAGE_LISTINFO_START_ADD
-#define LABEL_LENGTH						0x07//7bytes:"XUNGENG"
+#define LABEL_LENGTH						0x06//6bytes:"PATROL"
 
 #define MESSAGE_NUMBERS_ADD					(XG_MESSAGE_LISTINFO_START_ADD + LABEL_LENGTH)
 #define MESSAGE_NUMBERS_LENGTH				0x02//2bytes:0x xxxx  
@@ -54,8 +55,8 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 //#define VOICE_INFO_LENGTH	0x08//8bytes:list_number(2bytes) + address(4bytes) + length(2bytes)
 #define XG_MESSAGE_INFO_HEADER_LENGTH		0x08
 
-#define XG_MESSAGE_DATA_START_ADD			0x80050000
-#define XG_MESSAGE_DATA_BOUNDARY_ADD		0x8005F000//60k
+#define XG_MESSAGE_DATA_START_ADD			XG_MESSAGE_LISTINFO_BOUNDARY_ADD + 10//0x008508
+#define XG_MESSAGE_DATA_BOUNDARY_ADD		DF_MAX_ADDR//0x7FFFFF    /* 8MB */
 
 #define MAX_MESSAGE_STORE 20
 

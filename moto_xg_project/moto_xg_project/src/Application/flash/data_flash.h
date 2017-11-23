@@ -48,15 +48,19 @@
 #define FATAL_ERROR_DATA_FLASH_READ_ID  0x03
 #define FATAL_ERROR_ACC_INIT            0x04
 
-#define DF_SPI_FIRST_NPCS 0
+//#define DF_SPI_FIRST_NPCS 0
+#define DF_SPI_SECOND_NPCS 1
 #define DF_SPI_MASTER_SPEED 24000000
 #define DF_SPI_BITS 8
-#define DF_SPI_PCS_0 0
+//#define DF_SPI_PCS_0 0
+#define DF_SPI_PCS_1 1
 
 #define DF_TEST_SUCCESS 0
 #define DF_TEST_FAIL 1
 
 #define     READ_ARRAY						0x03
+#define     FAST_READ						0x0B
+#define     FAST_READ_DUAL					0x3B
 #define     BLOCK_ERASE_4KB					0x20
 #define     BLOCK_ERASE_32KB				0x52
 #define     BLOCK_ERASE_64KB				0xD8
@@ -67,10 +71,14 @@
 #define     WRITE_DISABLE                   0x04
 #define     PROGRAM_ERASE_SUSPEND           0xB0
 #define     PROGRAM_ERASE_RESUME			0xD0
+#define     POWER_DOWN						0xB9
+#define     RELEASE_POWER_DOWN				0xAB
 #define     READ_STATUS_REG					0x05
 #define     WRITE_STATUS_REG_BYTE_1         0x01
 #define     WRITE_STATUS_REG_BYTE_2         0x31
-#define     READ_M_D_ID                     0x9F
+#define     READ_DEVICE_ID                  0xAB
+#define     READ_M_D_ID                     0x90
+
 
 #define     STATUS_BUSY                     0x01
 #define     STATUS_WRITE_NOT_ENABLED        0x02
@@ -106,6 +114,7 @@ typedef enum
 } df_block_size_t;
 
 #define spi_write_dummy()                   spi_write(spi, 0xFF)
+#define spi_write_zero()					spi_write(spi, 0x00)
 #define spi_write_byte(x)                   spi_write(spi, (U16)x)
 #define spi_read_byte(x)                    spi_read(spi, (U16*)x)
 
