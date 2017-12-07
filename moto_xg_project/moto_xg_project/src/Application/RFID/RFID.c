@@ -19,9 +19,9 @@ void rfid_init()
 	
 	rc522_init();
 	
-	if(rfid_auto_reader(card_id) == 0){
-		log("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
-	}
+	//if(rfid_auto_reader(card_id) == 0){
+		//log("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
+	//}
 		//
 }
 
@@ -31,10 +31,10 @@ U8 rfid_auto_reader(void *card_id)
 	U8 status = MI_ERR;
 	
 	PcdReset();
-while(1){
+//while(1){
 	status=PcdRequest(PICC_REQALL,	CT);//寻天线区内全部的卡，返回卡片类型 2字节
-	if(status!=MI_OK) //return status;
-	continue;
+	if(status!=MI_OK) return status;
+	//continue;
 	
 	if(CT[0]==0x04&&CT[1]==0x00)
 		log("MFOne-S50\n");
@@ -53,23 +53,23 @@ while(1){
 	if(status!=MI_OK)
 	{
 		xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to noticy failure!!!
-		//return status;
-		continue;
+		return status;
+		//continue;
 	}
 	
 	//memcpy(MLastSelectedSnr,&RevBuffer[2],4);
 	status=PcdSelect(SN);//选卡
-	if(status!=MI_OK)//return status;
-	continue;
+	if(status!=MI_OK)return status;
+	//continue;
 	else{//选卡成功
 			
 		memcpy(card_id, SN, 4);
 		log("select okay\n");
-		continue;
-		//return status;	
+		//continue;
+		return status;	
 	}
 	
-}
+//}
 	
 }
 
