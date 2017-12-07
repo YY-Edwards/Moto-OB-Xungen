@@ -38,6 +38,30 @@ U8 data_flash_failure = 0;
 
 U8 FLASH_BUF[4096];
 
+
+
+
+void W25Q64_SPI_SetSpeed(U16 SPI_BaudRatePrescaler)
+{
+	spi->csr0 = (spi->csr1 & (U16)0x00FF) |SPI_BaudRatePrescaler;
+
+	spi_enable(spi); /*!< W25Q64_SPI enable */
+	
+	
+}
+void W25Q64_SPI_SetSpeedLow(void)
+{
+	W25Q64_SPI_SetSpeed(0xFF00);//baudDiv=4
+	
+}
+void W25Q64_SPI_SetSpeedHi(void)
+{
+	
+	W25Q64_SPI_SetSpeed(0x0100);//baudDiv=1
+	
+}
+
+
 /*******************************************************************************
 *
 *                     C L U S T E R    F U N C T I O N
@@ -90,12 +114,14 @@ void data_flash_init(void)
 		.spck_delay   = 0,
 		.trans_delay  = 0,
 		.stay_act     = 1,
-		.spi_mode     = 0,
+		.spi_mode     = 0,//0,
 		.modfdis      = 1
 	};
 
 	// Assign I/Os to SPI.
 	gpio_enable_module(DF_SPI_GPIO_MAP, sizeof(DF_SPI_GPIO_MAP) / sizeof(DF_SPI_GPIO_MAP[0]));
+
+	gpio_enable_gpio_pin(AVR32_PIN_PA23);
 
 	spi = &AVR32_SPI;
 
@@ -114,7 +140,7 @@ void data_flash_init(void)
 		data_flash_failure = FATAL_ERROR_DATA_FLASH_SPI_INIT;
 		return;
 	}
-
+	 
 	if (data_flash_check_device_id() != TRUE)//check W25Q64 ID
 	{
 		data_flash_failure = FATAL_ERROR_DATA_FLASH_READ_ID;
@@ -162,6 +188,8 @@ static Bool data_flash_check_device_id(void)
 	/* DF memory check. */
 	/* Select the DF memory to check. */
 	//spi_selectChip(spi, DF_SPI_PCS_0);
+	CLR_SPI_CS_1;
+	
 	spi_selectChip(spi, DF_SPI_PCS_1);
 
 	/* Send the Manufacturer/Device ID Read command. */
@@ -170,6 +198,8 @@ static Bool data_flash_check_device_id(void)
 	/* Send 2 dummy byte and 1 zero byte to read the status register. */
 	spi_write_dummy();
 	spi_write_dummy();
+	//spi_write_zero();
+	//spi_write_zero();
 	spi_write_zero();
 	
 	spi_read(spi, &manufacturer_device_id[0]);
@@ -179,6 +209,8 @@ static Bool data_flash_check_device_id(void)
 	/* Unselect the checked DF memory. */
 	//spi_unselectChip(spi, DF_SPI_PCS_0);
 	spi_unselectChip(spi, DF_SPI_PCS_1);
+	
+	SET_SPI_CS_1;
 
 	/* Unexpected device ID. */
     if ((manufacturer_device_id[0] != 0xEF) || (manufacturer_device_id[1] != 0x16))
@@ -242,7 +274,7 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 
 	U16 data_u16;
 
-	spi_selectChip(spi, DF_SPI_PCS_0);
+	spi_selectChip(spi, DF_SPI_PCS_1);
 
     switch (command)
 	{
@@ -299,7 +331,7 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 			break;
 	}
 
-	spi_unselectChip(spi, DF_SPI_PCS_0);
+	spi_unselectChip(spi, DF_SPI_PCS_1);
 
 	return status;
 }

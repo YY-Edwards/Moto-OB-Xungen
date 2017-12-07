@@ -223,7 +223,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		
 		
 		//set a message info by current_message_index	
-		return_code = data_flash_write((U8 *)ptr, address, XG_MESSAGE_INFO_HEADER_LENGTH);
+		return_code = data_flash_write((U8 *)&ptr, address, XG_MESSAGE_INFO_HEADER_LENGTH);
 		//set message numbers
 		return_code = data_flash_write(&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
 		if(return_code != DF_WRITE_COMPLETED)
@@ -463,7 +463,7 @@ void xg_flashc_init(void)
 	}
 	
 	
-	//data_flash_init();//interface
+	data_flash_init();//interface
 	
 	//flashc_lock_all_regions(false);
 	//xgflash_list_info_init();

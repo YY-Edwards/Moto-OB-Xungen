@@ -45,7 +45,7 @@ int main (void)
 
 	//tc_init();
 	
-	rfid_init();
+	//rfid_init();
 		
 	app_init();
 	
