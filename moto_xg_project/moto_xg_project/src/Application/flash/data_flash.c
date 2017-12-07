@@ -43,7 +43,7 @@ U8 FLASH_BUF[4096];
 
 void W25Q64_SPI_SetSpeed(U16 SPI_BaudRatePrescaler)
 {
-	spi->csr0 = (spi->csr1 & (U16)0x00FF) |SPI_BaudRatePrescaler;
+	spi->csr1 = (spi->csr1 & (U16)0x00FF) |SPI_BaudRatePrescaler;
 
 	spi_enable(spi); /*!< W25Q64_SPI enable */
 	
@@ -114,14 +114,12 @@ void data_flash_init(void)
 		.spck_delay   = 0,
 		.trans_delay  = 0,
 		.stay_act     = 1,
-		.spi_mode     = 0,//0,
+		.spi_mode     = 1,//0,0 针对不同的存储芯片，注意模式
 		.modfdis      = 1
 	};
 
 	// Assign I/Os to SPI.
 	gpio_enable_module(DF_SPI_GPIO_MAP, sizeof(DF_SPI_GPIO_MAP) / sizeof(DF_SPI_GPIO_MAP[0]));
-
-	gpio_enable_gpio_pin(AVR32_PIN_PA23);
 
 	spi = &AVR32_SPI;
 
@@ -187,30 +185,24 @@ static Bool data_flash_check_device_id(void)
 
 	/* DF memory check. */
 	/* Select the DF memory to check. */
-	//spi_selectChip(spi, DF_SPI_PCS_0);
-	CLR_SPI_CS_1;
-	
 	spi_selectChip(spi, DF_SPI_PCS_1);
 
 	/* Send the Manufacturer/Device ID Read command. */
-	spi_write(spi, READ_M_D_ID);
-
-	/* Send 2 dummy byte and 1 zero byte to read the status register. */
-	spi_write_dummy();
-	spi_write_dummy();
-	//spi_write_zero();
-	//spi_write_zero();
+	spi_write(spi, READ_M_D_ID);	
 	spi_write_zero();
+	spi_write_zero();
+	spi_write_zero();
+
+	/* Send 2 dummy byte to read the status register. */
 	
+	spi_write_dummy();
 	spi_read(spi, &manufacturer_device_id[0]);
 	
+	spi_write_dummy();
 	spi_read(spi, &manufacturer_device_id[1]);
 
 	/* Unselect the checked DF memory. */
-	//spi_unselectChip(spi, DF_SPI_PCS_0);
 	spi_unselectChip(spi, DF_SPI_PCS_1);
-	
-	SET_SPI_CS_1;
 
 	/* Unexpected device ID. */
     if ((manufacturer_device_id[0] != 0xEF) || (manufacturer_device_id[1] != 0x16))
@@ -317,7 +309,7 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 			spi_write_byte(addr[0]);
 			for (i = 0; i < length; i++)
 			{
-				//spi_write_dummy();
+				spi_write_dummy();
 				spi_read_byte(&data_u16);
 				*data_ptr = (U8)data_u16;
 				data_ptr++;
@@ -325,6 +317,7 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 			break;
 		case WRITE_STATUS_REG_BYTE_1:
 			spi_write_byte(command);
+			spi_write_byte(UNPROTECT_ALL_SECTORS);
 			spi_write_byte(UNPROTECT_ALL_SECTORS);
 			break;
 		default:

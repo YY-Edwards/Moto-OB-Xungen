@@ -18,7 +18,7 @@ U8 RC522_WriteByte(U8 Data)
 {
 	U8 temp =0;
 	
-	spi_selectChip(spi, DF_SPI_PCS_0);
+	//spi_selectChip(spi, DF_SPI_PCS_0);
 	
 	/*!< Send the byte */
 	spi_write(spi,  (U16)Data);
@@ -27,7 +27,7 @@ U8 RC522_WriteByte(U8 Data)
 
 	temp = spi_read(spi, (U16*)&Data);
 	
-	spi_unselectChip(spi, DF_SPI_PCS_0);
+	//spi_unselectChip(spi, DF_SPI_PCS_0);
 	
 	/*!< Return the byte read from the SPI bus */
 	return  temp;
@@ -38,7 +38,7 @@ U8 RC522_ReadByte(void)
 	U16 *Data ;
 
 	//必须这样才能正常读写
-	spi_selectChip(spi, DF_SPI_PCS_0);
+	//spi_selectChip(spi, DF_SPI_PCS_0);
 	
 	/*!< Send the byte */
 
@@ -50,7 +50,7 @@ U8 RC522_ReadByte(void)
 
 	/*!< Return the shifted data */
 	
-	spi_unselectChip(spi, DF_SPI_PCS_0);
+	//spi_unselectChip(spi, DF_SPI_PCS_0);
 	
 	return (U8)(*Data);
 	
@@ -67,14 +67,16 @@ U8 ReadRawRC(U8   Address)
 {
 	U8   ucAddr;
 	U8   ucResult=0;
-	CLR_SPI_CS;	
+	//CLR_SPI_CS;	
+	spi_selectChip(spi, DF_SPI_PCS_0);
 	 
 	ucAddr = ((Address<<1)&0x7E)|0x80;
 	
 	RC522_WriteByte(ucAddr);
 	ucResult = RC522_ReadByte();
 	
-	SET_SPI_CS;
+	spi_unselectChip(spi, DF_SPI_PCS_0);
+	//SET_SPI_CS;
 	return ucResult;
 }
 
@@ -87,13 +89,16 @@ void WriteRawRC(U8   Address, U8   value)
 {
 	U8   ucAddr;
 
-	CLR_SPI_CS;	
+	//CLR_SPI_CS;	
+	spi_selectChip(spi, DF_SPI_PCS_0);
 	
 	ucAddr = ((Address<<1)&0x7E);
 	RC522_WriteByte(ucAddr);
 	RC522_WriteByte(value);
 	
-	SET_SPI_CS;
+	spi_unselectChip(spi, DF_SPI_PCS_0);
+	
+	//SET_SPI_CS;
 
 }
 
@@ -125,9 +130,9 @@ void static spi_init()
 
 	static const gpio_map_t RC522_SPI_GPIO_MAP =
 	{
-		{AVR32_SPI_SCK_0_1_PIN,        AVR32_SPI_SCK_0_1_FUNCTION   },  // SPI Clock. PA17 as SCK (func C)
-		{AVR32_SPI_MISO_0_2_PIN,       AVR32_SPI_MISO_0_2_FUNCTION  },  // MISO. PA28 as MISO (func C)
-		{AVR32_SPI_MOSI_0_2_PIN,       AVR32_SPI_MOSI_0_2_FUNCTION  },  // MOSI. PA29 as MOSI (func C)
+		//{AVR32_SPI_SCK_0_1_PIN,        AVR32_SPI_SCK_0_1_FUNCTION   },  // SPI Clock. PA17 as SCK (func C)
+		//{AVR32_SPI_MISO_0_2_PIN,       AVR32_SPI_MISO_0_2_FUNCTION  },  // MISO. PA28 as MISO (func C)
+		//{AVR32_SPI_MOSI_0_2_PIN,       AVR32_SPI_MOSI_0_2_FUNCTION  },  // MOSI. PA29 as MOSI (func C)
 		{AVR32_SPI_NPCS_0_1_PIN,       AVR32_SPI_NPCS_0_1_FUNCTION  },  // Chip Select NPCS. PA24 as NPCS[0] (func B)
 	};
 

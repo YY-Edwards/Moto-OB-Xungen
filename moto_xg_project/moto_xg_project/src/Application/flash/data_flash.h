@@ -54,8 +54,8 @@
 #define DF_SPI_BITS 8
 //#define DF_SPI_PCS_0 0
 #define DF_SPI_PCS_1 1
-#define SET_SPI_CS_1   gpio_set_gpio_pin(AVR32_SPI_NPCS_1_1_PIN)
-#define CLR_SPI_CS_1   gpio_clr_gpio_pin(AVR32_SPI_NPCS_1_1_PIN)
+#define SET_SPI_CS_1   gpio_set_gpio_pin(AVR32_SPI_NPCS_1_1_PIN)//AVR中的片选由处理器自身控制
+#define CLR_SPI_CS_1   gpio_clr_gpio_pin(AVR32_SPI_NPCS_1_1_PIN)//
 
 #define DF_TEST_SUCCESS 0
 #define DF_TEST_FAIL 1
