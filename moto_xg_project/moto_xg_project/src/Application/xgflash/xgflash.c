@@ -463,10 +463,10 @@ void xg_flashc_init(void)
 	}
 	
 	
-	//data_flash_init();//interface
+	data_flash_init();//interface
 	
 	//flashc_lock_all_regions(false);
-	//xgflash_list_info_init();
+	xgflash_list_info_init();
 	//create_xg_flash_test_task();
 
 }

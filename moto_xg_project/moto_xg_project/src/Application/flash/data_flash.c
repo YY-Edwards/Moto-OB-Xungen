@@ -146,9 +146,9 @@ void data_flash_init(void)
 	}
 
 	// Set STATUS reg to unprotect all sect
-	send_flash_command(WRITE_ENABLE, 0, NULL, 0);
-	send_flash_command(WRITE_STATUS_REG_BYTE_1, 0, NULL, 0);
-	status = send_flash_command(READ_STATUS_REG, 0, NULL, 0);
+	//send_flash_command(WRITE_ENABLE, 0, NULL, 0);
+	//send_flash_command(WRITE_STATUS_REG_BYTE_1, 0, NULL, 0);
+	//status = send_flash_command(READ_STATUS_REG, 0, NULL, 0);
 	
 	return;
 }
