@@ -28,6 +28,8 @@
 #define DF_TEST_SUCCESS 0
 #define DF_TEST_FAIL 1
 
+#define ENTER_POWERDOWN 1
+#define WAKEUP_RC522	0
 //
 //typedef enum
 //{
@@ -54,6 +56,7 @@
 #define PCD_TRANSCEIVE        0x0C               //发送并接收数据
 #define PCD_RESETPHASE        0x0F               //复位
 #define PCD_CALCCRC           0x03               //CRC计算
+#define PCD_POWERDOWN         0x10               //软掉电
 
 /////////////////////////////////////////////////////////////////////
 //Mifare_One卡片命令字
@@ -176,6 +179,8 @@
 U8 RC522_WriteByte(U8 Data);
 U8 RC522_ReadByte(void);
 
+void Powerdown_RC522(U8 act);
+void Wait_Wakeup_RC522(void);
 void ClearBitMask(U8   reg,U8   mask);
 void WriteRawRC(U8   Address, U8   value);
 void SetBitMask(U8   reg,U8   mask);
@@ -187,7 +192,6 @@ char PcdComMF522(	U8  Command,
 					
 void CalulateCRC(U8 *pIn ,U8   len,U8 *pOut );
 U8 ReadRawRC(U8   Address);
-void PcdAntennaOn(void);
 char PcdReset(void);
 char PcdRequest(unsigned char req_code,unsigned char *pTagType);
 void PcdAntennaOn(void);

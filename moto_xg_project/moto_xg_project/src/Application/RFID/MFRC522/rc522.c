@@ -360,6 +360,48 @@ void SetBitMask(U8   reg,U8   mask)
 }
 
 /////////////////////////////////////////////////////////////////////
+//功    能：使RC522进入软掉电模式
+//
+/////////////////////////////////////////////////////////////////////
+void Powerdown_RC522(U8 act)
+{
+	char   tmp = 0x0;
+	char   reg = CommandReg;
+	
+	tmp = ReadRawRC(reg);
+	if(act == ENTER_POWERDOWN)//1
+		WriteRawRC(reg,tmp | PCD_POWERDOWN);  // set bit powerdown
+	else
+	{
+		WriteRawRC(reg,tmp | PCD_IDLE);  // wake up rc522
+		delay_ns(2);
+		Wait_Wakeup_RC522();
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////
+//功    能：等待RC522启动
+/////////////////////////////////////////////////////////////////////
+void Wait_Wakeup_RC522(void)
+{
+	char   tmp = 0x0;
+	char   reg = CommandReg;
+	
+	do 
+	{
+		tmp = ReadRawRC(reg);
+		//delay_ms(20);
+				
+	} while ((tmp & 0x10) == 1);
+			
+	//tmp = ReadRawRC(reg);
+	//if((tmp & 0x10) == 0)
+	//WriteRawRC(reg,tmp | PCD_POWERDOWN);  // set bit powerdown
+	
+}
+
+/////////////////////////////////////////////////////////////////////
 //功    能：读取M1卡一块数据
 //参数说明: addr[IN]：块地址
 //          p [OUT]：读出的数据，16字节
@@ -770,6 +812,14 @@ void rc522_init()
 	PcdAntennaOn();
 	
 	M500PcdConfigISOType( 'A' );
+	
+	Powerdown_RC522(ENTER_POWERDOWN);
+	
+	//Powerdown_RC522(WAKEUP_RC522);
+	
+	//Powerdown_RC522(ENTER_POWERDOWN);
+	
+	//Powerdown_RC522(WAKEUP_RC522);
 	
 
 }

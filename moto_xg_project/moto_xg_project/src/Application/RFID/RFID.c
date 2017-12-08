@@ -76,7 +76,7 @@ U8 rfid_auto_reader(void *card_id)
 extern volatile DateTime_t Current_time;
 U8 rfid_sendID_message()
 {
-	char SN[10];
+	static char SN[10];
 	//char data_buffer[16];
 	char message[80];
 	U8 return_err =0;
@@ -90,7 +90,12 @@ U8 rfid_sendID_message()
 	memset(SN, 0x00, 10);
 	memset(message, 0x00, 80);
 
-	return_err = rfid_auto_reader(SN);
+	//PcdReset();
+	//Powerdown_RC522(WAKEUP_RC522);
+	//return_err = rfid_auto_reader(SN);
+	//Powerdown_RC522(ENTER_POWERDOWN);
+	
+	return_err = scan_patrol(SN);
 	
 	if(return_err == 0){
 		
@@ -140,6 +145,22 @@ U8 rfid_sendID_message()
 	
 }
 
+U8 scan_patrol(char* SN)
+{
+	U8 return_err = MI_ERR;
+	
+	PcdReset();
+	Powerdown_RC522(WAKEUP_RC522);
+	return_err = rfid_auto_reader(SN);
+	Powerdown_RC522(ENTER_POWERDOWN);
+	//if(return_err == 0)
+		//log("scan_patrol okay!\n");
+	//else
+		//log("scan_patrol err!\n");
+		
+	return return_err;
+
+}
 
 
 
