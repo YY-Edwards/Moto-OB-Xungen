@@ -332,7 +332,7 @@ void runXGFlashTestSAVE( void *pvParameters )
 	Bool firstTest = TRUE;
 	static  portTickType xLastWakeTime;
 	static xgflash_status_t status = XG_ERROR;
-	const portTickType xFrequency = 3000;//2s,定时问题已经修正。2s x  2000hz = 4000
+	const portTickType xFrequency = 20000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	Message_Protocol_t data_ptr;
 	static const uint8_t write_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
 	static  portTickType water_value;
@@ -361,18 +361,18 @@ void runXGFlashTestSAVE( void *pvParameters )
 		nop();
 		//water_value = uxTaskGetStackHighWaterMark(NULL);
 		//log("water_value: %d\n", water_value);
-		log("XG save okay!\n");
-		//memset(&data_ptr.data.XG_Time.Minute, 0x01, 1);
-		//status = xgflash_message_save(&data_ptr, sizeof(Message_Protocol_t), TRUE);
-		//if(status == XG_OK)
-		//{
 		//log("XG save okay!\n");
-		//data_ptr.data.XG_Time.Second+=1;
-		//}
-		//else
-		//{
-		//log("save message err : %d\n", status);
-		//}
+		memset(&data_ptr.data.XG_Time.Minute, 0x01, 1);
+		status = xgflash_message_save(&data_ptr, sizeof(Message_Protocol_t), TRUE);
+		if(status == XG_OK)
+		{
+			log("XG save okay!\n");
+			data_ptr.data.XG_Time.Second+=1;
+		}
+		else
+		{
+			log("save message err : %d\n", status);
+		}
 	}
 	
 }
@@ -381,9 +381,12 @@ void runXGFlashTestREAD( void *pvParameters )
 	Bool firstTest = TRUE;
 	static  portTickType xLastWakeTime;
 	static xgflash_status_t status = XG_ERROR;
-	const portTickType xFrequency = 3500;//2s,定时问题已经修正。1.5s x  2000hz = 3000
+	const portTickType xFrequency = 22000;//2s,定时问题已经修正。1.5s x  2000hz = 3000
 	Message_Protocol_t *data_ptr = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
 	static U16 message_count = 0;
+	U8 return_err =0;
+	static char SN[10];
+	memset(SN, 0x00, 10);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	
@@ -399,6 +402,12 @@ void runXGFlashTestREAD( void *pvParameters )
 			if(status == XG_OK)
 			{
 				log("read out data : %d\n", data_ptr->data.XG_Time.Second);
+				
+				return_err = scan_patrol(SN);
+				if(return_err == 0){
+					
+					log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
+				}
 			}
 			else
 			{
@@ -420,22 +429,22 @@ void create_xg_flash_test_task(void)
 	xTaskCreate(
 	runXGFlashTestSAVE
 	,  (const signed portCHAR *)"XG_SAVE"
-	,  550
+	,  800
 	,  NULL
 	,  tskFLASH_PRIORITY+4
 	//, NULL);
 	,  &save_handle);
 	
-	vTaskSuspend(save_handle);
+	//vTaskSuspend(save_handle);
 	
-	//xTaskCreate(
-	//runXGFlashTestREAD
-	//,  (const signed portCHAR *)"XG_READ"
-	//,  configMINIMAL_STACK_SIZE
-	//,  NULL
-	//,  tskFLASH_PRIORITY
-	//,  NULL );
-	//
+	xTaskCreate(
+	runXGFlashTestREAD
+	,  (const signed portCHAR *)"XG_READ"
+	,  880
+	,  NULL
+	,  tskFLASH_PRIORITY+4
+	,  NULL );
+	
 }
 
 
@@ -467,7 +476,7 @@ void xg_flashc_init(void)
 	
 	//flashc_lock_all_regions(false);
 	xgflash_list_info_init();
-	//create_xg_flash_test_task();
+	create_xg_flash_test_task();
 
 }
 

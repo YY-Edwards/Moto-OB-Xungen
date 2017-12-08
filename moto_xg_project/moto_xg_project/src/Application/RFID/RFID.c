@@ -153,10 +153,10 @@ U8 scan_patrol(char* SN)
 	Powerdown_RC522(WAKEUP_RC522);
 	return_err = rfid_auto_reader(SN);
 	Powerdown_RC522(ENTER_POWERDOWN);
-	//if(return_err == 0)
-		//log("scan_patrol okay!\n");
-	//else
-		//log("scan_patrol err!\n");
+	if(return_err == 0)
+		log("scan_patrol okay!\n");
+	else
+		log("scan_patrol err!\n");
 		
 	return return_err;
 

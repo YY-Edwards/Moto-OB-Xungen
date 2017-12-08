@@ -902,7 +902,6 @@ static __app_Thread_(app_cfg)
 					connect_flag=1;
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
 					OB_State = OB_CONNECTEDWAITTINGSYNTIME;
-					//vTaskResume(save_handle);
 					log("connect OB okay!\n");
 				}
 				else
@@ -924,6 +923,7 @@ static __app_Thread_(app_cfg)
 							
 							OB_State = OB_WAITINGAPPTASK;
 							log("get time okay!\n");
+							//vTaskResume(save_handle);
 						}
 						else
 						{						

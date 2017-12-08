@@ -112,7 +112,7 @@ void RC522_SPI_SetSpeed(U16 SPI_BaudRatePrescaler)
 }
 void RC522_SPI_SetSpeedLow(void)
 {
-	RC522_SPI_SetSpeed(0x0400);//baudDiv=4
+	RC522_SPI_SetSpeed(0x0A00);//baudDiv=4
 	
 }
 void RC522_SPI_SetSpeedHi(void)
@@ -161,13 +161,13 @@ void static spi_init()
 	spi = &AVR32_SPI;
 
 	// Initialize as master.
-	spi_initMaster(spi, &spiOptions);
+	//spi_initMaster(spi, &spiOptions);
 
 	// Set selection mode: variable_ps, pcs_decode, delay.
-	spi_selectionMode(spi, 0, 0, 0);
+	//spi_selectionMode(spi, 0, 0, 0);
 
 	// Enable SPI.
-	spi_enable(spi);
+	//spi_enable(spi);
 
 	// Initialize RC522 with SPI clock PBA.
 	if (spi_setupChipReg(spi, &spiOptions, 2*12000000) != SPI_OK)

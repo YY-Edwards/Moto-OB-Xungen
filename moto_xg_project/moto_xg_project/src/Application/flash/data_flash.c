@@ -51,7 +51,7 @@ void W25Q64_SPI_SetSpeed(U16 SPI_BaudRatePrescaler)
 }
 void W25Q64_SPI_SetSpeedLow(void)
 {
-	W25Q64_SPI_SetSpeed(0xFF00);//baudDiv=4
+	W25Q64_SPI_SetSpeed(0x0200);//baudDiv=4
 	
 }
 void W25Q64_SPI_SetSpeedHi(void)
@@ -145,6 +145,7 @@ void data_flash_init(void)
 		return;
 	}
 
+	W25Q64_SPI_SetSpeedHi();
 	// Set STATUS reg to unprotect all sect
 	//send_flash_command(WRITE_ENABLE, 0, NULL, 0);
 	//send_flash_command(WRITE_STATUS_REG_BYTE_1, 0, NULL, 0);
