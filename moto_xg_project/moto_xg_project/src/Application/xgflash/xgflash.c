@@ -183,8 +183,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		return XG_INVALID_PARAM;
 	}
 	
-	xSemaphoreTake(xgflash_mutex, portMAX_DELAY) ;//lock
-	
+	xSemaphoreTake(xgflash_mutex, portMAX_DELAY) ;//lock	
 	//save data
 	if(current_save_message_offset > XG_MESSAGE_DATA_BOUNDARY_ADD)//The message data is out of boundary
 	{
@@ -193,16 +192,18 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		return XG_OUT_BOUNDARY;
 	}
 	
-	
+	//log("receive...1-1\n");
 	return_code = data_flash_write((U8 *)data_ptr, current_save_message_offset, data_len);
 	if(return_code != DF_WRITE_COMPLETED)
 	{
 		xSemaphoreGive(xgflash_mutex );//unlock
+		//log("receive...1-3\n");
 		return XG_FLASH_ACTION_FAIL;
 	}
 	
+	//log("receive...1-2\n");
 	current_save_message_offset+=data_len;
-	//log("current_save_message_offset : %X\n", current_save_message_offset);
+	log("current_save_message_offset : %X\n", current_save_message_offset);
 		
 	MessageList_Info_t ptr;
 		
@@ -467,6 +468,18 @@ void xg_flashc_init(void)
 	
 	//flashc_lock_all_regions(false);
 	xgflash_list_info_init();
+	
+	//static char buff[250];
+	//static U8 mycount =0;
+	//memset(buff,0x18,sizeof(buff));
+	//
+	//xgflash_message_save(buff, 32, TRUE);
+	//
+	//memset(buff,0x00,sizeof(buff));
+	//
+	//mycount = xgflash_get_message_count();
+	//
+	//xgflash_get_message_data(mycount, buff, TRUE);
 	//create_xg_flash_test_task();
 
 }

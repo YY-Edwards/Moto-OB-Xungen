@@ -880,16 +880,19 @@ static __app_Thread_(app_cfg)
 {
 	static int coun=0;
 	//static U32 isAudioRouting = 0;
-	//static U16 Current_total_message_count =0;
+	static U16 Current_total_message_count =0;
 	static  portTickType xLastWakeTime;
 	//static  portTickType water_value;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
 	char card_id[4]={0};
 	U16  * data_ptr;
+	U8 storage_buff[50];
+	
 	//static const uint8_t test_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 	xLastWakeTime = xTaskGetTickCount();
+	memset(storage_buff, 0x00, sizeof(storage_buff));
 		
 	for(;;)
 	{
@@ -936,24 +939,29 @@ static __app_Thread_(app_cfg)
 					{
 						if(data_ptr!=NULL){//Resend message
 							
+							log("receive...1\n");
 							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-							//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+							xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+							log("receive...2\n");
 							//log("receive data : %d", ptr->data.XG_Time.Second);
-							xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);
+							//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);
 							
 							//flashc_memset8((void*)0x80038000, 0x02, 5, TRUE);
 							
 							set_message_store(data_ptr);
-							log("receive okay!\n");
+							log("receive okay and save!\n");
 							
 						}
 						
 					}
-					//Current_total_message_count = xgflash_get_message_count();
-					//if(Current_total_message_count!=0)//有缓存，需重发
-					//{
-					//log("Current_total_message_count: %d\n", Current_total_message_count);
-					//}
+					Current_total_message_count = xgflash_get_message_count();
+					if(Current_total_message_count!=0)//有缓存，需重发
+					{
+						log("Current_total_message_count: %d\n", Current_total_message_count);
+						xgflash_get_message_data(Current_total_message_count, storage_buff, TRUE);//read out from flash and erase info
+						xcmp_data_session_req(storage_buff, sizeof(Message_Protocol_t), DEST);//send buff-message to DEST
+						memset(storage_buff, 0x00, sizeof(storage_buff));//reset buff
+					}
 					//rfid_sendID_message();
 					//if(rfid_auto_reader(card_id) == 0){
 					//log("card_id : %x, %x, %x, %x\n", card_id[0], card_id[1], card_id[2], card_id[3]);

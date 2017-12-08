@@ -39,7 +39,7 @@ int main (void)
 	log_init();
 	log("----start debug----");
 	
-	xg_flashc_init();
+	//xg_flashc_init();
 		
 	//voc_init();
 

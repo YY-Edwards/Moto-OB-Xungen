@@ -145,11 +145,14 @@ void data_flash_init(void)
 		return;
 	}
 
+	//W25Q64_SPI_SetSpeedHi();
+	//W25Q64不需要此操作
 	// Set STATUS reg to unprotect all sect
 	//send_flash_command(WRITE_ENABLE, 0, NULL, 0);
 	//send_flash_command(WRITE_STATUS_REG_BYTE_1, 0, NULL, 0);
+	//send_flash_command(WRITE_STATUS_REG_BYTE_2, 0, NULL, 0);
 	//status = send_flash_command(READ_STATUS_REG, 0, NULL, 0);
-	
+	//
 	return;
 }
 
@@ -266,10 +269,21 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 
 	U16 data_u16;
 
+    //log("0-0-1\n");
 	spi_selectChip(spi, DF_SPI_PCS_1);
+	//log("0-0-1-2\n");
 
     switch (command)
 	{
+		//读取flash的状态寄存器
+		//bit15 14   13   12    11  10  9    8      7     6    5   4   3    2    1    0
+		//  SUS CMP  LB3  LB2  LB1  R   QE  SRP1   SRP0  SEC  TB  BP2  BP1  BP0  WEL  BUSY
+		//SRP00,SRP1: 默认0，状态寄存器保护位，配合WP使用
+		//SEC,TB,BP2，BP1，BP0：FLASH区域写保护
+		//WEL:写使能锁定
+		//busy：忙标志位（1，忙；0，闲）
+		//SUS: 
+		//默认:0x00
 		case READ_STATUS_REG:
 			spi_write_byte(command);
 			spi_write_dummy();
@@ -325,7 +339,8 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 	}
 
 	spi_unselectChip(spi, DF_SPI_PCS_1);
-
+	//log("receive...0-0-1-3\n");
+	
 	return status;
 }
 
@@ -817,6 +832,7 @@ df_status_t data_flash_write(U8 *data_ptr, U32 address, U16 data_length)
 	if(data_length <= secremain)secremain = data_length;//不大于4096个字节
 	while(1)
 	{
+		//log("receive...1-1-1\n");
 		data_flash_read_block(secpos*4096, 4096, FLASH_BUF);//读出整个扇区的内容
 		for(i=0; i<secremain; i++)//校验数据
 		{
@@ -824,16 +840,19 @@ df_status_t data_flash_write(U8 *data_ptr, U32 address, U16 data_length)
 		}
 		if(i < secremain)//需要擦除
 		{
+			//log("receive...1-1-2\n");
 			return_code = data_flash_erase_block(secpos*4096, DF_BLOCK_4KB);//擦除这个扇区
 			for(i=0; i<secremain; i++)	   //复制
 			{
 				FLASH_BUF[i+secoff]=data_ptr[i];
 			}
+			//log("receive...1-1-3\n");
 			return_code = data_flash_write_block(FLASH_BUF, secpos*4096, 4096);//写入整个扇区
 
 		}
 		else 
 		{
+			//log("receive...1-1-4\n");
 			return_code = data_flash_write_block(data_ptr, address, secremain);//写已经擦除了的,直接写入扇区剩余区间.
 		}
 		if(data_length==secremain)break;//写入结束了
@@ -972,6 +991,7 @@ df_status_t data_flash_write_page(U8 *data_ptr, U32 address, U16 length)
 		return DF_INVALID_PARAM;
 	}
 
+	log("receive...0-0-2\n");
 	while(status = send_flash_command(READ_STATUS_REG, 0, NULL, 0) == STATUS_BUSY);
 	//if ((status & STATUS_BUSY) != 0)
 	//{
@@ -1050,6 +1070,7 @@ df_status_t data_flash_read_block(U32 address, U16 length, U8 *data_ptr)
 	}
 
 	send_flash_command(READ_ARRAY, address, data_ptr, length);
+	log("0-0-1-3\n");
 
 	return DF_OK;
 }
