@@ -7089,7 +7089,7 @@ void runXGFlashTestREAD( void *pvParameters )
 	Bool firstTest = TRUE;
 	static  portTickType xLastWakeTime;
 	static xgflash_status_t status = XG_ERROR;
-	const portTickType xFrequency = 22000;//2s,定时问题已经修正。1.5s x  2000hz = 3000
+	const portTickType xFrequency = 20000;//2s,定时问题已经修正。1.5s x  2000hz = 3000
 	Message_Protocol_t *data_ptr = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
 800045d2:	32 0c       	mov	r12,32
 800045d4:	f0 1f 00 31 	mcall	80004698 <runXGFlashTestREAD+0xc8>
@@ -7113,7 +7113,7 @@ void runXGFlashTestREAD( void *pvParameters )
 	while(1)
 	{
 		vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
-800045f0:	e0 6b 55 f0 	mov	r11,22000
+800045f0:	e0 6b 4e 20 	mov	r11,20000
 800045f4:	10 9c       	mov	r12,r8
 800045f6:	f0 1f 00 2d 	mcall	800046a8 <runXGFlashTestREAD+0xd8>
 		if(data_ptr == NULL)break;
@@ -7140,7 +7140,7 @@ void runXGFlashTestREAD( void *pvParameters )
 	{
 		vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 8000460c:	4a 66       	lddpc	r6,800046a4 <runXGFlashTestREAD+0xd4>
-8000460e:	e0 65 55 f0 	mov	r5,22000
+8000460e:	e0 65 4e 20 	mov	r5,20000
 		if(data_ptr == NULL)break;
 		message_count = xgflash_get_message_count();
 		if(message_count != 0)

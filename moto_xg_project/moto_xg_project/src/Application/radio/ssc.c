@@ -30,7 +30,7 @@ Defines the interface function (callback function) is used to send/receive SSC
 data*/
 volatile void (*phy_rx_exec)(void *) = NULL;
 volatile void (*phy_tx_exec)(void *) = NULL;
-extern volatile  xSemaphoreHandle xBinarySemaphore;
+//extern volatile  xSemaphoreHandle xBinarySemaphore;
 
 
 /**
@@ -45,8 +45,8 @@ __attribute__((__interrupt__))
 static void pdca_int_handler(void)
 {
     
-	static portBASE_TYPE xHigherPriorityTaskWoken;
-	xHigherPriorityTaskWoken = pdFALSE;
+	//static portBASE_TYPE xHigherPriorityTaskWoken;
+	//xHigherPriorityTaskWoken = pdFALSE;
 	
 	static U32 count=0;
 	//intStartCount = Get_system_register(AVR32_COUNT);

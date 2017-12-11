@@ -14,6 +14,7 @@
 #include "xcmp.h"
 #include "log.h"
 #include "xgrtc.h"
+#include "xgflash.h"
 
 
 
@@ -52,6 +53,7 @@ typedef struct
 
 void rfid_init();
 U8 rfid_sendID_message();
+U8 scan_rfid_save_message();
 U8 rfid_auto_reader(void *card_id);
 U8 scan_patrol(char* SN);
 

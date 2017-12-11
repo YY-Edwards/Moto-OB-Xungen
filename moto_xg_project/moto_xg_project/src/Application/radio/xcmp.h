@@ -1359,6 +1359,42 @@ typedef struct
 	
 }CallControl_brdcst_t;
 
+
+
+
+/*
+
+Battery Level----------------------------
+
+This message is used by a device to report its current battery level in three different
+formats: battery state, battery charge (if known) and battery voltage (if known). This
+message is broadcast any time that battery state changes, or any time that battery
+charge and/or battery voltage changes by a significant amount
+
+
+*/
+//command-broadcast
+#define BATLVL  0x410
+
+//battery state
+#define Battery_Okay  0x00
+#define Battery_Low   0x01
+
+//battery charge
+
+//battery voltage
+
+
+typedef struct
+{
+	unsigned char  State;
+	unsigned char  Charge;
+	unsigned short Voltage;
+	
+}BatteryLevel_brdcast_t;
+
+
+
 /*
 
 Transmit Control ----------------------------

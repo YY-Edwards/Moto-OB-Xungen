@@ -28,6 +28,7 @@ volatile U8 Mic_is_Enabled = 0;
 volatile U8 Call_Begin = 0;
 
 volatile U8 VF_SN = 0;
+volatile U8 Battery_Flag = Battery_Okay;
 
 /* Declare a variable that will be incremented by the hook function. */
 unsigned long ulIdleCycleCount = 0UL;
@@ -455,6 +456,23 @@ void DataSession_reply_func(xcmp_fragment_t * xcmp)
 	
 }
 
+void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
+{
+	/*point to xcmp payload*/
+	BatteryLevel_brdcast_t *ptr = (BatteryLevel_brdcast_t* )(xcmp->u8);
+	if(ptr->State == Battery_Okay)
+		log("\n Battery Okay\n");
+	else
+		log("\n Battery Low !!!\n");
+		
+	log("\n Battery charge: %X \n" , ptr->Charge);
+	log("\n Battery voltage: %X \n" , ptr->Voltage);
+	
+	Battery_Flag = ptr->State;
+
+}
+
+extern volatile xSemaphoreHandle SendM_CountingSemaphore;
 void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 Session_number = 0;
@@ -519,6 +537,17 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			}
 			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
+		
+		if((ptr->State == DATA_SESSION_TX_Fail) || (ptr->State == DATA_SESSION_TX_Suc))
+		{		
+			if( xSemaphoreGive( SendM_CountingSemaphore ) != pdTRUE )
+			{
+				log("xSemaphoreGive: err\n\r" );
+			}
+		}
+		
+			
+			
 		//log("Session_ID: %x \n\r",Session_number );
 		//log("paylaod_length: %d \n\r",data_length );
 		//for(i=0; i<data_length; i++)
@@ -575,9 +604,10 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 		//log("send message\n");
 		xcmp_IdleTestTone(Tone_Start, ACK_Received_Tone);//set tone to indicate the scan!!!
 			
-		vTaskDelay(400*2 / portTICK_RATE_MS);//延迟400ms
+		vTaskDelay(200*2 / portTICK_RATE_MS);//延迟200ms
 		//delay_ms(200);
-		rfid_sendID_message();//send message		
+		//rfid_sendID_message();//send message		
+		scan_rfid_save_message();
 	}
 	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
 	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);
@@ -742,7 +772,7 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
     {NULL, NULL, NULL},// 0x40D -- Channel Zone Selection
     {NULL, mic_reply_func, mic_brdcst_func},// 0x40E -- Microphone Control
     {NULL, NULL, NULL},// 0x40F -- Scan Control
-    {NULL, NULL, NULL},// 0x410 -- Battery Level
+    {NULL, NULL, BatteryLevel_brdcst_func},// 0x410 -- Battery Level
     {NULL, NULL, NULL},// 0x411 -- Brightness
     {NULL, ButtonConfig_reply_func, ButtonConfig_brdcst_func},// 0x412 -- Button Configuration
     {NULL, NULL, NULL},// 0x413 -- Emergency Control
@@ -879,16 +909,17 @@ extern volatile  xTaskHandle save_handle;
 static __app_Thread_(app_cfg)
 {
 	static int coun=0;
-	//static U32 isAudioRouting = 0;
-	//static U16 Current_total_message_count =0;
+
+	static U16 message_count =0;
+	U8 destination = DEST;
 	static  portTickType xLastWakeTime;
-	//static  portTickType water_value;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
 	char card_id[4]={0};
 	U16  * data_ptr;
-	//static const uint8_t test_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+	Message_Protocol_t *m_buff = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
+	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
 		
 	for(;;)
@@ -934,14 +965,12 @@ static __app_Thread_(app_cfg)
 			
 					if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
 					{
-						if(data_ptr!=NULL){//Resend message
+						if(data_ptr!=NULL){//save message
 							
 							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-							//xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+							xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
 							//log("receive data : %d", ptr->data.XG_Time.Second);
-							xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);
-							
-							//flashc_memset8((void*)0x80038000, 0x02, 5, TRUE);
+							//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);		
 							
 							set_message_store(data_ptr);
 							log("receive okay!\n");
@@ -949,6 +978,32 @@ static __app_Thread_(app_cfg)
 						}
 						
 					}
+										
+					message_count = xgflash_get_message_count();
+					if( (message_count!=0) && (Battery_Flag == Battery_Okay) )//有缓存且电量充足，需发送短信
+					{
+						log("Current_total_message_count: %d\n", message_count);
+						if(xSemaphoreTake(SendM_CountingSemaphore, (1000*2) / portTICK_RATE_MS) == pdTRUE)
+						{
+							log("xSemaphoreTake okay!\n");
+							if(m_buff==NULL)break;
+							status = xgflash_get_message_data(message_count, m_buff, TRUE);
+							if(status == XG_OK)
+							{
+								xcmp_data_session_req(m_buff, (sizeof(Message_Protocol_t)), destination);//send message
+							}
+							else
+							{
+								log("get message err : %d\n", status);
+							}
+									
+						}								
+					}
+					else if (Battery_Flag == Battery_Low)
+					{
+						log("The device battery level is low !\n");
+					}		
+											
 					//Current_total_message_count = xgflash_get_message_count();
 					//if(Current_total_message_count!=0)//有缓存，需重发
 					//{
@@ -964,9 +1019,6 @@ static __app_Thread_(app_cfg)
 					//log("no find card...\n");
 					//}
 					nop();
-					//log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
-					//Current_time.Year, Current_time.Month, Current_time.Day,
-					//Current_time.Hour, Current_time.Minute, Current_time.Second);
 					log("app task run!\n");
 				
 			break;

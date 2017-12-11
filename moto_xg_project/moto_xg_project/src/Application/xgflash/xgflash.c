@@ -25,8 +25,8 @@ static volatile xSemaphoreHandle xgflash_mutex = NULL;
 void runXGFlashTestSAVE( void *pvParameters );
 void runXGFlashTestREAD( void *pvParameters );
 volatile  xTaskHandle save_handle;  
-volatile  xSemaphoreHandle xBinarySemaphore;
-
+//volatile  xSemaphoreHandle xBinarySemaphore;
+volatile xSemaphoreHandle SendM_CountingSemaphore = NULL;
 
 /*! \brief This is an example demonstrating flash read / write data accesses
  *         using the FLASHC driver.
@@ -381,7 +381,7 @@ void runXGFlashTestREAD( void *pvParameters )
 	Bool firstTest = TRUE;
 	static  portTickType xLastWakeTime;
 	static xgflash_status_t status = XG_ERROR;
-	const portTickType xFrequency = 22000;//2s,定时问题已经修正。1.5s x  2000hz = 3000
+	const portTickType xFrequency = 20000;//2s,定时问题已经修正。1.5s x  2000hz = 3000
 	Message_Protocol_t *data_ptr = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
 	static U16 message_count = 0;
 	U8 return_err =0;
@@ -460,8 +460,18 @@ void xg_flashc_init(void)
 	}
 	
 	/* Create the binary semaphore to Synchronize other threads.*/
-	vSemaphoreCreateBinary(xBinarySemaphore);
-	
+	//vSemaphoreCreateBinary(xBinarySemaphore);
+	/* Create the SendM_Counting semaphore to Synchronize the event of resend-message.*/
+	SendM_CountingSemaphore = xSemaphoreCreateCounting(300, 1);
+	//计数最大值为300
+	//初始值为1(当flash信息数量为0时：用户扫点 -> flash-save -> flash-count+1 -> take Sem -> send -> wait for give-Sem(success/fail))
+	//如果此时反馈成功，则继续查询count值是否等于0/等待用户扫点
+	//如果此时反馈失败，则flash-save
+	//当flash信息数量！=0时；等待查询count值
+	if (SendM_CountingSemaphore == NULL)
+	{
+		log("Create the SendM_Counting semaphore failure\n");
+	}
 	
 	xg_resend_queue = xQueueCreate(20, sizeof(U32));
 	/*initialize the queue*/
@@ -476,7 +486,7 @@ void xg_flashc_init(void)
 	
 	//flashc_lock_all_regions(false);
 	xgflash_list_info_init();
-	create_xg_flash_test_task();
+	//create_xg_flash_test_task();
 
 }
 
