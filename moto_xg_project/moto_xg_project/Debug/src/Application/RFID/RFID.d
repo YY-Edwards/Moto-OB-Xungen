@@ -87,7 +87,6 @@ src/Application/RFID/RFID.d src/Application/RFID/RFID.o \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/Log/log.h ../src/Application/myrtc/xgrtc.h \
  ../src/ASF/avr32/drivers/rtc/rtc.h ../src/Application/xgflash/xgflash.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/Application/RFID/RFID.h
 
 ../src/Application/RFID/RFID.h:
@@ -279,7 +278,5 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/avr32/drivers/rtc/rtc.h:
 
 ../src/Application/xgflash/xgflash.h:
-
-../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/Application/RFID/RFID.h:

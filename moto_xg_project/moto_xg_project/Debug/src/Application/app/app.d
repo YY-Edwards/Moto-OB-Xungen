@@ -87,11 +87,9 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/Application/radio/xnl.h ../src/config/../Log/log.h \
  ../src/ASF/avr32/drivers/usart/usart.h ../src/Log/log.h \
  ../src/Application/myrtc/xgrtc.h ../src/ASF/avr32/drivers/rtc/rtc.h \
- ../src/Application/xgflash/xgflash.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
- ../src/Application/radio/xnl.h ../src/Application/radio/payload.h \
- ../src/ASF/avr32/drivers/rtc/rtc.h ../src/Application/radio/physical.h \
- ../src/Application/radio/payload.h
+ ../src/Application/xgflash/xgflash.h ../src/Application/radio/xnl.h \
+ ../src/Application/radio/payload.h ../src/ASF/avr32/drivers/rtc/rtc.h \
+ ../src/Application/radio/physical.h ../src/Application/radio/payload.h
 
 ../src/Application/app/app.h:
 
@@ -284,8 +282,6 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/avr32/drivers/rtc/rtc.h:
 
 ../src/Application/xgflash/xgflash.h:
-
-../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/Application/radio/xnl.h:
 

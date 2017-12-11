@@ -10,8 +10,6 @@
 #define XGFLASH_H_
 #include "FreeRTOS.h"
 #include "semphr.h"
-#include <ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h>
-
 #include "task.h"
 #include "compiler.h"
 #include "data_flash.h"
