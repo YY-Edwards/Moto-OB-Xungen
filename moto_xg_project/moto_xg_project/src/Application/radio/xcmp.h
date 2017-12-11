@@ -826,6 +826,26 @@ typedef struct
 
 /*
 
+ Shut Down
+ 
+The request message type is used by one device to request a second device to shut down (or reset).
+This reply message type is used by the second device to acknowledge whether the
+request is accepted or denied. The second device should continue to process other
+messages normally (or as best it can) up to the time it sends the shutdown broadcast.
+The broadcast message type is used by the second device to indicate it is acting on the
+request. This message must be sent when the device is actually about to shutdown.
+
+*/
+
+
+//Function
+#define Shut_Down_Device 0x01
+#define Reset_Device     0x02
+
+
+
+/*
+
  Button Configuration
 This message is used to report the characteristic or to change the logical functionality of
 the radio¡¯s programmable buttons. Changing the logical function of a button is known as

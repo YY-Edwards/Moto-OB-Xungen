@@ -51,7 +51,7 @@ int main (void)
 	
 	xg_rtc_init();
 		
-	//xcmp_init();
+	xcmp_init();
 
 	local_start_timer();
 		

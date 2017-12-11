@@ -288,9 +288,9 @@ void Volume_brdcst_func(xcmp_fragment_t * xcmp)
 	/*point to xcmp payload*/
 	VolumeControl_brdcst_t *ptr = (VolumeControl_brdcst_t* )xcmp->u8;
 	
-	//log("\n\r Attenuator_Number: %x \n\r",  ((ptr->Attenuator_Number[0]<<8) | (ptr->Attenuator_Number[1])) );
+	//log("Attenuator_Number: %x \n",  ((ptr->Attenuator_Number[0]<<8) | (ptr->Attenuator_Number[1])) );
 	
-	//log("\n\r Audio_Parameter: %x \n\r", ptr->Audio_Parameter);
+	//log("Audio_Parameter: %x \n", ptr->Audio_Parameter);
 	
 	
 }
@@ -457,6 +457,21 @@ void DataSession_reply_func(xcmp_fragment_t * xcmp)
 	}
 	
 }
+void ShutDown_brdcst_func(xcmp_fragment_t * xcmp)
+{
+	if (xcmp->u8[0] == Shut_Down_Device)
+	{
+		log("Shut_Down_Device \n");
+		
+	}
+	else if(xcmp->u8[0] == Reset_Device)
+	{
+		log("Reset_Device \n");
+	}
+	
+	
+}
+
 
 void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 {
@@ -767,7 +782,7 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
     {NULL, spk_reply_func, spk_brdcst_func},// 0x407 -- Speaker Control
     {NULL, NULL, NULL},// 0x408 -- Transmit Power Level
     {NULL, ToneControl_reply_func, NULL},// 0x409 -- Tone Control
-    {NULL, NULL, NULL},// 0x40A -- Shut Down
+    {NULL, NULL, ShutDown_brdcst_func},// 0x40A -- Shut Down
     {NULL, NULL, NULL},// 0x40B --
     {NULL, NULL, NULL},// 0x40C -- Monitor Control
     {NULL, NULL, NULL},// 0x40D -- Channel Zone Selection
