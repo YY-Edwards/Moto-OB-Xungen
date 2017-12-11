@@ -893,7 +893,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  384//1024//800//384
+	,  800//1024//800//384
 	,  NULL
 	,  1
 	,  NULL );

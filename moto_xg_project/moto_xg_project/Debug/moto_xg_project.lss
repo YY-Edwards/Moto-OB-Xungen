@@ -157,14 +157,14 @@ void app_init(void)
 80002050:	1a d9       	st.w	--sp,r9
 80002052:	1a d9       	st.w	--sp,r9
 80002054:	30 18       	mov	r8,1
-80002056:	e0 6a 01 80 	mov	r10,384
+80002056:	e0 6a 03 20 	mov	r10,800
 8000205a:	48 ab       	lddpc	r11,80002080 <app_init+0x44>
 8000205c:	48 ac       	lddpc	r12,80002084 <app_init+0x48>
 8000205e:	f0 1f 00 0b 	mcall	80002088 <app_init+0x4c>
 80002062:	48 b8       	lddpc	r8,8000208c <app_init+0x50>
 80002064:	91 0c       	st.w	r8[0x0],r12
 80002066:	2f dd       	sub	sp,-12
-	,  384//1024//800//384
+	,  800//1024//800//384
 	,  NULL
 	,  1
 	,  NULL );
