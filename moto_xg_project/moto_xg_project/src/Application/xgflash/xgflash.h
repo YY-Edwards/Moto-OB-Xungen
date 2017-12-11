@@ -8,8 +8,10 @@
 
 #ifndef XGFLASH_H_
 #define XGFLASH_H_
-
 #include "FreeRTOS.h"
+#include "semphr.h"
+#include <ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h>
+
 #include "task.h"
 #include "compiler.h"
 #include "data_flash.h"
@@ -60,10 +62,12 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 
 #define MAX_MESSAGE_STORE 20
 
-volatile Message_Protocol_t message_store[MAX_MESSAGE_STORE];
+//volatile Message_Protocol_t message_store[MAX_MESSAGE_STORE];
 
+extern volatile xQueueHandle message_storage_queue ;
 extern void * get_idle_store(xQueueHandle store);
 extern void set_idle_store(xQueueHandle store, void * ptr);
+
 
 #define get_message_store()			get_idle_store(message_storage_queue)
 #define set_message_store(ptr)		set_idle_store(message_storage_queue, ptr)

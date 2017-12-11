@@ -6,8 +6,7 @@
  */ 
 
 #include "xgflash.h"
-#include "FreeRTOS.h"
-#include "semphr.h"
+
 
 /*the queue is used to storage failure-send message*/
 volatile xQueueHandle message_storage_queue = NULL;
@@ -27,6 +26,7 @@ void runXGFlashTestREAD( void *pvParameters );
 volatile  xTaskHandle save_handle;  
 //volatile  xSemaphoreHandle xBinarySemaphore;
 volatile xSemaphoreHandle SendM_CountingSemaphore = NULL;
+volatile Message_Protocol_t message_store[MAX_MESSAGE_STORE];
 
 /*! \brief This is an example demonstrating flash read / write data accesses
  *         using the FLASHC driver.
@@ -107,6 +107,7 @@ start:
 				//Calculates the offset address of the current stored message
 				if(current_message_index != 0){
 					
+					log("current_message_index: %d\n", current_message_index);
 					memset(str, 0x00, sizeof(str));	
 					address = XG_MESSAGE_INFO_HEADER_START_ADD + ((current_message_index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
 					return_code = data_flash_read_block(address, XG_MESSAGE_INFO_HEADER_LENGTH, (U8 *)str);			
@@ -462,12 +463,12 @@ void xg_flashc_init(void)
 	/* Create the binary semaphore to Synchronize other threads.*/
 	//vSemaphoreCreateBinary(xBinarySemaphore);
 	/* Create the SendM_Counting semaphore to Synchronize the event of resend-message.*/
-	SendM_CountingSemaphore = xSemaphoreCreateCounting(300, 1);
 	//计数最大值为300
 	//初始值为1(当flash信息数量为0时：用户扫点 -> flash-save -> flash-count+1 -> take Sem -> send -> wait for give-Sem(success/fail))
 	//如果此时反馈成功，则继续查询count值是否等于0/等待用户扫点
 	//如果此时反馈失败，则flash-save
 	//当flash信息数量！=0时；等待查询count值
+	SendM_CountingSemaphore = xSemaphoreCreateCounting(300, 1);
 	if (SendM_CountingSemaphore == NULL)
 	{
 		log("Create the SendM_Counting semaphore failure\n");
@@ -486,7 +487,22 @@ void xg_flashc_init(void)
 	
 	//flashc_lock_all_regions(false);
 	xgflash_list_info_init();
+	
+	
 	//create_xg_flash_test_task();
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

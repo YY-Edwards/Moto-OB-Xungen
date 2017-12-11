@@ -10,6 +10,12 @@ U8 CT[2];				//卡类型
 U8 SN[4];				//卡号
 U8 RFID[16];			//存放RFID
 U8 unsure_data[5]={0x04, 0x0d, 0x00, 0x0a, 0x00};
+	
+/*the queue is used to storage failure-send message*/
+extern volatile xQueueHandle message_storage_queue ;
+
+/*the queue is used to receive failure-send message*/
+extern volatile xQueueHandle xg_resend_queue ;
 
 
 void rfid_init()
@@ -74,6 +80,8 @@ U8 rfid_auto_reader(void *card_id)
 }
 
 extern volatile DateTime_t Current_time;
+/*the queue is used to receive failure-send message*/
+
 U8 scan_rfid_save_message()
 {
 	static char SN[10];

@@ -63,6 +63,8 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/task.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/list.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
@@ -80,17 +82,16 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/ASF/avr32/drivers/pm/pm.h \
  ../src/ASF/avr32/drivers/flashc/flashc.h ../src/Application/RFID/RFID.h \
  ../src/Application/RFID/MFRC522/rc522.h \
- ../src/ASF/avr32/drivers/spi/spi.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
- ../src/ASF/avr32/drivers/gpio/gpio.h \
+ ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/gpio/gpio.h \
  ../src/Application/flash/data_flash.h ../src/Application/radio/xcmp.h \
  ../src/Application/radio/xnl.h ../src/config/../Log/log.h \
  ../src/ASF/avr32/drivers/usart/usart.h ../src/Log/log.h \
  ../src/Application/myrtc/xgrtc.h ../src/ASF/avr32/drivers/rtc/rtc.h \
- ../src/Application/xgflash/xgflash.h ../src/Application/radio/xnl.h \
- ../src/Application/radio/payload.h ../src/ASF/avr32/drivers/rtc/rtc.h \
- ../src/Application/radio/physical.h ../src/Application/radio/payload.h
+ ../src/Application/xgflash/xgflash.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
+ ../src/Application/radio/xnl.h ../src/Application/radio/payload.h \
+ ../src/ASF/avr32/drivers/rtc/rtc.h ../src/Application/radio/physical.h \
+ ../src/Application/radio/payload.h
 
 ../src/Application/app/app.h:
 
@@ -220,6 +221,10 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h:
 
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
+
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/task.h:
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/list.h:
@@ -260,10 +265,6 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/ASF/avr32/drivers/spi/spi.h:
 
-../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
-
-../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
-
 ../src/ASF/avr32/drivers/gpio/gpio.h:
 
 ../src/Application/flash/data_flash.h:
@@ -283,6 +284,8 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/avr32/drivers/rtc/rtc.h:
 
 ../src/Application/xgflash/xgflash.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/Application/radio/xnl.h:
 

@@ -48,6 +48,8 @@ extern volatile xQueueHandle message_storage_queue ;
 /*the queue is used to receive failure-send message*/
 extern volatile xQueueHandle xg_resend_queue ;
 
+extern volatile xSemaphoreHandle SendM_CountingSemaphore;
+
 //app func--list
 
 void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
@@ -472,7 +474,6 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 
 }
 
-extern volatile xSemaphoreHandle SendM_CountingSemaphore;
 void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 Session_number = 0;

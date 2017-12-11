@@ -82,6 +82,7 @@ src/main.d src/main.o src/main.o: ../src/main.c \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/Application/xgflash/xgflash.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/Application/flash/data_flash.h ../src/ASF/avr32/drivers/spi/spi.h \
  ../src/config/../Log/log.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
@@ -264,6 +265,8 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/Application/xgflash/xgflash.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/Application/flash/data_flash.h:
 

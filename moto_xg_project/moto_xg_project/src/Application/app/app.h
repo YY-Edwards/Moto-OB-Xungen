@@ -10,6 +10,7 @@
 #define APP_H_
 
 #include "FreeRTOS.h"
+#include "semphr.h"
 #include "task.h"
 #include "string.h"
 #include "queue.h"
