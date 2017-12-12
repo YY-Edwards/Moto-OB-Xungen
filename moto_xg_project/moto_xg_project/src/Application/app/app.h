@@ -13,8 +13,8 @@
 #include "task.h"
 #include "queue.h"
 #include "timer.h"
-#include "RFID.h"
-//#include "voice.h"
+//#include "RFID.h"
+#include "voice.h"
 
 #include <xnl.h>
 

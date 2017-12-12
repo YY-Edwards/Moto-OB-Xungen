@@ -550,7 +550,7 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 			
 		vTaskDelay(400*2 / portTICK_RATE_MS);//ясЁы400ms
 		//delay_ms(200);
-		rfid_sendID_message();//send message		
+		//rfid_sendID_message();//send message		
 	}
 	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
 	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);

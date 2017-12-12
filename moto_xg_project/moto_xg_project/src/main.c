@@ -38,11 +38,11 @@ int main (void)
 	log_init();
 	log("----start debug----");
 		
-	//voc_init();
+	voc_init();
 
 	//tc_init();
 	
-	rfid_init();
+	//rfid_init();
 		
 	app_init();
 		
