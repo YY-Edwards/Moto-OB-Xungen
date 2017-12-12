@@ -531,15 +531,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
-			//Message_Protocol_t  *xgmessage = (Message_Protocol_t  *)ptr->DataPayload.DataPayload;
 			Message_Protocol_t  xgmessage;
 			memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
-			//log("data transmit failure\n");
-			//log("xgmessage.XG_Time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
-			//xgmessage.data.XG_Time.Year, xgmessage.data.XG_Time.Month, xgmessage.data.XG_Time.Day,
-			//xgmessage.data.XG_Time.Hour, xgmessage.data.XG_Time.Minute, xgmessage.data.XG_Time.Second);
-
-			//return_value = xgflash_message_save(&xgmessage, sizeof(Message_Protocol_t), TRUE);
 
 			Message_Protocol_t * myptr = get_message_store();	
 			if(NULL != myptr)
@@ -553,16 +546,6 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			}
 			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
-		
-		if((ptr->State == DATA_SESSION_TX_Fail) || (ptr->State == DATA_SESSION_TX_Suc))
-		{		
-			if( xSemaphoreGive( SendM_CountingSemaphore ) != pdTRUE )
-			{
-				log("xSemaphoreGive: err\n\r" );
-			}
-		}
-		
-			
 			
 		//log("Session_ID: %x \n\r",Session_number );
 		//log("paylaod_length: %d \n\r",data_length );
@@ -622,8 +605,7 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 			
 		vTaskDelay(200*2 / portTICK_RATE_MS);//延迟200ms
 		//delay_ms(200);
-		//rfid_sendID_message();//send message		
-		scan_rfid_save_message();
+		rfid_sendID_message();//send message		
 	}
 	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
 	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);
@@ -948,7 +930,7 @@ static __app_Thread_(app_cfg)
 				{
 					connect_flag=1;
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
-					OB_State = OB_CONNECTEDWAITTINGSYNTIME;
+					OB_State = OB_WAITINGAPPTASK;
 					log("connect OB okay!\n");
 				}
 				else
@@ -956,84 +938,27 @@ static __app_Thread_(app_cfg)
 					nop();
 					nop();
 					nop();
-					//xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
 					log("connecting...\n");
-					log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
-					Current_time.Year, Current_time.Month, Current_time.Day,
-					Current_time.Hour, Current_time.Minute, Current_time.Second);
+					//log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+					//Current_time.Year, Current_time.Month, Current_time.Day,
+					//Current_time.Hour, Current_time.Minute, Current_time.Second);
 				}
 								
-			break;
-			case OB_CONNECTEDWAITTINGSYNTIME:
-			
-						if(get_time_okay){
-							
-							OB_State = OB_WAITINGAPPTASK;
-							log("get time okay!\n");
-							//vTaskResume(save_handle);
-						}
-						else
-						{						
-							xcmp_data_session_req(0x00, sizeof(Message_Protocol_t), DEST);//request to get system time						
-						}
 			break;
 			case OB_WAITINGAPPTASK:
 			
 					if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
 					{
-						if(data_ptr!=NULL){//save message
+						if(data_ptr!=NULL){//resend message
 							
-							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-							xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
-							//log("receive data : %d", ptr->data.XG_Time.Second);
-							//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);		
-							
+							log("receive Okay!\n");						
+							xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
 							set_message_store(data_ptr);
-							log("receive okay!\n");
 							
 						}
 						
 					}
 										
-					message_count = xgflash_get_message_count();
-					if( (message_count!=0) && (Battery_Flag == Battery_Okay) )//有缓存且电量充足，需发送短信
-					{
-						log("Current_total_message_count: %d\n", message_count);
-						if(xSemaphoreTake(SendM_CountingSemaphore, (1000*2) / portTICK_RATE_MS) == pdTRUE)
-						{
-							log("xSemaphoreTake okay!\n");
-							if(m_buff==NULL)break;
-							status = xgflash_get_message_data(message_count, m_buff, TRUE);
-							if(status == XG_OK)
-							{
-								xcmp_data_session_req(m_buff, (sizeof(Message_Protocol_t)), destination);//send message
-							}
-							else
-							{
-								log("get message err : %d\n", status);
-							}
-									
-						}								
-					}
-					else if (Battery_Flag == Battery_Low)
-					{
-						log("The device battery level is low !\n");
-					}		
-											
-					//Current_total_message_count = xgflash_get_message_count();
-					//if(Current_total_message_count!=0)//有缓存，需重发
-					//{
-					//log("Current_total_message_count: %d\n", Current_total_message_count);
-					//}
-					//rfid_sendID_message();
-					//if(rfid_auto_reader(card_id) == 0){
-					//log("card_id : %x, %x, %x, %x\n", card_id[0], card_id[1], card_id[2], card_id[3]);
-					//memset(card_id,0x00,4);
-					//}
-					//else
-					//{
-					//log("no find card...\n");
-					//}
 					nop();
 					log("app task run!\n");
 				
@@ -1042,8 +967,6 @@ static __app_Thread_(app_cfg)
 			break;
 				
 		} //End of switch on OB_State.
-		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
-		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 }

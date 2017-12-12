@@ -49,7 +49,7 @@ int main (void)
 		
 	app_init();
 	
-	xg_rtc_init();
+	//xg_rtc_init();
 		
 	xcmp_init();
 

@@ -327,102 +327,102 @@ xgflash_status_t xgflash_erase_info_region(void)
 	return status;
 		
 }
-
-void runXGFlashTestSAVE( void *pvParameters )
-{
-	Bool firstTest = TRUE;
-	static  portTickType xLastWakeTime;
-	static xgflash_status_t status = XG_ERROR;
-	const portTickType xFrequency = 20000;//2s,定时问题已经修正。2s x  2000hz = 4000
-	Message_Protocol_t data_ptr;
-	static const uint8_t write_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
-	static  portTickType water_value;
-	
-	xLastWakeTime = xTaskGetTickCount();
-	while(1)
-	{
-		vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
-
-		//xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
-		
-		//xgflash_get_message_count();
-		//Disable_interrupt_level(1);
-		//taskENTER_CRITICAL();
-		//flashc_memcpy((void *)0x80061234, (void *)write_data, 7,  true);
-		//taskEXIT_CRITICAL();
-		//data_ptr.data.XG_Time.Second+=1;
-		//Enable_interrupt_level(1);
-		//if (flashc_is_lock_error() || flashc_is_programming_error())
+//
+//void runXGFlashTestSAVE( void *pvParameters )
+//{
+	//Bool firstTest = TRUE;
+	//static  portTickType xLastWakeTime;
+	//static xgflash_status_t status = XG_ERROR;
+	//const portTickType xFrequency = 20000;//2s,定时问题已经修正。2s x  2000hz = 4000
+	//Message_Protocol_t data_ptr;
+	//static const uint8_t write_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+	//static  portTickType water_value;
+	//
+	//xLastWakeTime = xTaskGetTickCount();
+	//while(1)
+	//{
+		//vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+//
+		////xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
+		//
+		////xgflash_get_message_count();
+		////Disable_interrupt_level(1);
+		////taskENTER_CRITICAL();
+		////flashc_memcpy((void *)0x80061234, (void *)write_data, 7,  true);
+		////taskEXIT_CRITICAL();
+		////data_ptr.data.XG_Time.Second+=1;
+		////Enable_interrupt_level(1);
+		////if (flashc_is_lock_error() || flashc_is_programming_error())
+		////{
+		////log("XG flashc_memcpy err...\n");
+		////}
+		////else
+		//nop();
+		//nop();
+		//nop();
+		////water_value = uxTaskGetStackHighWaterMark(NULL);
+		////log("water_value: %d\n", water_value);
+		////log("XG save okay!\n");
+		//memset(&data_ptr.data.XG_Time.Minute, 0x01, 1);
+		//status = xgflash_message_save(&data_ptr, sizeof(Message_Protocol_t), TRUE);
+		//if(status == XG_OK)
 		//{
-		//log("XG flashc_memcpy err...\n");
+			//log("XG save okay!\n");
+			//data_ptr.data.XG_Time.Second+=1;
 		//}
 		//else
-		nop();
-		nop();
-		nop();
-		//water_value = uxTaskGetStackHighWaterMark(NULL);
-		//log("water_value: %d\n", water_value);
-		//log("XG save okay!\n");
-		memset(&data_ptr.data.XG_Time.Minute, 0x01, 1);
-		status = xgflash_message_save(&data_ptr, sizeof(Message_Protocol_t), TRUE);
-		if(status == XG_OK)
-		{
-			log("XG save okay!\n");
-			data_ptr.data.XG_Time.Second+=1;
-		}
-		else
-		{
-			log("save message err : %d\n", status);
-		}
-	}
-	
-}
-void runXGFlashTestREAD( void *pvParameters )
-{
-	Bool firstTest = TRUE;
-	static  portTickType xLastWakeTime;
-	static xgflash_status_t status = XG_ERROR;
-	const portTickType xFrequency = 20000;//2s,定时问题已经修正。1.5s x  2000hz = 3000
-	Message_Protocol_t *data_ptr = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
-	static U16 message_count = 0;
-	U8 return_err =0;
-	static char SN[10];
-	memset(SN, 0x00, 10);
-	
-	xLastWakeTime = xTaskGetTickCount();
-	
-	while(1)
-	{
-		vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
-		if(data_ptr == NULL)break;
-		message_count = xgflash_get_message_count();
-		if(message_count != 0)
-		{
-			log("message_count : %d\n", message_count);
-			status = xgflash_get_message_data(message_count, data_ptr, true);
-			if(status == XG_OK)
-			{
-				log("read out data : %d\n", data_ptr->data.XG_Time.Second);
-				
-				return_err = scan_patrol(SN);
-				if(return_err == 0){
-					
-					log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
-				}
-			}
-			else
-			{
-				log("get message err : %d\n", status);
-			}
-		}
-		else
-		continue;
-		
-	}
-	vPortFree(data_ptr);
-	log("data_ptr == NULL,exit runXGFlashTestREAD\n");
-	
-}
+		//{
+			//log("save message err : %d\n", status);
+		//}
+	//}
+	//
+//}
+//void runXGFlashTestREAD( void *pvParameters )
+//{
+	//Bool firstTest = TRUE;
+	//static  portTickType xLastWakeTime;
+	//static xgflash_status_t status = XG_ERROR;
+	//const portTickType xFrequency = 20000;//2s,定时问题已经修正。1.5s x  2000hz = 3000
+	//Message_Protocol_t *data_ptr = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
+	//static U16 message_count = 0;
+	//U8 return_err =0;
+	//static char SN[10];
+	//memset(SN, 0x00, 10);
+	//
+	//xLastWakeTime = xTaskGetTickCount();
+	//
+	//while(1)
+	//{
+		//vTaskDelayUntil( &xLastWakeTime, xFrequency / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		//if(data_ptr == NULL)break;
+		//message_count = xgflash_get_message_count();
+		//if(message_count != 0)
+		//{
+			//log("message_count : %d\n", message_count);
+			//status = xgflash_get_message_data(message_count, data_ptr, true);
+			//if(status == XG_OK)
+			//{
+				//log("read out data : %d\n", data_ptr->data.XG_Time.Second);
+				//
+				//return_err = scan_patrol(SN);
+				//if(return_err == 0){
+					//
+					//log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
+				//}
+			//}
+			//else
+			//{
+				//log("get message err : %d\n", status);
+			//}
+		//}
+		//else
+		//continue;
+		//
+	//}
+	//vPortFree(data_ptr);
+	//log("data_ptr == NULL,exit runXGFlashTestREAD\n");
+	//
+//}
 
 void create_xg_flash_test_task(void)
 {
@@ -486,7 +486,7 @@ void xg_flashc_init(void)
 	data_flash_init();//interface
 	
 	//flashc_lock_all_regions(false);
-	xgflash_list_info_init();
+	//xgflash_list_info_init();
 	
 	
 	//create_xg_flash_test_task();

@@ -35,7 +35,7 @@ typedef struct
 {
 	//unsigned char	RFID_ID[4];
 	unsigned char	RFID_ID[16];//Unicode码,大端模式
-	DateTime_t		XG_Time;
+	//DateTime_t		XG_Time;
 
 }Message_Data_t;//22bytes
 #pragma pack()
