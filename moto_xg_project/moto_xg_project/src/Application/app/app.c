@@ -546,7 +546,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			}
 			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
-			
+		
+		xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
+
 		//log("Session_ID: %x \n\r",Session_number );
 		//log("paylaod_length: %d \n\r",data_length );
 		//for(i=0; i<data_length; i++)
