@@ -482,8 +482,8 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 	else
 		log("\n Battery Low !!!\n");
 		
-	log("\n Battery charge: %X \n" , ptr->Charge);
-	log("\n Battery voltage: %X \n" , ptr->Voltage);
+	//log("\n Battery charge: %X \n" , ptr->Charge);
+	//log("\n Battery voltage: %X \n" , ptr->Voltage);
 	
 	Battery_Flag = ptr->State;
 
@@ -528,6 +528,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
 			log("data transmit success\n");
+			xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
@@ -546,9 +547,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			}
 			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
-		
-		xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
-
+				
 		//log("Session_ID: %x \n\r",Session_number );
 		//log("paylaod_length: %d \n\r",data_length );
 		//for(i=0; i<data_length; i++)
@@ -949,16 +948,22 @@ static __app_Thread_(app_cfg)
 			break;
 			case OB_WAITINGAPPTASK:
 			
-					if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+
+					//if (xSemaphoreTake(xBinarySemaphore, (1000*2) / portTICK_RATE_MS) == pdPASS)
 					{
-						if(data_ptr!=NULL){//resend message
+					
+						if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+						{
+							if(data_ptr!=NULL){//resend message
 							
-							log("receive Okay!\n");						
-							xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
-							set_message_store(data_ptr);
+								log("receive Okay!\n");						
+								xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
+								set_message_store(data_ptr);
+								vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 							
-						}
+							}
 						
+						}
 					}
 										
 					nop();
