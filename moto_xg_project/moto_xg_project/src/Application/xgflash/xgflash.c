@@ -461,11 +461,11 @@ void xg_flashc_init(void)
 	//}
 	//
 	/* Create the binary semaphore to Synchronize other threads.*/
-	//vSemaphoreCreateBinary(xBinarySemaphore);
-	//if (xBinarySemaphore == NULL)
-	//{
-		//log("Create the xBinarySemaphore failure\n");
-	//}
+	vSemaphoreCreateBinary(xBinarySemaphore);
+	if (xBinarySemaphore == NULL)
+	{
+		log("Create the xBinarySemaphore failure\n");
+	}
 	///* Create the SendM_Counting semaphore to Synchronize the event of resend-message.*/
 	////计数最大值为300
 	////初始值为1(当flash信息数量为0时：用户扫点 -> flash-save -> flash-count+1 -> take Sem -> send -> wait for give-Sem(success/fail))

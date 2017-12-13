@@ -49,6 +49,8 @@ extern volatile xQueueHandle message_storage_queue ;
 extern volatile xQueueHandle xg_resend_queue ;
 
 extern volatile xSemaphoreHandle SendM_CountingSemaphore;
+extern volatile  xSemaphoreHandle xBinarySemaphore;
+
 
 //app func--list
 
@@ -547,6 +549,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			}
 			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
 		}
+		
+		/* 'Give' the semaphore to unblock the task. */
+		xSemaphoreGive(xBinarySemaphore);
 				
 		//log("Session_ID: %x \n\r",Session_number );
 		//log("paylaod_length: %d \n\r",data_length );
@@ -606,7 +611,8 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 			
 		vTaskDelay(200*2 / portTICK_RATE_MS);//延迟200ms
 		//delay_ms(200);
-		rfid_sendID_message();//send message		
+		//rfid_sendID_message();//send message	
+		scan_rfid_save_message();//scan and save message	
 	}
 	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
 	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);
@@ -920,6 +926,11 @@ static __app_Thread_(app_cfg)
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
+	
+	/* 'Give' the semaphore to unblock the task. */
+	 if( xBinarySemaphore != NULL ){
+		xSemaphoreGive(xBinarySemaphore);
+	 }
 		
 	for(;;)
 	{
@@ -956,10 +967,16 @@ static __app_Thread_(app_cfg)
 						{
 							if(data_ptr!=NULL){//resend message
 							
-								log("receive Okay!\n");						
+								log("receive Okay!\n");		
+								do 
+								{
+									log("wait message Ack\n");	
+								} while (xSemaphoreTake(xBinarySemaphore, (5000*2) / portTICK_RATE_MS) == pdFALSE);
+												
 								xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
 								set_message_store(data_ptr);
-								vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+								log("send message\n");
+								//vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 							
 							}
 						
