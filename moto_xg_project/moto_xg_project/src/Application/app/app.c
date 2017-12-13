@@ -547,7 +547,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			{
 				log("myptr: err\n\r" );
 			}
-			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
+			xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
 		}
 		
 		/* 'Give' the semaphore to unblock the task. */

@@ -222,7 +222,14 @@ U8 scan_rfid_save_message()
 		if(NULL != myptr)
 		{
 			memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));
-			xQueueSend(xg_resend_queue, &myptr, 0);
+			if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
+			{
+				log("xg_resend_queue: full\n" );
+				xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+				vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+				xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+			}
+
 		}
 		else
 		{
