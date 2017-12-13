@@ -55,7 +55,7 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 //#define VOICE_INFO_LENGTH	0x08//8bytes:list_number(2bytes) + address(4bytes) + length(2bytes)
 #define XG_MESSAGE_INFO_HEADER_LENGTH		0x08
 
-#define XG_MESSAGE_DATA_START_ADD			XG_MESSAGE_LISTINFO_BOUNDARY_ADD + 10//0x008508
+#define XG_MESSAGE_DATA_START_ADD			XG_MESSAGE_LISTINFO_BOUNDARY_ADD + 10//0x02000A
 #define XG_MESSAGE_DATA_BOUNDARY_ADD		DF_MAX_ADDR//0x7FFFFF    /* 8MB */
 
 #define MAX_MESSAGE_STORE 20

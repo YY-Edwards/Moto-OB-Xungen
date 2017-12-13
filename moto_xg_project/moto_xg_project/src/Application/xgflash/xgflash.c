@@ -163,24 +163,27 @@ U16 xgflash_get_message_count(void)
 	
 }
 
-static U32 current_bytes_remained = 0;
+//static U32 current_bytes_remained = 0;
 xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_flag)
 {
 
 	if(!list_init_success_flag)return XG_ERROR;
 	U32 address = 0;
 	static U32 bytes_remained = 0;
+	static U32 current_bytes_remained = 0;
 	df_status_t return_code = DF_WRITE_COMPLETED;
 		
-	current_bytes_remained+=data_len;//accumulate
 	/* check input parameter */
 	if (data_ptr == NULL || data_len > 0x0200)//512bytes
 	{
 		return XG_INVALID_PARAM;
 	}
+	
+	current_bytes_remained+=data_len;//accumulate
+	
 	if(current_bytes_remained > 0xF000)//data size > 60k,overout
 	{
-		//current_bytes_remained = 0;
+		current_bytes_remained = 0;
 		return XG_INVALID_PARAM;
 	}
 	
@@ -190,6 +193,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 	if(current_save_message_offset > XG_MESSAGE_DATA_BOUNDARY_ADD)//The message data is out of boundary
 	{
 		log("\r\n----message data is Out of bounds!!!\r\n----");
+		current_bytes_remained = 0;
 		xSemaphoreGive(xgflash_mutex );//unlock
 		return XG_OUT_BOUNDARY;
 	}
@@ -198,6 +202,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 	return_code = data_flash_write((U8 *)data_ptr, current_save_message_offset, data_len);
 	if(return_code != DF_WRITE_COMPLETED)
 	{
+		current_bytes_remained = 0;
 		xSemaphoreGive(xgflash_mutex );//unlock
 		return XG_FLASH_ACTION_FAIL;
 	}
@@ -218,6 +223,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		if(address > XG_MESSAGE_LISTINFO_BOUNDARY_ADD)//The number of messages is out of bounds
 		{
 			log("\r\n----info list is Out of bounds!!!\r\n----");
+			current_bytes_remained = 0;
 			xSemaphoreGive(xgflash_mutex );//unlock
 			return XG_OUT_BOUNDARY;
 		}
@@ -229,6 +235,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		return_code = data_flash_write(&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
 		if(return_code != DF_WRITE_COMPLETED)
 		{
+			current_bytes_remained = 0;
 			xSemaphoreGive(xgflash_mutex );//unlock
 			return XG_FLASH_ACTION_FAIL;
 		}
@@ -256,6 +263,9 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 	df_status_t return_code = DF_OK;
 	U32 info_address =0x00000000;
 	U32 data_address =0x00000000;
+	U32 erase_address =0x00;
+	U32 erase_length =0x00;
+	
 	char str[XG_MESSAGE_INFO_HEADER_LENGTH];
 	memset(str, 0x00, sizeof(str));
 	
@@ -270,7 +280,10 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 		if(ptr->numb == message_index)
 		{
 			bytes_remained = ptr->offset;
+			erase_length = ptr->offset;
+			
 			data_address = ptr->address;
+			erase_address = ptr->address;
 			
 			while (bytes_remained >= 1 && return_code == DF_OK)
 			{
@@ -285,6 +298,7 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 					return_code = data_flash_read_block(data_address, DF_DATA_SPACE_SIZE, buff_ptr);
 					bytes_remained-=DF_DATA_SPACE_SIZE;
 					data_address+=DF_DATA_SPACE_SIZE;
+					buff_ptr+=DF_DATA_SPACE_SIZE;
 						
 				}
 				//memset(PLAYBACK_BUF, 0x00, DF_DATA_SPACE_SIZE);
@@ -292,14 +306,16 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 			
 			if(erase)//erase the message
 			{
-				//erase data and reset:current_save_message_offset
-				memset(str, 0x00, sizeof(str));
-				return_code = data_flash_write((U8 *)str, data_address, bytes_remained);
-				current_save_message_offset-=bytes_remained;
-				//erase info and reset:current_message_index
+				memset(str, 0xFF, sizeof(str));
+				//reset:current_message_index and erase info
 				current_message_index-=1;
+				return_code = data_flash_write((U8 *)&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
 				return_code = data_flash_write((U8 *)str, info_address, XG_MESSAGE_INFO_HEADER_LENGTH);
-				return_code = data_flash_write((U8 *)&current_message_index, MESSAGE_NUMBERS_ADD, XG_MESSAGE_INFO_HEADER_LENGTH);
+				
+				//erase data and reset:current_save_message_offset
+				return_code = data_flash_write((U8 *)str, erase_address, sizeof(str));
+				current_save_message_offset-=erase_length;//出错在这...如果掉线，未执行，则会出现存储碎片
+				
 			}
 		
 			xSemaphoreGive(xgflash_mutex);//unlock
