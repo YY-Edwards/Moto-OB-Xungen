@@ -58,7 +58,7 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 #define XG_MESSAGE_DATA_START_ADD			XG_MESSAGE_LISTINFO_BOUNDARY_ADD + 10//0x008508
 #define XG_MESSAGE_DATA_BOUNDARY_ADD		DF_MAX_ADDR//0x7FFFFF    /* 8MB */
 
-#define MAX_MESSAGE_STORE 200
+#define MAX_MESSAGE_STORE 400
 
 //volatile Message_Protocol_t message_store[MAX_MESSAGE_STORE];
 

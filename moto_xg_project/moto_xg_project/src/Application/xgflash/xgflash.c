@@ -478,7 +478,7 @@ void xg_flashc_init(void)
 		//log("Create the SendM_Counting semaphore failure\n");
 	//}
 	//
-	xg_resend_queue = xQueueCreate(100, sizeof(U32));
+	xg_resend_queue = xQueueCreate(300, sizeof(U32));
 	/*initialize the queue*/
 	message_storage_queue = xQueueCreate(MAX_MESSAGE_STORE, sizeof(U32));
 	for(int i= 0; i < MAX_MESSAGE_STORE; i++ )
