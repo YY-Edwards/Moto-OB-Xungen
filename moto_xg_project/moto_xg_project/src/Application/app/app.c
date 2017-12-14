@@ -50,7 +50,8 @@ extern volatile xQueueHandle xg_resend_queue ;
 
 extern volatile xSemaphoreHandle SendM_CountingSemaphore;
 extern volatile  xSemaphoreHandle xBinarySemaphore;
-
+volatile xSemaphoreHandle count_mutex = NULL;
+volatile U32 global_count =0;
 
 //app func--list
 
@@ -446,8 +447,8 @@ void DataSession_reply_func(xcmp_fragment_t * xcmp)
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{
 		log("DATArep OK \n");
-		log("Func: %X \n", xcmp->u8[1]);
-		log("ID: %X \n", xcmp->u8[2]);
+		//log("Func: %X \n", xcmp->u8[1]);
+		//log("ID: %X \n", xcmp->u8[2]);
 		
 	}
 	else
@@ -530,7 +531,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
 			log("data transmit success\n");
-			xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
+			vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
+			xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
@@ -541,7 +543,20 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			if(NULL != myptr)
 			{
 				memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));			
-				xQueueSend(xg_resend_queue, &myptr, 0);
+				//xQueueSend(xg_resend_queue, &myptr, 0);			
+				if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
+				{
+					log("xg_resend_queue: full\n" );
+					xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+					vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+					xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+				}
+				else{
+					
+					xSemaphoreTake(count_mutex, portMAX_DELAY);
+					global_count++;
+					xSemaphoreGive(count_mutex);
+				}
 			}
 			else
 			{
@@ -607,9 +622,9 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 	
 	if((PUI_ID == 0x0060) && (PUI_State = 0x02) && (connect_flag == 1)){
 		//log("send message\n");
-		xcmp_IdleTestTone(Tone_Start, ACK_Received_Tone);//set tone to indicate the scan!!!
+		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_9);//set tone to indicate the scan!!!
 			
-		vTaskDelay(200*2 / portTICK_RATE_MS);//延迟200ms
+		vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
 		//delay_ms(200);
 		//rfid_sendID_message();//send message	
 		scan_rfid_save_message();//scan and save message	
@@ -893,6 +908,14 @@ void app_init(void)
 	//将app_payload_rx_proc更改为PCM加密功能
 	payload_init( app_payload_rx_proc , app_payload_tx_proc );
 	
+	/* Create the mutex semaphore to guard a shared global_count.*/
+	count_mutex = xSemaphoreCreateMutex();
+	if (count_mutex == NULL)
+	{
+		log("Create the count_mutex semaphore failure\n");
+	}
+	
+	
 	static portBASE_TYPE res = 0;
 	 res = xTaskCreate(
 	app_cfg
@@ -901,7 +924,7 @@ void app_init(void)
 	,  NULL
 	,  1
 	,  NULL );
-	
+		
 }
 
 extern  char AudioData[];
@@ -916,6 +939,7 @@ static __app_Thread_(app_cfg)
 	static int coun=0;
 
 	static U16 message_count =0;
+	U16 TONE_ID = Ring_Style_Tone_8;
 	U8 destination = DEST;
 	static  portTickType xLastWakeTime;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
@@ -942,6 +966,7 @@ static __app_Thread_(app_cfg)
 				{
 					connect_flag=1;
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
+					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
 					OB_State = OB_WAITINGAPPTASK;
 					log("connect OB okay!\n");
 				}
@@ -959,7 +984,14 @@ static __app_Thread_(app_cfg)
 			break;
 			case OB_WAITINGAPPTASK:
 			
-
+					//log("TONE_ID: %x\n", TONE_ID);		
+					//xcmp_IdleTestTone(Tone_Start, TONE_ID);
+					//vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+					//xcmp_IdleTestTone(Tone_Stop, TONE_ID);
+					//TONE_ID++;
+					//if(TONE_ID > 0x004f)TONE_ID = Ring_Style_Tone_8;
+						
+					
 					//if (xSemaphoreTake(xBinarySemaphore, (1000*2) / portTICK_RATE_MS) == pdPASS)
 					{
 					
@@ -967,9 +999,16 @@ static __app_Thread_(app_cfg)
 						{
 							if(data_ptr!=NULL){//resend message
 							
-								log("receive Okay!\n");		
+								log("receive Okay!\n");	
+								xSemaphoreTake(count_mutex, portMAX_DELAY);
+								global_count--;
+								xSemaphoreGive(count_mutex);
+								log("global_count:%d\n", global_count);	
 								do 
 								{
+									nop();
+									nop();
+									nop();
 									log("wait message Ack\n");	
 								} while (xSemaphoreTake(xBinarySemaphore, (5000*2) / portTICK_RATE_MS) == pdFALSE);
 												
@@ -994,7 +1033,6 @@ static __app_Thread_(app_cfg)
 		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 }
-
 
 
 static void app_payload_rx_proc(void  * payload)

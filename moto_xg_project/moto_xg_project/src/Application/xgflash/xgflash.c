@@ -480,7 +480,7 @@ void xg_flashc_init(void)
 	//
 	xg_resend_queue = xQueueCreate(100, sizeof(U32));
 	/*initialize the queue*/
-	message_storage_queue = xQueueCreate(100, sizeof(U32));
+	message_storage_queue = xQueueCreate(MAX_MESSAGE_STORE, sizeof(U32));
 	for(int i= 0; i < MAX_MESSAGE_STORE; i++ )
 	{
 		set_message_store(&message_store[i]);//push <message_store> address to the message_storage_queue;
