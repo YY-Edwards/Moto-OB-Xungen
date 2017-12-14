@@ -208,7 +208,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 	}
 	
 	current_save_message_offset+=data_len;
-	//log("current_save_message_offset : %X\n", current_save_message_offset);
+	log("current_save_message_offset : %X\n", current_save_message_offset);
 		
 	MessageList_Info_t ptr;
 		

@@ -444,8 +444,8 @@ void DataSession_reply_func(xcmp_fragment_t * xcmp)
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{
 		log("DATArep OK \n");
-		log("Func: %X \n", xcmp->u8[1]);
-		log("ID: %X \n", xcmp->u8[2]);
+		//log("Func: %X \n", xcmp->u8[1]);
+		//log("ID: %X \n", xcmp->u8[2]);
 		
 	}
 	else
@@ -948,6 +948,7 @@ static __app_Thread_(app_cfg)
 				{
 					connect_flag=1;
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
+					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
 					OB_State = OB_CONNECTEDWAITTINGSYNTIME;
 					log("connect OB okay!\n");
 				}
@@ -983,13 +984,21 @@ static __app_Thread_(app_cfg)
 					{
 						if(data_ptr!=NULL){//save message
 							
-							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-							xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
-							//log("receive data : %d", ptr->data.XG_Time.Second);
-							//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);		
-							
-							set_message_store(data_ptr);
 							log("receive okay!\n");
+							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
+							status = xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
+							//log("receive data : %d", ptr->data.XG_Time.Second);
+							//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
+							if(status == XG_OK)
+							{
+								log("save message okay\n");
+							}
+							else
+							{
+								log("save message err : %d\n", status);
+									
+							}
+							set_message_store(data_ptr);
 							
 						}
 						
@@ -1020,20 +1029,6 @@ static __app_Thread_(app_cfg)
 						log("The device battery level is low !\n");
 					}		
 											
-					//Current_total_message_count = xgflash_get_message_count();
-					//if(Current_total_message_count!=0)//有缓存，需重发
-					//{
-					//log("Current_total_message_count: %d\n", Current_total_message_count);
-					//}
-					//rfid_sendID_message();
-					//if(rfid_auto_reader(card_id) == 0){
-					//log("card_id : %x, %x, %x, %x\n", card_id[0], card_id[1], card_id[2], card_id[3]);
-					//memset(card_id,0x00,4);
-					//}
-					//else
-					//{
-					//log("no find card...\n");
-					//}
 					nop();
 					log("app task run!\n");
 				
@@ -1044,8 +1039,9 @@ static __app_Thread_(app_cfg)
 		} //End of switch on OB_State.
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (1500*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
+	log("app exit:err\n");
 }
 
 
