@@ -19,11 +19,11 @@ History:
 #define TRUE 1
 #define FALSE 0
 
-#define MAX_XNL_STORE	 30
+#define MAX_XNL_STORE	 100
 
 /*the queue depth is used to create xnl queue*/
-#define TX_XNL_QUEUE_DEEP	20
-#define RX_XNL_QUEUE_DEEP	10
+#define TX_XNL_QUEUE_DEEP	50
+#define RX_XNL_QUEUE_DEEP	40
 
 /*Enable payload(media) or disable*/
 #define PAYLOAD_ENABLE	ENABLE	

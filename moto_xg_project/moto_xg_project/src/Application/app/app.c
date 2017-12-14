@@ -14,6 +14,7 @@
 #include "string.h"
 
 static __app_Thread_(app_cfg);
+static void send_message(void * pvParameters);
 
 U32 bunchofrandomstatusflags;
 
@@ -528,6 +529,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
 			log("data transmit success\n");
+			vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
+			xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
+
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
@@ -539,19 +543,25 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//xgmessage.data.XG_Time.Year, xgmessage.data.XG_Time.Month, xgmessage.data.XG_Time.Day,
 			//xgmessage.data.XG_Time.Hour, xgmessage.data.XG_Time.Minute, xgmessage.data.XG_Time.Second);
 
-			//return_value = xgflash_message_save(&xgmessage, sizeof(Message_Protocol_t), TRUE);
-
 			Message_Protocol_t * myptr = get_message_store();	
 			if(NULL != myptr)
 			{
 				memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));			
-				xQueueSend(xg_resend_queue, &myptr, 0);
+				//xQueueSend(xg_resend_queue, &myptr, 0);
+				if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
+				{
+					log("xg_resend_queue: full\n" );
+					xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+					vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+					xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+				}
 			}
 			else
 			{
 				log("myptr: err\n\r" );
 			}
-			//xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate send-failure!!!
+			xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
+			
 		}
 		
 		if((ptr->State == DATA_SESSION_TX_Fail) || (ptr->State == DATA_SESSION_TX_Suc))
@@ -618,9 +628,9 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 	
 	if((PUI_ID == 0x0060) && (PUI_State = 0x02) && (connect_flag == 1)){
 		//log("send message\n");
-		xcmp_IdleTestTone(Tone_Start, ACK_Received_Tone);//set tone to indicate the scan!!!
+		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_9);//set tone to indicate the scan!!!
 			
-		vTaskDelay(200*2 / portTICK_RATE_MS);//延迟200ms
+		vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
 		//delay_ms(200);
 		//rfid_sendID_message();//send message		
 		scan_rfid_save_message();
@@ -913,6 +923,14 @@ void app_init(void)
 	,  1
 	,  NULL );
 	
+	 res = xTaskCreate(
+	 send_message
+	 ,  (const signed portCHAR *)"SEND_M"
+	 ,  800
+	 ,  NULL
+	 ,  1
+	 ,  NULL );
+	
 }
 
 extern  char AudioData[];
@@ -922,18 +940,76 @@ extern volatile  xTaskHandle save_handle;
 //extern portTickType water_value;
 //extern portTickType tx_water_value;
 //extern portTickType log_water_value;
+static void send_message(void * pvParameters)
+{
+
+	static U16 message_count =0;
+	U32 destination = DEST;
+	static  portTickType xLastWakeTime;
+	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
+	U16  * data_ptr;
+	Message_Protocol_t *m_buff = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
+	static xgflash_status_t status = XG_ERROR;
+	
+	xLastWakeTime = xTaskGetTickCount();
+		
+	for (;;)
+	{
+	
+		message_count = xgflash_get_message_count();
+		if( (message_count!=0) && (Battery_Flag == Battery_Okay) && (connect_flag))//有缓存且电量充足，需发送短信
+		{
+			log("Current_total_message_count: %d\n", message_count);
+			if(m_buff==NULL)break;
+			status = xgflash_get_message_data(message_count, m_buff, TRUE);
+			if(status == XG_OK)
+			{
+				xcmp_data_session_req(m_buff, (sizeof(Message_Protocol_t)), destination);//send message
+				if(xSemaphoreTake(SendM_CountingSemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
+				{
+					log("xSemaphoreTake okay!\n");
+				}
+				else//短信丢失，手台未响应，超时后默认再次重发
+				{
+					log("xSemaphoreTake failure!\n");
+					xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
+					status = xgflash_message_save(m_buff, sizeof(Message_Protocol_t), TRUE);
+					if(status == XG_OK)
+					{
+						log("save message okay\n");
+					}
+					else
+					{
+						log("save message err : %d\n", status);
+					}
+				
+				}
+			}
+			else
+			{
+				log("get message err : %d\n", status);
+			}
+		
+		}
+		else if (Battery_Flag == Battery_Low)
+		{
+			log("The device battery level is low !\n");
+		}
+		
+		vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+	
+	}
+}
+
 static __app_Thread_(app_cfg)
 {
 	static int coun=0;
 
-	static U16 message_count =0;
-	U8 destination = DEST;
 	static  portTickType xLastWakeTime;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
 	char card_id[4]={0};
 	U16  * data_ptr;
-	Message_Protocol_t *m_buff = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
@@ -1002,32 +1078,7 @@ static __app_Thread_(app_cfg)
 							
 						}
 						
-					}
-										
-					message_count = xgflash_get_message_count();
-					if( (message_count!=0) && (Battery_Flag == Battery_Okay) )//有缓存且电量充足，需发送短信
-					{
-						log("Current_total_message_count: %d\n", message_count);
-						if(xSemaphoreTake(SendM_CountingSemaphore, (1000*2) / portTICK_RATE_MS) == pdTRUE)
-						{
-							log("xSemaphoreTake okay!\n");
-							if(m_buff==NULL)break;
-							status = xgflash_get_message_data(message_count, m_buff, TRUE);
-							if(status == XG_OK)
-							{
-								xcmp_data_session_req(m_buff, (sizeof(Message_Protocol_t)), destination);//send message
-							}
-							else
-							{
-								log("get message err : %d\n", status);
-							}
-									
-						}								
-					}
-					else if (Battery_Flag == Battery_Low)
-					{
-						log("The device battery level is low !\n");
-					}		
+					}						
 											
 					nop();
 					log("app task run!\n");

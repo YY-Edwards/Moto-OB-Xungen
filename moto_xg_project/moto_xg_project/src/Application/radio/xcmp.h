@@ -1621,7 +1621,7 @@ void xcmp_function_mic( void );
 void xcmp_mute_speaker( void );
 void xcmp_transmit_control( void );
 void xcmp_transmit_dekeycontrol( void );
-void xcmp_data_session_req(void *message, U16 length, U8 dest);
+void xcmp_data_session_req(void *message, U16 length, U32 dest);
 void xcmp_data_session_brd( void *message, U16 length, U8 SessionID);
 void xcmp_button_config(void);
 void xcmp_volume_control(void);

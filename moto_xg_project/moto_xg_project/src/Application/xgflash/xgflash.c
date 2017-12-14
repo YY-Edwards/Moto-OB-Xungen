@@ -479,20 +479,20 @@ void xg_flashc_init(void)
 	/* Create the binary semaphore to Synchronize other threads.*/
 	//vSemaphoreCreateBinary(xBinarySemaphore);
 	/* Create the SendM_Counting semaphore to Synchronize the event of resend-message.*/
-	//计数最大值为300
+	//计数最大值为10
 	//初始值为1(当flash信息数量为0时：用户扫点 -> flash-save -> flash-count+1 -> take Sem -> send -> wait for give-Sem(success/fail))
 	//如果此时反馈成功，则继续查询count值是否等于0/等待用户扫点
 	//如果此时反馈失败，则flash-save
 	//当flash信息数量！=0时；等待查询count值
-	SendM_CountingSemaphore = xSemaphoreCreateCounting(300, 1);
+	SendM_CountingSemaphore = xSemaphoreCreateCounting(10, 0);
 	if (SendM_CountingSemaphore == NULL)
 	{
 		log("Create the SendM_Counting semaphore failure\n");
 	}
 	
-	xg_resend_queue = xQueueCreate(20, sizeof(U32));
+	xg_resend_queue = xQueueCreate(40, sizeof(U32));
 	/*initialize the queue*/
-	message_storage_queue = xQueueCreate(20, sizeof(U32));
+	message_storage_queue = xQueueCreate(MAX_MESSAGE_STORE, sizeof(U32));
 	for(int i= 0; i < MAX_MESSAGE_STORE; i++ )
 	{
 		set_message_store(&message_store[i]);//push <message_store> address to the message_storage_queue;
