@@ -29,17 +29,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  12 .debug_abbrev 0000728c  00000000  00000000  000403d9  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_line   0000d451  00000000  00000000  00047665  2**0
+ 13 .debug_line   0000d44f  00000000  00000000  00047665  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_frame  00003d10  00000000  00000000  00054ab8  2**2
+ 14 .debug_frame  00003d10  00000000  00000000  00054ab4  2**2
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_str    00007fb6  00000000  00000000  000587c8  2**0
+ 15 .debug_str    00007fb6  00000000  00000000  000587c4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_loc    0000f385  00000000  00000000  0006077e  2**0
+ 16 .debug_loc    0000f385  00000000  00000000  0006077a  2**0
                   CONTENTS, READONLY, DEBUGGING
  17 .stack        00001000  00017000  00017000  00000400  2**0
                   ALLOC
- 18 .debug_ranges 00001750  00000000  00000000  0006fb08  2**3
+ 18 .debug_ranges 00001750  00000000  00000000  0006fb00  2**3
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .reset:
@@ -1580,7 +1580,7 @@ static __app_Thread_(app_cfg)
 800027cc:	58 08       	cp.w	r8,0
 800027ce:	c0 50       	breq	800027d8 <app_cfg+0x2c>
 800027d0:	58 38       	cp.w	r8,3
-800027d2:	e0 81 00 95 	brne	800028fc <app_cfg+0x150>
+800027d2:	e0 81 00 94 	brne	800028fa <app_cfg+0x14e>
 800027d6:	c2 08       	rjmp	80002816 <app_cfg+0x6a>
 		{
 			case OB_UNCONNECTEDWAITINGSTATUS:
@@ -1617,7 +1617,7 @@ static __app_Thread_(app_cfg)
 			case OB_UNCONNECTEDWAITINGSTATUS:
 			
 				if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
-80002806:	c7 b8       	rjmp	800028fc <app_cfg+0x150>
+80002806:	c7 a8       	rjmp	800028fa <app_cfg+0x14e>
 					OB_State = OB_WAITINGAPPTASK;
 					log("connect OB okay!\n");
 				}
@@ -1632,7 +1632,7 @@ static __app_Thread_(app_cfg)
 					log("connecting...\n");
 8000280e:	0a 9c       	mov	r12,r5
 80002810:	f0 1f 00 47 	mcall	8000292c <app_cfg+0x180>
-80002814:	c7 48       	rjmp	800028fc <app_cfg+0x150>
+80002814:	c7 38       	rjmp	800028fa <app_cfg+0x14e>
 						
 					
 					//if (xSemaphoreTake(xBinarySemaphore, (1000*2) / portTICK_RATE_MS) == pdPASS)
@@ -1646,12 +1646,12 @@ static __app_Thread_(app_cfg)
 80002820:	1a 9b       	mov	r11,sp
 80002822:	f0 1f 00 45 	mcall	80002934 <app_cfg+0x188>
 80002826:	58 1c       	cp.w	r12,1
-80002828:	c6 61       	brne	800028f4 <app_cfg+0x148>
+80002828:	c6 51       	brne	800028f2 <app_cfg+0x146>
 						{
 							if(data_ptr!=NULL){//resend message
 8000282a:	40 08       	lddsp	r8,sp[0x0]
 8000282c:	58 08       	cp.w	r8,0
-8000282e:	c6 30       	breq	800028f4 <app_cfg+0x148>
+8000282e:	c6 20       	breq	800028f2 <app_cfg+0x146>
 							
 								log("receive Okay!\n");	
 80002830:	4c 2c       	lddpc	r12,80002938 <app_cfg+0x18c>
@@ -1679,113 +1679,110 @@ static __app_Thread_(app_cfg)
 8000285a:	1a d8       	st.w	--sp,r8
 8000285c:	4b bc       	lddpc	r12,80002948 <app_cfg+0x19c>
 8000285e:	f0 1f 00 34 	mcall	8000292c <app_cfg+0x180>
-									//nop();
-									//nop();
-									//log("wait message Ack\n");	
-								//} while (xSemaphoreTake(xBinarySemaphore, (5000*2) / portTICK_RATE_MS) == pdFALSE);
-												
+																			
 								xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);	
-80002862:	e0 6a 04 1a 	mov	r10,1050
-80002866:	31 ab       	mov	r11,26
-80002868:	40 1c       	lddsp	r12,sp[0x4]
-8000286a:	f0 1f 00 39 	mcall	8000294c <app_cfg+0x1a0>
+80002862:	36 4a       	mov	r10,100
+80002864:	31 ab       	mov	r11,26
+80002866:	40 1c       	lddsp	r12,sp[0x4]
+80002868:	f0 1f 00 39 	mcall	8000294c <app_cfg+0x1a0>
 								if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) ==pdFALSE)
-8000286e:	4b 98       	lddpc	r8,80002950 <app_cfg+0x1a4>
-80002870:	70 0c       	ld.w	r12,r8[0x0]
-80002872:	30 09       	mov	r9,0
-80002874:	e0 6a 9c 40 	mov	r10,40000
-80002878:	12 9b       	mov	r11,r9
-8000287a:	f0 1f 00 2f 	mcall	80002934 <app_cfg+0x188>
-8000287e:	2f fd       	sub	sp,-4
-80002880:	58 0c       	cp.w	r12,0
-80002882:	c3 11       	brne	800028e4 <app_cfg+0x138>
+8000286c:	4b 98       	lddpc	r8,80002950 <app_cfg+0x1a4>
+8000286e:	70 0c       	ld.w	r12,r8[0x0]
+80002870:	30 09       	mov	r9,0
+80002872:	e0 6a 9c 40 	mov	r10,40000
+80002876:	12 9b       	mov	r11,r9
+80002878:	f0 1f 00 2f 	mcall	80002934 <app_cfg+0x188>
+8000287c:	2f fd       	sub	sp,-4
+8000287e:	58 0c       	cp.w	r12,0
+80002880:	c3 11       	brne	800028e2 <app_cfg+0x136>
 								{
 									
-									//xQueueSend(xg_resend_queue, &data_ptr, 0);
 									if (xQueueSend(xg_resend_queue, &data_ptr, 0) != pdPASS)
-80002884:	4a b8       	lddpc	r8,80002930 <app_cfg+0x184>
-80002886:	70 0c       	ld.w	r12,r8[0x0]
-80002888:	30 09       	mov	r9,0
-8000288a:	12 9a       	mov	r10,r9
-8000288c:	1a 9b       	mov	r11,sp
-8000288e:	f0 1f 00 2e 	mcall	80002944 <app_cfg+0x198>
-80002892:	58 1c       	cp.w	r12,1
-80002894:	c1 10       	breq	800028b6 <app_cfg+0x10a>
+80002882:	4a c8       	lddpc	r8,80002930 <app_cfg+0x184>
+80002884:	70 0c       	ld.w	r12,r8[0x0]
+80002886:	30 09       	mov	r9,0
+80002888:	12 9a       	mov	r10,r9
+8000288a:	1a 9b       	mov	r11,sp
+8000288c:	f0 1f 00 2e 	mcall	80002944 <app_cfg+0x198>
+80002890:	58 1c       	cp.w	r12,1
+80002892:	c1 10       	breq	800028b4 <app_cfg+0x108>
 									{
 										log("xg_resend_queue: full\n" );
-80002896:	4b 0c       	lddpc	r12,80002954 <app_cfg+0x1a8>
-80002898:	f0 1f 00 25 	mcall	8000292c <app_cfg+0x180>
+80002894:	4b 0c       	lddpc	r12,80002954 <app_cfg+0x1a8>
+80002896:	f0 1f 00 26 	mcall	8000292c <app_cfg+0x180>
 										xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
-8000289c:	32 3b       	mov	r11,35
-8000289e:	02 9c       	mov	r12,r1
-800028a0:	f0 1f 00 21 	mcall	80002924 <app_cfg+0x178>
+8000289a:	32 3b       	mov	r11,35
+8000289c:	02 9c       	mov	r12,r1
+8000289e:	f0 1f 00 22 	mcall	80002924 <app_cfg+0x178>
 										vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
-800028a4:	e0 6c 17 70 	mov	r12,6000
-800028a8:	f0 1f 00 2c 	mcall	80002958 <app_cfg+0x1ac>
+800028a2:	e0 6c 17 70 	mov	r12,6000
+800028a6:	f0 1f 00 2d 	mcall	80002958 <app_cfg+0x1ac>
 										xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
-800028ac:	32 3b       	mov	r11,35
-800028ae:	30 0c       	mov	r12,0
-800028b0:	f0 1f 00 1d 	mcall	80002924 <app_cfg+0x178>
-800028b4:	c1 28       	rjmp	800028d8 <app_cfg+0x12c>
+800028aa:	32 3b       	mov	r11,35
+800028ac:	30 0c       	mov	r12,0
+800028ae:	f0 1f 00 1e 	mcall	80002924 <app_cfg+0x178>
+800028b2:	c2 08       	rjmp	800028f2 <app_cfg+0x146>
 									}
 									else{
 											
 										xSemaphoreTake(count_mutex, portMAX_DELAY);
-800028b6:	4a 24       	lddpc	r4,8000293c <app_cfg+0x190>
-800028b8:	68 0c       	ld.w	r12,r4[0x0]
-800028ba:	30 09       	mov	r9,0
-800028bc:	3f fa       	mov	r10,-1
-800028be:	12 9b       	mov	r11,r9
-800028c0:	f0 1f 00 1d 	mcall	80002934 <app_cfg+0x188>
+800028b4:	4a 24       	lddpc	r4,8000293c <app_cfg+0x190>
+800028b6:	68 0c       	ld.w	r12,r4[0x0]
+800028b8:	30 09       	mov	r9,0
+800028ba:	3f fa       	mov	r10,-1
+800028bc:	12 9b       	mov	r11,r9
+800028be:	f0 1f 00 1e 	mcall	80002934 <app_cfg+0x188>
 										global_count++;
-800028c4:	49 f8       	lddpc	r8,80002940 <app_cfg+0x194>
-800028c6:	70 09       	ld.w	r9,r8[0x0]
-800028c8:	2f f9       	sub	r9,-1
-800028ca:	91 09       	st.w	r8[0x0],r9
+800028c2:	4a 08       	lddpc	r8,80002940 <app_cfg+0x194>
+800028c4:	70 09       	ld.w	r9,r8[0x0]
+800028c6:	2f f9       	sub	r9,-1
+800028c8:	91 09       	st.w	r8[0x0],r9
 										xSemaphoreGive(count_mutex);
-800028cc:	68 0c       	ld.w	r12,r4[0x0]
-800028ce:	30 09       	mov	r9,0
-800028d0:	12 9a       	mov	r10,r9
-800028d2:	12 9b       	mov	r11,r9
-800028d4:	f0 1f 00 1c 	mcall	80002944 <app_cfg+0x198>
+800028ca:	68 0c       	ld.w	r12,r4[0x0]
+800028cc:	30 09       	mov	r9,0
+800028ce:	12 9a       	mov	r10,r9
+800028d0:	12 9b       	mov	r11,r9
+800028d2:	f0 1f 00 1d 	mcall	80002944 <app_cfg+0x198>
+										xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
+800028d6:	e0 6b 00 b7 	mov	r11,183
+800028da:	02 9c       	mov	r12,r1
+800028dc:	f0 1f 00 12 	mcall	80002924 <app_cfg+0x178>
+800028e0:	c0 98       	rjmp	800028f2 <app_cfg+0x146>
 									}
-									xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
-800028d8:	e0 6b 00 b7 	mov	r11,183
-800028dc:	02 9c       	mov	r12,r1
-800028de:	f0 1f 00 12 	mcall	80002924 <app_cfg+0x178>
-800028e2:	c0 98       	rjmp	800028f4 <app_cfg+0x148>
+				
 								}	
 								else
 								{
 									set_message_store(data_ptr);
-800028e4:	49 e8       	lddpc	r8,8000295c <app_cfg+0x1b0>
-800028e6:	70 0c       	ld.w	r12,r8[0x0]
-800028e8:	40 0b       	lddsp	r11,sp[0x0]
-800028ea:	f0 1f 00 1e 	mcall	80002960 <app_cfg+0x1b4>
+800028e2:	49 f8       	lddpc	r8,8000295c <app_cfg+0x1b0>
+800028e4:	70 0c       	ld.w	r12,r8[0x0]
+800028e6:	40 0b       	lddsp	r11,sp[0x0]
+800028e8:	f0 1f 00 1e 	mcall	80002960 <app_cfg+0x1b4>
 									log("send message\n");
-800028ee:	49 ec       	lddpc	r12,80002964 <app_cfg+0x1b8>
-800028f0:	f0 1f 00 0f 	mcall	8000292c <app_cfg+0x180>
+800028ec:	49 ec       	lddpc	r12,80002964 <app_cfg+0x1b8>
+800028ee:	f0 1f 00 10 	mcall	8000292c <app_cfg+0x180>
 							}
 						
 						}
 					}
 										
 					nop();
-800028f4:	d7 03       	nop
+800028f2:	d7 03       	nop
 					log("app task run!\n");
-800028f6:	49 dc       	lddpc	r12,80002968 <app_cfg+0x1bc>
-800028f8:	f0 1f 00 0d 	mcall	8000292c <app_cfg+0x180>
+800028f4:	49 dc       	lddpc	r12,80002968 <app_cfg+0x1bc>
+800028f6:	f0 1f 00 0e 	mcall	8000292c <app_cfg+0x180>
 			break;
 			default:
 			break;
 				
 		} //End of switch on OB_State.
 		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
-800028fc:	e0 6b 0f a0 	mov	r11,4000
-80002900:	48 4c       	lddpc	r12,80002910 <app_cfg+0x164>
-80002902:	f0 1f 00 1b 	mcall	8000296c <app_cfg+0x1c0>
+800028fa:	e0 6b 0f a0 	mov	r11,4000
+800028fe:	48 5c       	lddpc	r12,80002910 <app_cfg+0x164>
+80002900:	f0 1f 00 1b 	mcall	8000296c <app_cfg+0x1c0>
 	}
-80002906:	c6 2b       	rjmp	800027ca <app_cfg+0x1e>
+80002904:	c6 3b       	rjmp	800027ca <app_cfg+0x1e>
+80002906:	00 00       	add	r0,r0
 80002908:	80 00       	ld.sh	r0,r0[0x0]
 8000290a:	60 2c       	ld.w	r12,r0[0x8]
 8000290c:	80 00       	ld.sh	r0,r0[0x0]
