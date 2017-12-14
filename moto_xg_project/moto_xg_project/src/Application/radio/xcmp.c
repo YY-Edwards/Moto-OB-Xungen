@@ -495,7 +495,7 @@ Description: send data-session request to test
 Calls: xcmp_tx
 Called By:...
 */
-void xcmp_data_session_req(void *message, U16 length, U8 dest)
+void xcmp_data_session_req(void *message, U16 length, U32 dest)
 {
 	//U8 *DMR_Raw_Data= &DataPayload[0];
 	U8 i =0;
