@@ -952,9 +952,9 @@ static __app_Thread_(app_cfg)
 	xLastWakeTime = xTaskGetTickCount();
 	
 	/* 'Give' the semaphore to unblock the task. */
-	 if( xBinarySemaphore != NULL ){
-		xSemaphoreGive(xBinarySemaphore);
-	 }
+	 //if( xBinarySemaphore != NULL ){
+		//xSemaphoreGive(xBinarySemaphore);
+	 //}
 		
 	for(;;)
 	{
@@ -1004,17 +1004,33 @@ static __app_Thread_(app_cfg)
 								global_count--;
 								xSemaphoreGive(count_mutex);
 								log("global_count:%d\n", global_count);	
-								do 
+																			
+								xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);	
+								if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) ==pdFALSE)
 								{
-									nop();
-									nop();
-									nop();
-									log("wait message Ack\n");	
-								} while (xSemaphoreTake(xBinarySemaphore, (5000*2) / portTICK_RATE_MS) == pdFALSE);
-												
-								xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
-								set_message_store(data_ptr);
-								log("send message\n");
+									
+									if (xQueueSend(xg_resend_queue, &data_ptr, 0) != pdPASS)
+									{
+										log("xg_resend_queue: full\n" );
+										xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+										vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+										xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+									}
+									else{
+											
+										xSemaphoreTake(count_mutex, portMAX_DELAY);
+										global_count++;
+										xSemaphoreGive(count_mutex);
+										xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
+									}
+				
+								}	
+								else
+								{
+									set_message_store(data_ptr);
+									log("send message\n");
+								}						
+				
 								//vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 							
 							}

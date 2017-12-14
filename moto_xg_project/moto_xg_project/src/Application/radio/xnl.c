@@ -790,7 +790,7 @@ void xnl_init(void)
 	/*initialize the semaphore and queue*/
 	vSemaphoreCreateBinary(xnl_timeout_semphr);		
 	
-	xnl_frame_tx = xQueueCreate(20, sizeof(xnl_fragment_t *)); //扩大xnl_frame_tx的队列深度
+	xnl_frame_tx = xQueueCreate(50, sizeof(xnl_fragment_t *)); //扩大xnl_frame_tx的队列深度
 		
 	xnl_store_idle = xQueueCreate(MAX_XNL_STORE, sizeof(phy_fragment_t *));
 	for(int i= 0; i < MAX_XNL_STORE; i++ )
@@ -824,7 +824,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_rx_process
 	,  (const signed portCHAR *)"XNL_RX"
-	,  220//512
+	,  512//220//512
 	,  NULL
 	,  tskXNL_PRIORITY //+ 1
 	,  NULL
