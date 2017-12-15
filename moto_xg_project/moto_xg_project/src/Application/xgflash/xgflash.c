@@ -24,8 +24,8 @@ static volatile xSemaphoreHandle xgflash_mutex = NULL;
 void runXGFlashTestSAVE( void *pvParameters );
 void runXGFlashTestREAD( void *pvParameters );
 volatile  xTaskHandle save_handle;  
-//volatile  xSemaphoreHandle xBinarySemaphore;
-volatile xSemaphoreHandle SendM_CountingSemaphore = NULL;
+volatile  xSemaphoreHandle xBinarySemaphore = NULL;
+//volatile xSemaphoreHandle SendM_CountingSemaphore = NULL;
 volatile Message_Protocol_t message_store[MAX_MESSAGE_STORE];
 
 /*! \brief This is an example demonstrating flash read / write data accesses
@@ -204,7 +204,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 	{
 		current_bytes_remained = 0;
 		xSemaphoreGive(xgflash_mutex );//unlock
-		return XG_FLASH_ACTION_FAIL;
+		return XG_FLASH_WRITE_FAIL;
 	}
 	
 	current_save_message_offset+=data_len;
@@ -237,7 +237,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		{
 			current_bytes_remained = 0;
 			xSemaphoreGive(xgflash_mutex );//unlock
-			return XG_FLASH_ACTION_FAIL;
+			return XG_FLASH_WRITE_FAIL;
 		}
 		
 		current_bytes_remained = 0;//reset 0
@@ -250,6 +250,8 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 
 xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, bool erase)
 {
+	xgflash_status_t status = XG_ERROR;
+	
 	if(!list_init_success_flag)return XG_ERROR;
 	
 	xSemaphoreTake(xgflash_mutex, portMAX_DELAY);//lock
@@ -303,38 +305,56 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 				}
 				//memset(PLAYBACK_BUF, 0x00, DF_DATA_SPACE_SIZE);
 			}
-			
-			if(erase)//erase the message
-			{
-				memset(str, 0xFF, sizeof(str));
-				//reset:current_message_index and erase info
-				current_message_index-=1;
-				return_code = data_flash_write((U8 *)&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
-				return_code = data_flash_write((U8 *)str, info_address, XG_MESSAGE_INFO_HEADER_LENGTH);
-				
-				//erase data and reset:current_save_message_offset
-				return_code = data_flash_write((U8 *)str, erase_address, sizeof(str));
-				current_save_message_offset-=erase_length;//出错在这...如果掉线，未执行，则会出现存储碎片
-				
-			}
-		
-			xSemaphoreGive(xgflash_mutex);//unlock
-			return XG_OK;
+			status = XG_OK;
 		}
 		else
 		{
-			log("ptr->numb : %x\n", ptr->numb);
-			log("ptr->offset : %x\n", ptr->offset);
-			log("ptr->address : %x\n", ptr->address);
-			log("message_index : %x\n",message_index);
+			log("Err flash data\n");
+			//log("ptr->numb : %x\n", ptr->numb);
+			//log("ptr->offset : %x\n", ptr->offset);
+			//log("ptr->address : %x\n", ptr->address);
+			//log("message_index : %x\n",message_index);
 			
-			xSemaphoreGive(xgflash_mutex);//unlock
-			return 7;
+			//xSemaphoreGive(xgflash_mutex);//unlock
+			status = 8;
+			//return 7;
 		}
+		if(erase)//erase the message
+		{
+			memset(str, 0x00, sizeof(str));
+			//reset:current_message_index and erase info
+			current_message_index-=1;
+			return_code = data_flash_write((U8 *)&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
+			if (return_code != DF_WRITE_COMPLETED)
+			{
+				log("data_flash_write 1...\n");
+				status = XG_FLASH_WRITE_FAIL;
+			}
+			return_code = data_flash_write((U8 *)str, info_address, XG_MESSAGE_INFO_HEADER_LENGTH);
+			if (return_code != DF_WRITE_COMPLETED)
+			{	
+				log("data_flash_write 2...\n");
+				status = XG_FLASH_WRITE_FAIL;
+			}
+					
+			//erase data and reset:current_save_message_offset
+			return_code = data_flash_write((U8 *)str, erase_address, sizeof(str));
+			current_save_message_offset-=erase_length;//出错在这...如果掉线，未执行，则会出现存储碎片
+			if (return_code != DF_WRITE_COMPLETED)
+			{
+				log("data_flash_write 3...\n");
+				status = XG_FLASH_WRITE_FAIL;
+			}
+					
+		}
+				
+		xSemaphoreGive(xgflash_mutex);//unlock
+		//status = XG_OK;
+		return status;
 	}
 	
 	xSemaphoreGive(xgflash_mutex);//unlock
-	return XG_FLASH_ACTION_FAIL;
+	return XG_FLASH_READ_FAIL;
 		
 }
 xgflash_status_t xgflash_erase_info_region(void)
@@ -485,20 +505,24 @@ void xg_flashc_init(void)
 	}
 	
 	/* Create the binary semaphore to Synchronize other threads.*/
-	//vSemaphoreCreateBinary(xBinarySemaphore);
+	vSemaphoreCreateBinary(xBinarySemaphore);
+	if (xBinarySemaphore == NULL)
+	{
+		log("Create the xBinarySemaphore semaphore failure\n");
+	}
 	/* Create the SendM_Counting semaphore to Synchronize the event of resend-message.*/
 	//计数最大值为10
 	//初始值为1(当flash信息数量为0时：用户扫点 -> flash-save -> flash-count+1 -> take Sem -> send -> wait for give-Sem(success/fail))
 	//如果此时反馈成功，则继续查询count值是否等于0/等待用户扫点
 	//如果此时反馈失败，则flash-save
 	//当flash信息数量！=0时；等待查询count值
-	SendM_CountingSemaphore = xSemaphoreCreateCounting(10, 0);
-	if (SendM_CountingSemaphore == NULL)
-	{
-		log("Create the SendM_Counting semaphore failure\n");
-	}
+	//SendM_CountingSemaphore = xSemaphoreCreateCounting(10, 0);
+	//if (SendM_CountingSemaphore == NULL)
+	//{
+		//log("Create the SendM_Counting semaphore failure\n");
+	//}
 	
-	xg_resend_queue = xQueueCreate(40, sizeof(U32));
+	xg_resend_queue = xQueueCreate(100, sizeof(U32));
 	/*initialize the queue*/
 	message_storage_queue = xQueueCreate(MAX_MESSAGE_STORE, sizeof(U32));
 	for(int i= 0; i < MAX_MESSAGE_STORE; i++ )
@@ -509,7 +533,35 @@ void xg_flashc_init(void)
 	
 	data_flash_init();//interface
 	
+	//static df_status_t status = DF_ERROR;
+	//char ptr_buff[80];
+	//char ret_buff[80];
+	//memset(ptr_buff, 0x47, sizeof(ptr_buff));
+	//memset(ret_buff, 0x00, sizeof(ret_buff));
+	//U8 temp = 0x47;
+	//static flag= 0;
+	//static U32 i = 0;
+	//for ( i; i<60000; i++)
+	//{
+		//status = data_flash_write(ptr_buff, (XG_MESSAGE_LISTINFO_START_ADD + i*80), sizeof(ptr_buff));
+		//if(status != DF_WRITE_COMPLETED){
+			//flag = 1;
+			//break;
+		//}
+		//temp++;
+		//memset(ptr_buff, temp, sizeof(ptr_buff));
+		//
+		//status = data_flash_read_block((XG_MESSAGE_LISTINFO_START_ADD + i*80), sizeof(ret_buff), ret_buff);
+		//if(status != DF_OK){
+			//flag = 2;
+			//break;
+		//}
+		//memset(ret_buff, 0x00, sizeof(ret_buff));
+	//}
+	//
+	//log("flag : %d", flag);
 	//flashc_lock_all_regions(false);
+	
 	xgflash_list_info_init();
 	
 	

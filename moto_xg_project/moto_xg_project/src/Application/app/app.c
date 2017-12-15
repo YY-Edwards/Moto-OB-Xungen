@@ -49,7 +49,9 @@ extern volatile xQueueHandle message_storage_queue ;
 /*the queue is used to receive failure-send message*/
 extern volatile xQueueHandle xg_resend_queue ;
 
-extern volatile xSemaphoreHandle SendM_CountingSemaphore;
+//extern volatile xSemaphoreHandle SendM_CountingSemaphore;
+extern volatile  xSemaphoreHandle xBinarySemaphore;
+volatile U32 global_count =0;
 
 //app func--list
 
@@ -555,6 +557,12 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 					vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
 					xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
 				}
+				else
+				{
+					xSemaphoreTake(count_mutex, portMAX_DELAY);
+					global_count++;
+					xSemaphoreGive(count_mutex);
+				}
 			}
 			else
 			{
@@ -566,7 +574,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		
 		if((ptr->State == DATA_SESSION_TX_Fail) || (ptr->State == DATA_SESSION_TX_Suc))
 		{		
-			if( xSemaphoreGive( SendM_CountingSemaphore ) != pdTRUE )
+			//if( xSemaphoreGive( SendM_CountingSemaphore ) != pdTRUE )
+			if( xSemaphoreGive( xBinarySemaphore ) != pdTRUE )
 			{
 				log("xSemaphoreGive: err\n\r" );
 			}
@@ -914,6 +923,13 @@ void app_init(void)
 	//将app_payload_rx_proc更改为PCM加密功能
 	payload_init( app_payload_rx_proc , app_payload_tx_proc );
 	
+	/* Create the mutex semaphore to guard a shared global_count.*/
+	count_mutex = xSemaphoreCreateMutex();
+	if (count_mutex == NULL)
+	{
+		log("Create the count_mutex semaphore failure\n");
+	}
+	
 	static portBASE_TYPE res = 0;
 	 res = xTaskCreate(
 	app_cfg
@@ -926,7 +942,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	 send_message
 	 ,  (const signed portCHAR *)"SEND_M"
-	 ,  750
+	 ,  900
 	 ,  NULL
 	 ,  1
 	 ,  NULL );
@@ -966,7 +982,8 @@ static void send_message(void * pvParameters)
 			if(status == XG_OK)
 			{
 				xcmp_data_session_req(m_buff, (sizeof(Message_Protocol_t)), destination);//send message
-				if(xSemaphoreTake(SendM_CountingSemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
+				//if(xSemaphoreTake(SendM_CountingSemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
+				if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
 				{
 					log("xSemaphoreTake okay!\n");
 				}
@@ -981,7 +998,7 @@ static void send_message(void * pvParameters)
 					}
 					else
 					{
-						log("save message err : %d\n", status);
+						log("!!!save message err : %d\n", status);
 					}
 				
 				}
@@ -1065,6 +1082,10 @@ static __app_Thread_(app_cfg)
 						if(data_ptr!=NULL){//save message
 							
 							log("receive okay!\n");
+							xSemaphoreTake(count_mutex, portMAX_DELAY);
+							global_count--;
+							xSemaphoreGive(count_mutex);
+							log("global_count:%d\n", global_count);
 							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
 							status = xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
 							//log("receive data : %d", ptr->data.XG_Time.Second);
@@ -1075,7 +1096,7 @@ static __app_Thread_(app_cfg)
 							}
 							else
 							{
-								log("save message err : %d\n", status);
+								log("!!! save message err : %d\n", status);
 									
 							}
 							set_message_store(data_ptr);

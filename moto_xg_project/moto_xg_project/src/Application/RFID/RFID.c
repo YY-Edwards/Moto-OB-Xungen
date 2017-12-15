@@ -16,6 +16,8 @@ extern volatile xQueueHandle message_storage_queue ;
 
 /*the queue is used to receive failure-send message*/
 extern volatile xQueueHandle xg_resend_queue ;
+extern volatile U32 global_count;
+extern volatile xSemaphoreHandle count_mutex;
 
 
 void rfid_init()
@@ -148,6 +150,12 @@ U8 scan_rfid_save_message()
 				xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
 				vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
 				xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+			}
+			else
+			{
+				xSemaphoreTake(count_mutex, portMAX_DELAY);
+				global_count++;
+				xSemaphoreGive(count_mutex);
 			}
 		}
 		else

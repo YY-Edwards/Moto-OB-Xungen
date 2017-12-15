@@ -132,6 +132,8 @@ void data_flash_init(void)
 	// Enable SPI.
 	spi_enable(spi);
 
+	W25Q64_SPI_SetSpeedLow();
+
 	// Initialize data flash with SPI clock PBA.
 	if (spi_setupChipReg(spi, &spiOptions, 2*12000000) != SPI_OK)
 	{
@@ -145,7 +147,8 @@ void data_flash_init(void)
 		return;
 	}
 
-	W25Q64_SPI_SetSpeedHi();
+
+	//W25Q64_SPI_SetSpeedHi();
 	// Set STATUS reg to unprotect all sect
 	//send_flash_command(WRITE_ENABLE, 0, NULL, 0);
 	//send_flash_command(WRITE_STATUS_REG_BYTE_1, 0, NULL, 0);

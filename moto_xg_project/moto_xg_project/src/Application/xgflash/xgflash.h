@@ -58,7 +58,7 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 #define XG_MESSAGE_DATA_START_ADD			XG_MESSAGE_LISTINFO_BOUNDARY_ADD + 10//0x02000A
 #define XG_MESSAGE_DATA_BOUNDARY_ADD		DF_MAX_ADDR//0x7FFFFF    /* 8MB */
 
-#define MAX_MESSAGE_STORE 50
+#define MAX_MESSAGE_STORE 120
 
 //volatile Message_Protocol_t message_store[MAX_MESSAGE_STORE];
 
@@ -100,7 +100,8 @@ typedef enum
 	XG_OUT_BOUNDARY = 3,
 	XG_ERASE_FAIL = 4,
 	XG_ERASE_COMPLETED = 5,
-	XG_FLASH_ACTION_FAIL = 6,
+	XG_FLASH_READ_FAIL = 6,
+	XG_FLASH_WRITE_FAIL = 7,
 	
 } xgflash_status_t;
 
