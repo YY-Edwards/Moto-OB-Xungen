@@ -918,7 +918,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  800//1024//800//384
+	,  750//1024//800//384
 	,  NULL
 	,  1
 	,  NULL );
@@ -926,7 +926,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	 send_message
 	 ,  (const signed portCHAR *)"SEND_M"
-	 ,  800
+	 ,  750
 	 ,  NULL
 	 ,  1
 	 ,  NULL );
@@ -952,6 +952,7 @@ static void send_message(void * pvParameters)
 	static xgflash_status_t status = XG_ERROR;
 	
 	xLastWakeTime = xTaskGetTickCount();
+	static  portTickType water_value;
 		
 	for (;;)
 	{
@@ -996,6 +997,8 @@ static void send_message(void * pvParameters)
 			log("The device battery level is low !\n");
 		}
 		
+		//water_value = uxTaskGetStackHighWaterMark(NULL);
+		//log("send-thread water_value: %d\n", water_value);
 		vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	
 	}
@@ -1013,6 +1016,7 @@ static __app_Thread_(app_cfg)
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
+	static  portTickType water_value;
 		
 	for(;;)
 	{
@@ -1081,6 +1085,8 @@ static __app_Thread_(app_cfg)
 					}						
 											
 					nop();
+					//water_value = uxTaskGetStackHighWaterMark(NULL);
+					//log("app-thread water_value: %d\n", water_value);
 					log("app task run!\n");
 				
 			break;
