@@ -52,6 +52,7 @@ extern volatile xQueueHandle xg_resend_queue ;
 //extern volatile xSemaphoreHandle SendM_CountingSemaphore;
 extern volatile  xSemaphoreHandle xBinarySemaphore;
 volatile U32 global_count =0;
+volatile xSemaphoreHandle count_mutex = NULL;
 
 //app func--list
 
@@ -936,7 +937,7 @@ void app_init(void)
 	,  (const signed portCHAR *)"USER_P"
 	,  750//1024//800//384
 	,  NULL
-	,  1
+	,  2
 	,  NULL );
 	
 	 res = xTaskCreate(

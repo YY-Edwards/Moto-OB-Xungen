@@ -330,21 +330,21 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 				log("data_flash_write 1...\n");
 				status = XG_FLASH_WRITE_FAIL;
 			}
-			return_code = data_flash_write((U8 *)str, info_address, XG_MESSAGE_INFO_HEADER_LENGTH);
-			if (return_code != DF_WRITE_COMPLETED)
-			{	
-				log("data_flash_write 2...\n");
-				status = XG_FLASH_WRITE_FAIL;
-			}
-					
-			//erase data and reset:current_save_message_offset
-			return_code = data_flash_write((U8 *)str, erase_address, sizeof(str));
-			current_save_message_offset-=erase_length;//出错在这...如果掉线，未执行，则会出现存储碎片
-			if (return_code != DF_WRITE_COMPLETED)
-			{
-				log("data_flash_write 3...\n");
-				status = XG_FLASH_WRITE_FAIL;
-			}
+			//return_code = data_flash_write((U8 *)str, info_address, XG_MESSAGE_INFO_HEADER_LENGTH);
+			//if (return_code != DF_WRITE_COMPLETED)
+			//{	
+				//log("data_flash_write 2...\n");
+				//status = XG_FLASH_WRITE_FAIL;
+			//}
+					//
+			////erase data and reset:current_save_message_offset
+			//return_code = data_flash_write((U8 *)str, erase_address, sizeof(str));
+			current_save_message_offset-=32;//出错在这...如果掉线，未执行，则会出现存储碎片
+			//if (return_code != DF_WRITE_COMPLETED)
+			//{
+				//log("data_flash_write 3...\n");
+				//status = XG_FLASH_WRITE_FAIL;
+			//}
 					
 		}
 				
