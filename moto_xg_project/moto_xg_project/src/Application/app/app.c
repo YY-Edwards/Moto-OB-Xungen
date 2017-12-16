@@ -482,12 +482,12 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 	/*point to xcmp payload*/
 	BatteryLevel_brdcast_t *ptr = (BatteryLevel_brdcast_t* )(xcmp->u8);
 	if(ptr->State == Battery_Okay)
-		log("\n Battery Okay\n");
+		;//log("\n Battery Okay\n");
 	else
 		log("\n Battery Low !!!\n");
 		
-	log("\n Battery charge: %X \n" , ptr->Charge);
-	log("\n Battery voltage: %X \n" , ptr->Voltage);
+	//log("\n Battery charge: %X \n" , ptr->Charge);
+	//log("\n Battery voltage: %X \n" , ptr->Voltage);
 	
 	Battery_Flag = ptr->State;
 
@@ -983,10 +983,12 @@ static void send_message(void * pvParameters)
 			if(status == XG_OK)
 			{
 				xcmp_data_session_req(m_buff, (sizeof(Message_Protocol_t)), destination);//send message
+				
 				//if(xSemaphoreTake(SendM_CountingSemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
 				if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
 				{
 					log("xSemaphoreTake okay!\n");
+					vTaskDelay((1500*2) / portTICK_RATE_MS);
 				}
 				else//短信丢失，手台未响应，超时后默认再次重发
 				{
@@ -995,7 +997,7 @@ static void send_message(void * pvParameters)
 					status = xgflash_message_save(m_buff, sizeof(Message_Protocol_t), TRUE);
 					if(status == XG_OK)
 					{
-						log("save message okay\n");
+						log("save message-2 okay\n");
 					}
 					else
 					{
@@ -1017,7 +1019,7 @@ static void send_message(void * pvParameters)
 		
 		//water_value = uxTaskGetStackHighWaterMark(NULL);
 		//log("send-thread water_value: %d\n", water_value);
-		vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	
 	}
 }
@@ -1078,7 +1080,8 @@ static __app_Thread_(app_cfg)
 			break;
 			case OB_WAITINGAPPTASK:
 			
-					if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+					//if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+					if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, 0))
 					{
 						if(data_ptr!=NULL){//save message
 							
