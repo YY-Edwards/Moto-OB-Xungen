@@ -955,6 +955,7 @@ static __app_Thread_(app_cfg)
 	 //if( xBinarySemaphore != NULL ){
 		//xSemaphoreGive(xBinarySemaphore);
 	 //}
+	 xSemaphoreTake(xBinarySemaphore, portMAX_DELAY); 
 		
 	for(;;)
 	{
@@ -995,7 +996,7 @@ static __app_Thread_(app_cfg)
 					//if (xSemaphoreTake(xBinarySemaphore, (1000*2) / portTICK_RATE_MS) == pdPASS)
 					{
 					
-						if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
+						if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (1000*2) / portTICK_RATE_MS))
 						{
 							if(data_ptr!=NULL){//resend message
 							
@@ -1046,7 +1047,7 @@ static __app_Thread_(app_cfg)
 			break;
 				
 		} //End of switch on OB_State.
-		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 }
 
