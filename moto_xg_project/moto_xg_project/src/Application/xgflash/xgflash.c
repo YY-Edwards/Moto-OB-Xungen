@@ -510,6 +510,7 @@ void xg_flashc_init(void)
 	{
 		log("Create the xBinarySemaphore semaphore failure\n");
 	}
+	
 	/* Create the SendM_Counting semaphore to Synchronize the event of resend-message.*/
 	//计数最大值为10
 	//初始值为1(当flash信息数量为0时：用户扫点 -> flash-save -> flash-count+1 -> take Sem -> send -> wait for give-Sem(success/fail))

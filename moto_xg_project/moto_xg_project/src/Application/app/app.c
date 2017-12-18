@@ -943,7 +943,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	 send_message
 	 ,  (const signed portCHAR *)"SEND_M"
-	 ,  900
+	 ,  800
 	 ,  NULL
 	 ,  1
 	 ,  NULL );
@@ -970,7 +970,9 @@ static void send_message(void * pvParameters)
 	
 	xLastWakeTime = xTaskGetTickCount();
 	static  portTickType water_value;
-		
+	/*clear xBinarySemaphore and wait Datasession broadcast reply*/
+	xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
+	
 	for (;;)
 	{
 	
@@ -988,7 +990,7 @@ static void send_message(void * pvParameters)
 				if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
 				{
 					log("xSemaphoreTake okay!\n");
-					vTaskDelay((1500*2) / portTICK_RATE_MS);
+					vTaskDelay((2000*2) / portTICK_RATE_MS);
 				}
 				else//短信丢失，手台未响应，超时后默认再次重发
 				{
@@ -1019,7 +1021,7 @@ static void send_message(void * pvParameters)
 		
 		//water_value = uxTaskGetStackHighWaterMark(NULL);
 		//log("send-thread water_value: %d\n", water_value);
-		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil(&xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	
 	}
 }
@@ -1107,12 +1109,15 @@ static __app_Thread_(app_cfg)
 							
 						}
 						
-					}						
+					}
+					else
+					{						
 											
-					nop();
-					//water_value = uxTaskGetStackHighWaterMark(NULL);
-					//log("app-thread water_value: %d\n", water_value);
-					log("app task run!\n");
+						nop();
+						//water_value = uxTaskGetStackHighWaterMark(NULL);
+						//log("app-thread water_value: %d\n", water_value);
+						log("app task run!\n");
+					}
 				
 			break;
 			default:
@@ -1121,7 +1126,7 @@ static __app_Thread_(app_cfg)
 		} //End of switch on OB_State.
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (1500*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (1200*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	log("app exit:err\n");
 }
