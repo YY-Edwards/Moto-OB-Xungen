@@ -316,6 +316,7 @@ void xcmp_opcode_not_supported( void )
 	xcmp_tx( &xcmp_farme, 1);
 }
 
+extern volatile char XCMP_Version[4];
 /**
 Function: xcmp_DeviceInitializationStatus_request
 Parameters:
@@ -336,10 +337,10 @@ void xcmp_DeviceInitializationStatus_request(void)
 						 = (DeviceInitializationStatus_brdcst_t *)xcmp_farme.u8;
 	
 	/*xcmp version 8.1.0.5*///版本号未正确填写，纠正
-	ptr->XCMPVersion[0] = 0x08;
-	ptr->XCMPVersion[1] = 0x01;
-	ptr->XCMPVersion[2] = 0x00;
-	ptr->XCMPVersion[3] = 0x05;
+	ptr->XCMPVersion[0] = XCMP_Version[0];
+	ptr->XCMPVersion[1] = XCMP_Version[1];
+	ptr->XCMPVersion[2] = XCMP_Version[2];
+	ptr->XCMPVersion[3] = XCMP_Version[3];
 	
 	/*
 	0x00:

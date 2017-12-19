@@ -27,7 +27,7 @@ History:
 #include "../log/log.h"
 
 /*information of xnl*/
-static volatile xnl_information_t xnl_information;
+volatile xnl_information_t xnl_information;
 
 /*Defines the callback function is used to receive XCMP*/
 void ( *xcmp_exec)(xnl_content_data_msg_t) = NULL;
@@ -168,7 +168,7 @@ void xnl_send_device_master_query(void)
 	/*send XNL message*/
 	xnl_tx(&xnl_frame);
 }
-
+//extern xnl_content_master_status_brdcst_t XNL_Version;
 /**
 Function: xnl_master_status_brdcst_func
 Description: process while receive master status boardcast.
@@ -197,7 +197,7 @@ void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	{
 		return;	
 	}
-		
+	
 	/*No timeout*/	
 	xSemaphoreGive(xnl_timeout_semphr);	
 
