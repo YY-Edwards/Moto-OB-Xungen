@@ -171,7 +171,7 @@ U8 scan_rfid_save_message()
 	char message[80];
 	U8 return_err =0;
 	U8 temp =0;
-	U8 destination = DEST;
+	U32 destination = DEST;
 	static U8 start_session = 0x80;
 	Message_Header_t header;
 	Message_Data_t data_buffer;//22bytes

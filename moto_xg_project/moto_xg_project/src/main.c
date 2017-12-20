@@ -40,16 +40,10 @@ int main (void)
 	log("----start debug----");
 	
 	xg_flashc_init();
-		
-	//voc_init();
-
-	//tc_init();
 	
 	rfid_init();
 		
 	app_init();
-	
-	//xg_rtc_init();
 		
 	xcmp_init();
 

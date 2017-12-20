@@ -9147,7 +9147,7 @@ U8 scan_rfid_save_message()
 {
 80005150:	eb cd 40 e0 	pushm	r5-r7,lr
 80005154:	fa cd 00 8c 	sub	sp,sp,140
-	U8 destination = DEST;
+	U32 destination = DEST;
 	static U8 start_session = 0x80;
 	Message_Header_t header;
 	Message_Data_t data_buffer;//22bytes
@@ -16259,18 +16259,12 @@ int main (void)
 	
 	xg_flashc_init();
 800073f4:	f0 1f 00 0c 	mcall	80007424 <main+0x58>
-		
-	//voc_init();
-
-	//tc_init();
 	
 	rfid_init();
 800073f8:	f0 1f 00 0c 	mcall	80007428 <main+0x5c>
 		
 	app_init();
 800073fc:	f0 1f 00 0c 	mcall	8000742c <main+0x60>
-	
-	//xg_rtc_init();
 		
 	xcmp_init();
 80007400:	f0 1f 00 0c 	mcall	80007430 <main+0x64>

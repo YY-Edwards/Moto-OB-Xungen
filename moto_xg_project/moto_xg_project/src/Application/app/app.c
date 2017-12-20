@@ -984,7 +984,7 @@ static __app_Thread_(app_cfg)
 
 	static U16 message_count =0;
 	U16 TONE_ID = Ring_Style_Tone_8;
-	U8 destination = DEST;
+	U32 destination = DEST;
 	static  portTickType xLastWakeTime;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
