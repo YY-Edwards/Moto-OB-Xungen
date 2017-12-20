@@ -1543,7 +1543,85 @@ typedef struct
 }MicControl_brdcast_t;
 
 
+/*
+Device Management ----------------------------
+This message is used to manage the non-XNL master device from the XNL master or
+another non-XNL master device. The following functionality can be managed for the
+non-XNL master device:
+	Device can be enabled.
+	Device can be disabled.
+	Device can be programmed through another non-XNL master device using Data
+Session.
+		o Non-master device can start the programming of the managed non-master
+device via the radio (XNL master device).
+		o Non-master device can stop the programming of the managed non-master
+device via the radio (XNL master device).
 
+Another non-master device can reset the device under management by sending
+the message to the Radio after completion of programming of the non-XNL master device.
+Any attached device can query the status of the device under management.
+Device can be enabled, disabled, reset or perform programming from another non-XNL
+master device. To program or reset the unique device in the system, the device type
+and XCMP device ID is included in the message. The XCMP device ID can be obtained
+from the XNL system map broadcast.
+If the Device Type and XCMP Device ID are cleared to a value of 0x00, Device
+Management Request/Broadcast is using the sender Device as the Device being managed.
+*/
+
+//Function
+typedef enum 
+{
+	Query	= 0x00,
+	Start	= 0x03,
+	Stop	= 0x04,
+	Reset	= 0x05,
+	GOB_Boot_Pin_Enable =	0x06,
+	GOB_Boot_Pin_Disable =	0x07,
+	Reset_Master		=	0x08
+	
+}DEVMGMTBCST_Function;
+	
+
+//State
+typedef enum
+{
+	DEFAULT	= 0x00,
+	NODETECT,
+	ENABLED,
+	DISABLED,
+	PROGRAM,
+	RESET,
+	BOOT_MODE,
+	PASSWORD_LOCK
+	
+	}DEVMGMTBCST_DeviceState;
+
+typedef struct
+{
+	unsigned char Function;
+	unsigned char Device_Type;
+	unsigned char XCMP_Device_ID;
+}DeviceManagement_req_t;
+
+
+typedef struct
+{
+	unsigned char Result;
+	unsigned char Function;
+	unsigned char Device_Type;
+	unsigned char XCMP_Device_ID;
+	unsigned char Device_State;
+}DeviceManagement_reply_t;
+
+typedef struct
+{
+
+	unsigned char Function;
+	unsigned char Device_Type;
+	unsigned char XCMP_Device_ID;
+	unsigned char Device_State;
+	
+}DeviceManagement_brdcast_t;
 
 
 
@@ -1563,7 +1641,7 @@ when an external handset speaker is connected.
 //Function /State
 #define MUTED (unsigned short )0x0000
 #define UNMUTED (unsigned short) 0x0001
-#define Qurey (unsigned short)0x0080
+#define QUREY (unsigned short)0x0080
 
 //Speaker Number
 #define Invalid 0x0000  //Invalid

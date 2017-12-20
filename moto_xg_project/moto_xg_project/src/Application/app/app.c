@@ -53,38 +53,90 @@ extern volatile xQueueHandle xg_resend_queue ;
 extern volatile  xSemaphoreHandle xBinarySemaphore;
 volatile U32 global_count =0;
 volatile xSemaphoreHandle count_mutex = NULL;
+volatile xnl_information_t xnl_information;
+volatile char XCMP_Version[4];
+
 
 //app func--list
 
 void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 {
-	if (xcmp->u8[4] == 0x01)
-	{
-		bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
-	}
-	else if(xcmp->u8[4] != 0x02)
-	{
-		bunchofrandomstatusflags  &= 0xFFFFFFFC; //Device Init no longer Complete.
-		xcmp_DeviceInitializationStatus_request();
-	}
+		/*point to xcmp payload*/
+		DeviceInitializationStatus_brdcst_t *ptr = (DeviceInitializationStatus_brdcst_t* )xcmp->u8;
+		
+		//log("DeviceInitializationStatus_brdcst...\n");
+		
+		memcpy(XCMP_Version, &(ptr->XCMPVersion[0]), sizeof(XCMP_Version));
+		
+		if (ptr->DeviceInitType == Device_Init_Complete)
+		{
+			bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
+		}
+		else if(ptr->DeviceInitType  == Device_Init_Status)
+		{
+			bunchofrandomstatusflags  &= 0xFFFFFFFC; //Device Init no longer Complete.
+			xcmp_DeviceInitializationStatus_request();
+		}
+		else//Device_Status_Update
+		{
+			//log("DeviceInitType : %x\n", ptr->DeviceInitType);
+			//log("Device Type : %x\n", ptr->DeviceStatusInfo.DeviceType);
+			//log("Device Status : %x\n", ptr->DeviceStatusInfo.DeviceStatus[1]);
+			//log("Descriptor size : %x\n", ptr->DeviceStatusInfo.DeviceDescriptorSize);
+			//log("Descriptor : %x\n", ptr->DeviceStatusInfo.DeviceDescriptor[0]);
+		}
+	//if (xcmp->u8[4] == 0x01)
+	//{
+		//bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
+	//}
+	//else if(xcmp->u8[4] != 0x02)
+	//{
+		//bunchofrandomstatusflags  &= 0xFFFFFFFC; //Device Init no longer Complete.
+		//xcmp_DeviceInitializationStatus_request();
+	//}
 }
 
 void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
 {
-		U8 temp = 0;
-		temp  = xcmp->u8[1] << 8;
-		temp |= xcmp->u8[2];
-		//if (temp == theXNL_Ctrlr.XNL_DeviceLogicalAddress)
+		U16 temp = 0;
+		/*point to xcmp payload*/
+		DeviceManagement_brdcast_t *ptr = (DeviceManagement_brdcast_t* )xcmp->u8;
+		temp  = ptr->Device_Type << 8;
+		temp |= ptr->XCMP_Device_ID;
+			
+		//log("DeviceManagement_brdcst...\n");
+		//log("temp: %x\n", temp);
+		//log("xnl_information.logical_address: %x\n", xnl_information.logical_address);
+		if (temp == xnl_information.logical_address)
 		{
 			if (xcmp->u8[0] == 0x01)
 			{
+				//Enable Option Board
 				bunchofrandomstatusflags |= 0x00000002;
 			}
 			else
 			{
+				//Disable Option Board.
+				//log("Device State : %d\n", );
 				bunchofrandomstatusflags &= 0xFFFFFFFD;
 			}
-		}
+			//log("Function : %d\n", ptr->Function);
+			//log("Device State : %d\n", ptr->Device_State);
+		}	
+		//U8 temp = 0;
+		//temp  = xcmp->u8[1] << 8;
+		//temp |= xcmp->u8[2];
+		////if (temp == theXNL_Ctrlr.XNL_DeviceLogicalAddress)
+		//{
+			//if (xcmp->u8[0] == 0x01)
+			//{
+				//bunchofrandomstatusflags |= 0x00000002;
+			//}
+			//else
+			//{
+				//bunchofrandomstatusflags &= 0xFFFFFFFD;
+			//}
+		//}
 }
 
 void ToneControl_reply_func(xcmp_fragment_t * xcmp)
@@ -1053,6 +1105,9 @@ static __app_Thread_(app_cfg)
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
 					OB_State = OB_CONNECTEDWAITTINGSYNTIME;
 					log("connect OB okay!\n");
+					log("XCMP_Version: %d.%d.%d.%d\n", XCMP_Version[0],  XCMP_Version[1],
+					XCMP_Version[2],  XCMP_Version[3]);
+					
 				}
 				else
 				{
