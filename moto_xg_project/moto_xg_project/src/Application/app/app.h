@@ -26,7 +26,16 @@
 
 #define tskIDLE_PRIORITY			( ( unsigned portBASE_TYPE ) 0 )
 
+static const U8 OB_Firmware_Version[3]={0x02, 0x00, 0x01}; 
+//The 3-byte OB Firmware Version number uses a Major Number to track the major changes,
+// Minor Number to track minor changes and Product ID Number to differentiate the product line.
+/*Product ID Number:
+				0x01   Patrol   
+				0x02   Record
+				0x03	...	
+				...		...
 
+*/
 typedef struct
 {
 	

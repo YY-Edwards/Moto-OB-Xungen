@@ -1022,6 +1022,7 @@ static __app_Thread_(app_cfg)
 					log("connect OB okay!\n");
 					log("XCMP_Version: %d.%d.%d.%d\n", XCMP_Version[0],  XCMP_Version[1],
 													 XCMP_Version[2],  XCMP_Version[3]);
+					log("OB_Firmware_Version: %d.%d.%d\n", OB_Firmware_Version[0],  OB_Firmware_Version[1], OB_Firmware_Version[2]);							 
 				}
 				else
 				{
