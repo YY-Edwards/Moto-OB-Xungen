@@ -15,7 +15,7 @@
 
 static __app_Thread_(app_cfg);
 
-U32 bunchofrandomstatusflags;
+volatile U32 bunchofrandomstatusflags;
 
 volatile U8 Speaker_is_unmute = 0;
 volatile U8 Silent_flag = 0;
@@ -975,6 +975,7 @@ extern  char AudioData[];
 extern U32 tc_tick;
 extern volatile DateTime_t Current_time;
 extern volatile  xTaskHandle save_handle; 
+extern void xnl_send_device_master_query(void);
 //extern portTickType water_value;
 //extern portTickType tx_water_value;
 //extern portTickType log_water_value;
@@ -994,6 +995,11 @@ static __app_Thread_(app_cfg)
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
+	
+	static const uint8_t test_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+	char str[80];
+	memset(str, 0x00, 80);
+	
 	
 	/* 'Give' the semaphore to unblock the task. */
 	 //if( xBinarySemaphore != NULL ){
@@ -1022,7 +1028,11 @@ static __app_Thread_(app_cfg)
 					nop();
 					nop();
 					nop();
+					/*send device_master_query to connect radio*/
+					xnl_send_device_master_query();
 					log("connecting...\n");
+					vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+					
 					//log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
 					//Current_time.Year, Current_time.Month, Current_time.Day,
 					//Current_time.Hour, Current_time.Minute, Current_time.Second);
@@ -1041,7 +1051,7 @@ static __app_Thread_(app_cfg)
 					
 					//if (xSemaphoreTake(xBinarySemaphore, (1000*2) / portTICK_RATE_MS) == pdPASS)
 					{
-					
+						
 						if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (1000*2) / portTICK_RATE_MS))
 						{
 							if(data_ptr!=NULL){//resend message
@@ -1084,9 +1094,45 @@ static __app_Thread_(app_cfg)
 						
 						}
 					}
-										
+					
+					if (0x00000003 != (bunchofrandomstatusflags & 0x00000003))//掉线
+					{					
+						OB_State = OB_UNCONNECTEDWAITINGSTATUS;
+						connect_flag=0;
+						log("OB disconnecting!!!\n");
+					}
+					
+					//Disable_interrupt_level(1);
+					//flashc_memcpy((void *)0x80061234, (void *)test_data, 7,  true);
+					//Enable_interrupt_level(1);
+					//if (flashc_is_lock_error() || flashc_is_programming_error())
+					//{
+						//log("flashc_memcpy-1 err...\n");
+					//}
+					//else
+					//{
+						//Disable_interrupt_level(1);
+						//flashc_memcpy((void *)str, (void *)0x80061234, 7,  true);
+						//Enable_interrupt_level(1);
+						//if (flashc_is_lock_error() || flashc_is_programming_error())
+						//{
+							//log("flashc_memcpy-2 err...\n");
+						//}
+						//else
+						//{
+							//for (U8 i=0; i<7;i++)
+							//{
+								//log("str[%d]: %x\n", i, str[i]);
+							//}
+							//memset(str, 0x00, 80);
+						//}
+					//}
+					
+											
 					nop();
 					log("app task run!\n");
+					
+					
 				
 			break;
 			default:
