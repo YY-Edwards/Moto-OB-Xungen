@@ -576,41 +576,41 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		{
 			log("data transmit success\n");
 			vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
-			xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
+			//xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
-			Message_Protocol_t  xgmessage;
-			memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
-
-			Message_Protocol_t * myptr = get_message_store();	
-			if(NULL != myptr)
-			{
-				memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));			
-				//xQueueSend(xg_resend_queue, &myptr, 0);			
-				if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
-				{
-					log("xg_resend_queue: full\n" );
-					xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
-					vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
-					xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
-				}
-				else{
-					
-					xSemaphoreTake(count_mutex, portMAX_DELAY);
-					global_count++;
-					xSemaphoreGive(count_mutex);
-				}
-			}
-			else
-			{
-				log("myptr: err\n\r" );
-			}
-			xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
+			//Message_Protocol_t  xgmessage;
+			//memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
+//
+			//Message_Protocol_t * myptr = get_message_store();	
+			//if(NULL != myptr)
+			//{
+				//memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));			
+				////xQueueSend(xg_resend_queue, &myptr, 0);			
+				//if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
+				//{
+					//log("xg_resend_queue: full\n" );
+					//xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+					//vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+					//xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+				//}
+				//else{
+					//
+					//xSemaphoreTake(count_mutex, portMAX_DELAY);
+					//global_count++;
+					//xSemaphoreGive(count_mutex);
+				//}
+			//}
+			//else
+			//{
+				//log("myptr: err\n\r" );
+			//}
+			//xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
 		}
 		
 		/* 'Give' the semaphore to unblock the task. */
-		xSemaphoreGive(xBinarySemaphore);
+		//xSemaphoreGive(xBinarySemaphore);
 				
 		//log("Session_ID: %x \n\r",Session_number );
 		//log("paylaod_length: %d \n\r",data_length );
@@ -668,10 +668,10 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 		//log("send message\n");
 		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_9);//set tone to indicate the scan!!!
 			
-		vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
+		vTaskDelay(2500*2 / portTICK_RATE_MS);//延迟1000ms
 		//delay_ms(200);
-		//rfid_sendID_message();//send message	
-		scan_rfid_save_message();//scan and save message	
+		rfid_sendID_message();//send message	
+		//scan_rfid_save_message();//scan and save message	
 	}
 	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
 	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);
@@ -1053,47 +1053,47 @@ static __app_Thread_(app_cfg)
 					//if (xSemaphoreTake(xBinarySemaphore, (1000*2) / portTICK_RATE_MS) == pdPASS)
 					{
 						
-						if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (1000*2) / portTICK_RATE_MS))
-						{
-							if(data_ptr!=NULL){//resend message
-							
-								log("receive Okay!\n");	
-								xSemaphoreTake(count_mutex, portMAX_DELAY);
-								global_count--;
-								xSemaphoreGive(count_mutex);
-								log("global_count:%d\n", global_count);	
-																			
-								xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);	
-								if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) ==pdFALSE)
-								{
-									
-									if (xQueueSend(xg_resend_queue, &data_ptr, 0) != pdPASS)
-									{
-										log("xg_resend_queue: full\n" );
-										xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
-										vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
-										xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
-									}
-									else{
-											
-										xSemaphoreTake(count_mutex, portMAX_DELAY);
-										global_count++;
-										xSemaphoreGive(count_mutex);
-										xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
-									}
-				
-								}	
-								else
-								{
-									set_message_store(data_ptr);
-									log("send message\n");
-								}						
-				
-								//vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
-							
-							}
-						
-						}
+						//if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (1000*2) / portTICK_RATE_MS))
+						//{
+							//if(data_ptr!=NULL){//resend message
+							//
+								//log("receive Okay!\n");	
+								//xSemaphoreTake(count_mutex, portMAX_DELAY);
+								//global_count--;
+								//xSemaphoreGive(count_mutex);
+								//log("global_count:%d\n", global_count);	
+																			//
+								//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);	
+								//if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) ==pdFALSE)
+								//{
+									//
+									//if (xQueueSend(xg_resend_queue, &data_ptr, 0) != pdPASS)
+									//{
+										//log("xg_resend_queue: full\n" );
+										//xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+										//vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+										//xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+									//}
+									//else{
+											//
+										//xSemaphoreTake(count_mutex, portMAX_DELAY);
+										//global_count++;
+										//xSemaphoreGive(count_mutex);
+										//xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
+									//}
+				//
+								//}	
+								//else
+								//{
+									//set_message_store(data_ptr);
+									//log("send message\n");
+								//}						
+				//
+								////vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+							//
+							//}
+						//
+						//}
 					}
 					
 					if (0x00000003 != (bunchofrandomstatusflags & 0x00000003))//掉线
