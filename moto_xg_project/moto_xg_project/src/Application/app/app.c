@@ -668,7 +668,7 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 		//log("send message\n");
 		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_9);//set tone to indicate the scan!!!
 			
-		vTaskDelay(2500*2 / portTICK_RATE_MS);//ясЁы1000ms
+		vTaskDelay(100*2 / portTICK_RATE_MS);//ясЁы100ms
 		//delay_ms(200);
 		rfid_sendID_message();//send message	
 		//scan_rfid_save_message();//scan and save message	

@@ -60,7 +60,7 @@ U8 rfid_auto_reader(void *card_id)
 	status=PcdAnticoll(SN);//防冲撞，返回卡的序列号 4字节
 	if(status!=MI_OK)
 	{
-		xcmp_IdleTestTone(Tone_Start, Low_Battery_3);//set tone to noticy failure!!!
+		//xcmp_IdleTestTone(Tone_Start, Low_Battery_3);//set tone to noticy failure!!!
 		return status;
 		//continue;
 	}
@@ -90,6 +90,7 @@ U8 rfid_sendID_message()
 	//char data_buffer[16];
 	char message[80];
 	U8 return_err =0;
+	U8 connect_counts =0;
 	U8 temp =0;
 	U32 destination = DEST;
 	static U8 start_session = 0x80;
@@ -99,7 +100,19 @@ U8 rfid_sendID_message()
 	memset(SN, 0x00, 10);
 	memset(message, 0x00, 80);
 	
-	return_err = scan_patrol(SN);
+	//return_err = scan_patrol(SN);
+	
+	do 
+	{	
+		return_err = scan_patrol(SN);
+		if(return_err == 0)break;
+		else
+		{
+			vTaskDelay(400*2 / portTICK_RATE_MS);//延迟400ms
+		}
+		connect_counts++;
+		
+	} while ((connect_counts < 7) && (return_err !=0));
 	
 	if(return_err == 0){
 		
