@@ -18,7 +18,7 @@
 
 
 
-#define DEST 65535//目的ID
+#define DEST 65793//目的ID
 #pragma pack(1)
 //typedef struct
 //{

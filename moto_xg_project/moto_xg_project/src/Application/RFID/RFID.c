@@ -28,7 +28,7 @@ void rfid_init()
 	
 	rc522_init();
 	
-	rfid_sendID_message();
+	//rfid_sendID_message();
 	//if(rfid_auto_reader(card_id) == 0){
 		//log("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
 	//}
