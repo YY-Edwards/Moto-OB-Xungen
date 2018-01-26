@@ -9,7 +9,8 @@
 U8 CT[2];				//卡类型
 U8 SN[4];				//卡号
 U8 RFID[16];			//存放RFID
-U8 unsure_data[5]={0x04, 0x0d, 0x00, 0x0a, 0x00};
+//U8 unsure_data[5]={0x04, 0x0d, 0x00, 0x0a, 0x00};
+const U8 unsure_data[4]={0xe0, 0x81, 0x04, 0x00};
 	
 /*the queue is used to storage failure-send message*/
 extern volatile xQueueHandle message_storage_queue ;
@@ -27,6 +28,7 @@ void rfid_init()
 	
 	rc522_init();
 	
+	rfid_sendID_message();
 	//if(rfid_auto_reader(card_id) == 0){
 		//log("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
 	//}
@@ -86,7 +88,7 @@ extern volatile DateTime_t Current_time;
 
 U8 rfid_sendID_message()
 {
-	static char SN[10];
+	volatile char SN[10];
 	//char data_buffer[16];
 	char message[80];
 	U8 return_err =0;
@@ -136,20 +138,24 @@ U8 rfid_sendID_message()
 		}
 		
 		//memcpy(&data_buffer.XG_Time.Year, &Current_time.Year, sizeof(DateTime_t))	;
+	//
+		//header.length = (0x0008 + sizeof(Message_Data_t));
+	//
+		//if(start_session > 0x9f)start_session = 0x80;
+	//
+		//header.session_id = (++start_session);
 	
-		header.length = (0x0008 + sizeof(Message_Data_t));
+		//memcpy(&header.fixed_data[0], unsure_data, sizeof(unsure_data));
+		//header.type = 0xe000;
 	
-		if(start_session > 0x9f)start_session = 0x80;
-	
-		header.session_id = (++start_session);
-	
-		memcpy(&header.fixed_data[0], unsure_data, sizeof(unsure_data));
-		header.type = 0xe000;
-	
-		memcpy(message, &header, sizeof(Message_Header_t));//拷贝header数据
+		memcpy(message, unsure_data, sizeof(Message_Header_t));//拷贝header数据
+		//memcpy(&header.fixed_data[0], unsure_data, sizeof(unsure_data));
+		
 		memcpy(&message[sizeof(Message_Header_t)], &data_buffer, sizeof(Message_Data_t));//拷贝短信内容数据
+		
+		message[sizeof(Message_Header_t)+sizeof(Message_Data_t)] = 0x00;//terminate flag;
 	
-		xcmp_data_session_req(message, (sizeof(Message_Header_t)+sizeof(Message_Data_t)), destination);
+		xcmp_data_session_req(message, (sizeof(Message_Header_t)+sizeof(Message_Data_t)+1), destination);
 		
 	}
 	else
@@ -179,95 +185,95 @@ U8 scan_patrol(char* SN)
 	return return_err;
 
 }
-U8 scan_rfid_save_message()
-{
-	static char SN[10];
-	char message[80];
-	U8 return_err =0;
-	U8 temp =0;
-	U32 destination = DEST;
-	static U8 start_session = 0x80;
-	Message_Header_t header;
-	Message_Data_t data_buffer;//22bytes
-	
-	memset(SN, 0x00, 10);
-	memset(message, 0x00, 80);
-	
-	return_err = scan_patrol(SN);
-	
-	if(return_err == 0){
-		
-		log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
-		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_8);//set tone to indicate scan rfid success!!!
-		for(int i = 0; i<4; i++){//将Unicode码转换为大端模式
-			
-			temp = ((SN[i] & 0xF0) >> 4);//取字节高四位
-			if((temp >= 0) && (temp <= 9))data_buffer.RFID_ID[i*4] = temp+0x30;
-			else
-			data_buffer.RFID_ID[i*4] = ((temp - 0x0a)+0x61);
-			
-			data_buffer.RFID_ID[i*4+1] = 0x00;
-			
-			temp = (SN[i] & 0x0F);//取字节低四位
-			if((temp >= 0) && (temp <= 9))data_buffer.RFID_ID[i*4+2] = temp+0x30;
-			else
-			data_buffer.RFID_ID[i*4+2] = ((temp - 0x0a)+0x61);
-
-			data_buffer.RFID_ID[i*4+3] = 0x00;
-		}
-		
-		//memcpy(&data_buffer.XG_Time.Year, &Current_time.Year, sizeof(DateTime_t))	;
-		
-		header.length = (0x0008 + sizeof(Message_Data_t));
-		
-		if(start_session > 0x9f)start_session = 0x80;
-		
-		header.session_id = (++start_session);
-		
-		memcpy(&header.fixed_data[0], unsure_data, sizeof(unsure_data));
-		header.type = 0xe000;
-		
-		memcpy(message, &header, sizeof(Message_Header_t));//拷贝header数据
-		memcpy(&message[sizeof(Message_Header_t)], &data_buffer, sizeof(Message_Data_t));//拷贝短信内容数据
-		
-		//xcmp_data_session_req(message, (sizeof(Message_Header_t)+sizeof(Message_Data_t)), destination);
-		Message_Protocol_t  xgmessage;
-		memcpy(&xgmessage, message, sizeof(Message_Protocol_t));
-
-		Message_Protocol_t * myptr = get_message_store();
-		if(NULL != myptr)
-		{
-			memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));
-			if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
-			{
-				log("xg_resend_queue: full\n" );
-				xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
-				vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
-				xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
-			}
-			else{
-				
-				xSemaphoreTake(count_mutex, portMAX_DELAY);
-				global_count++;
-				xSemaphoreGive(count_mutex);
-			}
-
-		}
-		else
-		{
-			log("myptr: err\n\r" );
-		}
-		
-	}
-	else
-	{
-		xcmp_IdleTestTone(Tone_Start, Low_Battery_3);//set tone to indicate scan rfid failure!!!
-		log("no card find...\n");
-	}
-	
-	return return_err;
-	
-}
+//U8 scan_rfid_save_message()
+//{
+	//static char SN[10];
+	//char message[80];
+	//U8 return_err =0;
+	//U8 temp =0;
+	//U32 destination = DEST;
+	//static U8 start_session = 0x80;
+	//Message_Header_t header;
+	//Message_Data_t data_buffer;//22bytes
+	//
+	//memset(SN, 0x00, 10);
+	//memset(message, 0x00, 80);
+	//
+	//return_err = scan_patrol(SN);
+	//
+	//if(return_err == 0){
+		//
+		//log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
+		//xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_8);//set tone to indicate scan rfid success!!!
+		//for(int i = 0; i<4; i++){//将Unicode码转换为大端模式
+			//
+			//temp = ((SN[i] & 0xF0) >> 4);//取字节高四位
+			//if((temp >= 0) && (temp <= 9))data_buffer.RFID_ID[i*4] = temp+0x30;
+			//else
+			//data_buffer.RFID_ID[i*4] = ((temp - 0x0a)+0x61);
+			//
+			//data_buffer.RFID_ID[i*4+1] = 0x00;
+			//
+			//temp = (SN[i] & 0x0F);//取字节低四位
+			//if((temp >= 0) && (temp <= 9))data_buffer.RFID_ID[i*4+2] = temp+0x30;
+			//else
+			//data_buffer.RFID_ID[i*4+2] = ((temp - 0x0a)+0x61);
+//
+			//data_buffer.RFID_ID[i*4+3] = 0x00;
+		//}
+		//
+		////memcpy(&data_buffer.XG_Time.Year, &Current_time.Year, sizeof(DateTime_t))	;
+		//
+		//header.length = (0x0008 + sizeof(Message_Data_t));
+		//
+		//if(start_session > 0x9f)start_session = 0x80;
+		//
+		//header.session_id = (++start_session);
+		//
+		//memcpy(&header.fixed_data[0], unsure_data, sizeof(unsure_data));
+		//header.type = 0xe000;
+		//
+		//memcpy(message, &header, sizeof(Message_Header_t));//拷贝header数据
+		//memcpy(&message[sizeof(Message_Header_t)], &data_buffer, sizeof(Message_Data_t));//拷贝短信内容数据
+		//
+		////xcmp_data_session_req(message, (sizeof(Message_Header_t)+sizeof(Message_Data_t)), destination);
+		//Message_Protocol_t  xgmessage;
+		//memcpy(&xgmessage, message, sizeof(Message_Protocol_t));
+//
+		//Message_Protocol_t * myptr = get_message_store();
+		//if(NULL != myptr)
+		//{
+			//memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));
+			//if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
+			//{
+				//log("xg_resend_queue: full\n" );
+				//xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+				//vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+				//xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+			//}
+			//else{
+				//
+				//xSemaphoreTake(count_mutex, portMAX_DELAY);
+				//global_count++;
+				//xSemaphoreGive(count_mutex);
+			//}
+//
+		//}
+		//else
+		//{
+			//log("myptr: err\n\r" );
+		//}
+		//
+	//}
+	//else
+	//{
+		//xcmp_IdleTestTone(Tone_Start, Low_Battery_3);//set tone to indicate scan rfid failure!!!
+		//log("no card find...\n");
+	//}
+	//
+	//return return_err;
+	//
+//}
 
 
 

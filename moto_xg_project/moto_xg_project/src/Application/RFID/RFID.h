@@ -20,14 +20,22 @@
 
 #define DEST 65535//目的ID
 #pragma pack(1)
+//typedef struct
+//{
+	//U16 length;//0x0008+
+	//U16 type;//0xa000(group);0xe000(point)
+	//U8  session_id;//0x81~0x9f:30
+	//U8  fixed_data[5];//0x04 0d 00 0a 00
+	//
+//}Message_Header_t;
 typedef struct
 {
-	U16 length;//0x0008+
-	U16 type;//0xa000(group);0xe000(point)
-	U8  session_id;//0x81~0x9f:30
-	U8  fixed_data[5];//0x04 0d 00 0a 00
 	
+U8  fixed_data[4];//0xe0 81 04 00
+
 }Message_Header_t;
+
+
 #pragma pack()
 
 #pragma pack(1)
@@ -46,6 +54,7 @@ typedef struct
 
 	Message_Header_t	header;
 	Message_Data_t		data;
+	
 
 }Message_Protocol_t;//10+22bytes
 #pragma pack()
