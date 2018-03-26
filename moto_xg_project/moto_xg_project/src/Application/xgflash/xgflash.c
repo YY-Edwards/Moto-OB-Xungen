@@ -14,7 +14,7 @@ volatile xQueueHandle message_storage_queue = NULL;
 /*the queue is used to receive failure-send message*/
 volatile xQueueHandle xg_resend_queue = NULL;
 
-volatile const char XGFlashLabel[] = {"PATROL"};
+volatile const char XGFlashLabel[] = {"CSBK"};
 static unsigned short current_message_index = 0;
 static unsigned int	  current_save_message_offset = XG_MESSAGE_DATA_START_ADD;
 static U8 list_init_success_flag = 0;
@@ -95,7 +95,7 @@ start:
 				return FALSE;
 			}
 			current_message_index = 0;
-			log("\r\n----create xg message info okay!----\r\n");
+			log("\r\n----create csbk message info okay!----\r\n");
 		}
 		else//success
 		{

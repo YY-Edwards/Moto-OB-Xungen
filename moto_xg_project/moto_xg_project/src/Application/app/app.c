@@ -1081,7 +1081,7 @@ static void send_message(void * pvParameters)
 static __app_Thread_(app_cfg)
 {
 	static int coun=0;
-
+	static int run_counter=0;
 	static  portTickType xLastWakeTime;
 	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	U8 Burst_ID = 0;
@@ -1169,11 +1169,11 @@ static __app_Thread_(app_cfg)
 					}
 					else
 					{						
-											
+						run_counter++;			
 						nop();
 						//water_value = uxTaskGetStackHighWaterMark(NULL);
 						//log("app-thread water_value: %d\n", water_value);
-						log("app task run!\n");
+						log("app task run:%d\n", run_counter);
 					}
 				
 			break;
@@ -1183,7 +1183,7 @@ static __app_Thread_(app_cfg)
 		} //End of switch on OB_State.
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (1200*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	log("app exit:err\n");
 }

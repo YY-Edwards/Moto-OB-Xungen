@@ -36,7 +36,7 @@ int main (void)
 		
 	INTC_init_interrupts();
 		
-	log_init();
+	log_init();//usart2
 	log("----start debug----");
 	
 	xg_flashc_init();
@@ -45,7 +45,7 @@ int main (void)
 
 	//tc_init();
 	
-	rfid_init();
+	//rfid_init();csbk-ob：无此硬件接口
 		
 	app_init();
 	
