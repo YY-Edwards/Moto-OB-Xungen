@@ -52,12 +52,12 @@ information between the radio¡¯s main board and the option board.
 | Slot 1 | Slot 2 | Slot 3 | Slot 4 | Slot 5 | Slot 6 | Slot 7 | Slot 8 |
 |-----------------+-----------------+-----------------------------------|
 |    Reserved     |   XNL Channel   |        Payload Channel            |
-/*
+
 
 
 Slots 1 and 2 are reserved for main board use only to transport data between
 devices within the radio.
-*/
+**/
 typedef union {
     U32    dword;
     U16    word[2];

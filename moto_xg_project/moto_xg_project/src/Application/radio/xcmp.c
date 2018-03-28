@@ -120,7 +120,7 @@ static void xcmp_tx( void * data_ptr, U32 data_len)
 		= 0x02 + 0x0C + 0x02 + xcmp payload
 		*/
 		
-		//xnl_frame.phy_header.phy_control  = (0x4000 | fragement_type |(sizeof(phy_header_t.check_sum) + sizeof(xnl_header_t) + r));
+		xnl_frame.phy_header.phy_control  = ((0x4000 | fragement_type) + (sizeof(xnl_frame.phy_header.check_sum) + sizeof(xnl_header_t) + r));
 		
 		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, r);
 		xnl_frame.xnl_header.payload_length = r;
@@ -341,7 +341,7 @@ void xcmp_opcode_not_supported( void )
 {
 	/*xcmp frame will be sent*/
 	xcmp_fragment_t xcmp_farme;
-	
+
 	/*insert XCMP opcode*/
 	xcmp_farme.xcmp_opcode = XCMP_REPLY;
 	

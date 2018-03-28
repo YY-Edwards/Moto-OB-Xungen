@@ -484,7 +484,7 @@ Device Type
 #define IP_Peripheral		0x0A
 
 /*3rd party non-IP Peripheral-based application.*/
-#define Non-IP_Peripheral	0x0B
+#define Non_IP_Peripheral	0x0B
 
 /*
 Device Status

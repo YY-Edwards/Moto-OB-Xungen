@@ -141,7 +141,7 @@ void xnl_send_device_master_query(void)
 	Fragment Type:0
 	Length :12 + 2(xnl length(12) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = 0x4000 | 12 + 2;
+	xnl_frame.phy_header.phy_control = (0x4000 | 12 + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
@@ -210,7 +210,7 @@ void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	Fragment Type:0
 	Length :12 + 2(xnl length(12) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = 0x4000 | 12 + 2;
+	xnl_frame.phy_header.phy_control = (0x4000 | 12 + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
@@ -312,7 +312,7 @@ void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 	Fragment Type:0
 	Length :24 + 2(xnl length(24) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = 0x4000 | 24 + 2;
+	xnl_frame.phy_header.phy_control = (0x4000 | 24 + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
@@ -444,7 +444,7 @@ static void xnl_send_msg_ack(xnl_header_t * hdr)
 	Fragment Type:0
 	Length :12 + 2(xnl length(12) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = 0x4000 | 12 + 2;
+	xnl_frame.phy_header.phy_control = (0x4000 | 12 + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/

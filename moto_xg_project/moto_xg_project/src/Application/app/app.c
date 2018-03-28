@@ -761,7 +761,7 @@ void SingleDetection_brdcst_func(xcmp_fragment_t * xcmp)
 	else
 	{
 		log("SIGBRCST error\n");
-		log("\Signal_type: %X \n\r", xcmp->u8[0] );
+		log("Signal_type: %X \n\r", xcmp->u8[0] );
 	}
 	
 
