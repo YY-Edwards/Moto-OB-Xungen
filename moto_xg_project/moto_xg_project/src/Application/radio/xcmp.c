@@ -65,7 +65,8 @@ static void xcmp_tx( xcmp_fragment_t * xcmp, U8 payload_len)
 	
 	/*
 	Data Type 0x4000
-	Fragment Type:0
+	!!!neeed to adjust the Fragment Type
+	Fragment Type:0£¬default-setting
 	Length :xnl length + checksum
 	= checksum + xnl header + xcmp opcode + xcmp payload
 	= 0x02 + 0x0C + 0x02 + xcmp payload
