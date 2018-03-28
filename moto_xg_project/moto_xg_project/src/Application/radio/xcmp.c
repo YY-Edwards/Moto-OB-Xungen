@@ -51,29 +51,31 @@ volatile app_exec_t * app_list;
 
 /**
 Function: xcmp_tx
-Parameters: xcmp_fragment_t *
-	U8:xcmp payload length
+Parameters: 
+	void *: data point
+	U32:	data length
 Description: build xnl frame to send 
 Calls:   
 	xnl_tx -- xnl.c
 Called By: ...
 */
-static void xcmp_tx( xcmp_fragment_t * xcmp, U8 payload_len)
+static void xcmp_tx( void * data_ptr, U32 data_len)
+//static void xcmp_tx( xcmp_fragment_t * xcmp, U8 payload_len)
 {
 	/*xnl frame will be sent*/
 	xnl_fragment_t xnl_frame;
-	
+
 	/*
 	Data Type 0x4000
-	!!!neeed to adjust the Fragment Type
-	Fragment Type:0£¨default-setting
-	Length :xnl length + checksum
-	= checksum + xnl header + xcmp opcode + xcmp payload
-	= 0x02 + 0x0C + 0x02 + xcmp payload
-	= 0x10 + xcmp payload
 	*/
-	xnl_frame.phy_header.phy_control = 0x4000 | ( 0x10 + payload_len);
+	U32 q= 0;
+	U32 r = 0;
+	U16 fragement_type =0x0000;//default SINGLE_FRAGMENT
 	
+	q = data_len/MAX_XCMP_DATA_LENGTH;
+	r = data_len%MAX_XCMP_DATA_LENGTH;
+	
+		
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
 	xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
@@ -88,12 +90,45 @@ static void xcmp_tx( xcmp_fragment_t * xcmp, U8 payload_len)
 	xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 	xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 	
-	/*insert xcmp frame data*/
-	memcpy(&xnl_frame.xnl_payload.xnl_content_data_msg, xcmp, payload_len + 2);
-	xnl_frame.xnl_header.payload_length = payload_len + 2;	
 	
-	/* send xnl frame*/	
-	xnl_tx(&xnl_frame);
+	if(q != 0)//…Ã
+	{//need to send data in a sub package 
+		int idx=0;
+		fragement_type = 0x100;//first fragment
+		for (; idx<q; idx++)
+		{
+			xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+			/*insert xcmp frame data*/
+			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
+			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;	
+			
+			/* send xnl frame*/	
+			xnl_tx(&xnl_frame);
+			
+			//clear 
+			memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
+			data_ptr+=MAX_XCMP_DATA_LENGTH;//÷∏’Î∆´“∆
+			fragement_type = 0x200;//middle fragment
+		}
+	}
+	if(r!=0)//”‡ ˝
+	{
+		/*
+		Length :
+		= checksum + xnl header + data_len
+		= checksum + xnl header + xcmp opcode + xcmp payload
+		= 0x02 + 0x0C + 0x02 + xcmp payload
+		*/
+		
+		xnl_frame.phy_header.phy_control  = (0x4000 | fragement_type |(sizeof(phy_header_t.check_sum) + sizeof(xnl_header_t) + r));
+		
+		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, r);
+		xnl_frame.xnl_header.payload_length = r;
+		
+		/* send xnl frame*/
+		xnl_tx(&xnl_frame);
+
+	}
 }
 
 /**
@@ -413,6 +448,7 @@ void xcmp_IdleTestTone(U8 type, U16 toneID)
 	memset(ptr->Reserved, 0, 8);
 	
 	/*send xcmp frame*/
+	//note:length <=238bytes
 	xcmp_tx( &xcmp_farme, sizeof(ToneControl_req_t));
 }
 

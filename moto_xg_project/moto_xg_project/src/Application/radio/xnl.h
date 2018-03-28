@@ -86,7 +86,7 @@ typedef struct {   //XCMP/XNL Development Guide Section 5.1
 	U16            transaction_id;
 	
 	/*Number of bytes of payload*/
-	S16            payload_length;
+	U16            payload_length;
 }xnl_header_t;
 
 /**invalid XNL opcode*/
@@ -304,7 +304,8 @@ indicate the type of raw data.*/
 typedef struct 
 {
 	U16  xcmp_opcode;
-	U8   u8[200];
+	//U8   u8[200];
+	U8   u8[238];
 } xnl_content_data_msg_t;
 
 /*DATA_MSG_ACK*/
@@ -340,8 +341,8 @@ typedef union {
 typedef struct {
 	phy_header_t     phy_header;  // 2  Words
 	xnl_header_t     xnl_header;  // 6  Words
-	xnl_payload_t    xnl_payload; // 7  ,10hWords (most common messages)
-	U16            rest[19];
+	xnl_payload_t    xnl_payload; // 7  ,10hWords (most common messages),=>238bytes,at most
+	//U16            rest[19];
 } xnl_fragment_t;
 
 /*f times smaller than A supermarket, then resend the instructions*/

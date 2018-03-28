@@ -18,6 +18,13 @@ History:
 typedef xnl_content_data_msg_t xcmp_fragment_t;
 
 #define MAX_APP_FUNC 0x0069
+/*For the XNL Channel, the total data length includes the checksum bytes in
+each fragment while for the Payload Channel the checksum bytes do not exist. Note
+that the total data length does not include the payload padding byte for both XNL
+Channel and Payload Channel*/
+#define MAX_TRANSFER_UNIT 254
+#define MAX_XCMP_DATA_LENGTH (MAX_TRANSFER_UNIT - sizeof(phy_header_t) - sizeof(xnl_header_t)) //256-4-12=240
+
 typedef struct
 {
 	/*request function*/
