@@ -180,7 +180,7 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	/*XNL frame will be send*/	
 	xnl_fragment_t xnl_frame;
 	
-	//log("T_xnl-opcode:%4x", xnl->xnl_header.opcode);
+	//mylog("T_xnl-opcode:%4x", xnl->xnl_header.opcode);
 	
 	/*
 	The XNL_MASTER_STATUS_BRDCST message is sent out by the master device to 
@@ -201,7 +201,7 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	/*No timeout*/	
 	xSemaphoreGive(xnl_timeout_semphr);	
 
-	//log("xnl-ma:%4x", xnl->xnl_header.source);
+	//mylog("xnl-ma:%4x", xnl->xnl_header.source);
 	/*get the master adderss from this message*/	
 	xnl_information.master_address = xnl->xnl_header.source;	
 	
@@ -258,7 +258,7 @@ static void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 	the receiving device and will be used to authenticate the connection 
 	request. 5.4.4
 	*/
-	//log("R_xnl-opcode:%4x", xnl->xnl_header.opcode);
+	//mylog("R_xnl-opcode:%4x", xnl->xnl_header.opcode);
 	
 	if(xnl_information.is_connected)
 	{
@@ -421,7 +421,7 @@ static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 		/*connect finish*/
 		xnl_information.is_connected = TRUE;
 		
-		//log("connected finish");
+		//mylog("connected finish");
 	}
 	
 	//xcmp_audio_route_speaker();
@@ -600,10 +600,10 @@ void xnl_tx(xnl_fragment_t * xnl)
 	xnl->phy_header.check_sum = check_sum( xnl );
 	
 	
-	//log("op -%8x", xnl->xnl_header.opcode);
+	//mylog("op -%8x", xnl->xnl_header.opcode);
 	
-	//log("\n\r T_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:T_xnl指令
-	//log("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
+	//mylog("\n\r T_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:T_xnl指令
+	//mylog("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 	
 	xnl_fragment_t * ptr = get_xnl_idle();//pvPortMalloc(sizeof(xnl_fragment_t));
 	//get_xnl_idle(&ptr);
@@ -613,10 +613,10 @@ void xnl_tx(xnl_fragment_t * xnl)
 	
 		/*push to queue and send*/
 		
-		//log("ptr -%8x", ptr);
+		//mylog("ptr -%8x", ptr);
 		
 		xQueueSend(xnl_frame_tx, &ptr, 0);
-		//log("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
+		//mylog("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 		
 		//vPortFree(ptr);
 	}
@@ -671,7 +671,7 @@ static void xnl_tx_process(void * pvParameters)
 					
 					/*send physical data*/
 					phy_tx((phy_fragment_t *)ptr);
-					//log("\n\r T_xcmp:%4x \n\r", ptr->xnl_payload.xnl_content_data_msg.xcmp_opcode);
+					//mylog("\n\r T_xcmp:%4x \n\r", ptr->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 					xnl_send_times = 1;				
 					/*clear timeout semaphore and wait XNL reply*/
 					xSemaphoreTake( xnl_timeout_semphr, ( portTickType )0);			
@@ -729,7 +729,7 @@ static void xnl_rx(xnl_fragment_t * xnl)
 
 	if(NULL != xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec)
 	{
-		//log("\n\r R_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:R_xnl指令
+		//mylog("\n\r R_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:R_xnl指令
 		/*execute the function in list*/
 		xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec(xnl);
 	}

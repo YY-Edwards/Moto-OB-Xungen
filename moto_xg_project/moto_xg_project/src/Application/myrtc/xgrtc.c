@@ -12,7 +12,7 @@ static volatile xSemaphoreHandle rtc_mutex = NULL;
 volatile static int print_sec = 1;
 
 // Time counter
-static int sec = 0;
+//static int sec = 0;
 
 volatile U32 Time_scale;
 
@@ -23,7 +23,7 @@ __attribute__((__interrupt__))
 #pragma handler = AVR32_RTC_IRQ_GROUP, 1
 __interrupt
 #endif
-void rtc_irq(void)
+static void rtc_irq(void)
 {
 	U8 T,K;
 	U32 T16,K16;
@@ -89,7 +89,7 @@ char *print_i(char *str, unsigned int n)
   return &str[i];
 }
 
-void RTC_Test()
+static void RTC_Test()
 {
 	
 	temp_time.Year		= 18;
@@ -132,7 +132,7 @@ void xg_rtc_init(void)
 	//if (!rtc_init(&AVR32_RTC, RTC_OSC_RC, RTC_PSEL_RC_1_76HZ))
 	if (!rtc_init(&AVR32_RTC, RTC_OSC_32KHZ, RTC_PSEL_32KHZ_1HZ))
 	{
-		log("Error initializing the RTC\r\n");
+		mylog("Error initializing the RTC\r\n");
 	}
 	// Set top value to 0 to generate an interrupt every seconds */
 	rtc_set_top_value(&AVR32_RTC, 0);

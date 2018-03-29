@@ -51,9 +51,9 @@ typedef struct
 #pragma pack()
 
 
-void rfid_init();
-U8 rfid_sendID_message();
-U8 scan_rfid_save_message();
+void rfid_init(void);
+U8 rfid_sendID_message(void);
+U8 scan_rfid_save_message(void);
 U8 rfid_auto_reader(void *card_id);
 U8 scan_patrol(char* SN);
 

@@ -59,7 +59,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel);
 volatile static RxAMBEBurstType m_RxBurstType = VOICE_WATING;
 volatile static U32 AMBE_HT[2];
 
-static U8 AMBE_Per_Burst_Flag = 0;
+//static U8 AMBE_Per_Burst_Flag = 0;
 
 volatile xQueueHandle test_tx = NULL;
 extern U32 tc_tick;
@@ -104,8 +104,8 @@ void phy_tx(phy_fragment_t * phy)
 	
 	//phy_fragment_t * phy_ptr = malloc(sizeof(phy_fragment_t));
 	//memcpy(phy_ptr, phy, sizeof(phy_fragment_t));
-	//log("\n\r T_xcmp:%4x \n\r", phy->xnl_fragment.xnl_payload.xnl_content_data_msg.xcmp_opcode);
-	//log("T_xnl-opcode:%4x", xnl->xnl_header.opcode);//log:R_xnl指令	
+	//mylog("\n\r T_xcmp:%4x \n\r", phy->xnl_fragment.xnl_payload.xnl_content_data_msg.xcmp_opcode);
+	//mylog("T_xnl-opcode:%4x", xnl->xnl_header.opcode);//log:R_xnl指令	
 	if(XCMPXNL_DATA == (phy_ctrl & 0xF000))
 	{
 		/*push the xnl packet to queue to send */
@@ -148,7 +148,7 @@ Calls:
 Called By: phy_xnl_rx
     phy_payload_rx
 */
-void phy_rx(phy_fragment_t * phy_ptr)
+static void phy_rx(phy_fragment_t * phy_ptr)
 {
     /*variables are used to store the push result in interrupt*/
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
@@ -374,7 +374,7 @@ Called By: phy_rx_func
 */
 static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 {
-	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+//	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	
 	static phy_fragment_t * phy_frame_ptr = NULL;
 	
@@ -583,22 +583,22 @@ Called By:phy_tx_func
 
 static void phy_payload_tx(payload_channel_t * payload_tx_channel)
 {
-	static U32 counter = 0;
+//	static U32 counter = 0;
 	// 0:idle;1:header; 2:send, 3:end frame
 	static AMBEPayloadTxStates AMBEpayload_tx_state = AMBE_IDLE;
 	
-	static U8 payload_tx_state = 0;
-	static U8 frame_number = 0; // 10frame;
-	static S16 expexted_length = 0;
-	static Bool last_frame = FALSE;
+//	static U8 payload_tx_state = 0;
+//	static U8 frame_number = 0; // 10frame;
+//	static S16 expexted_length = 0;
+//	static Bool last_frame = FALSE;
 	
-	static U32 index = 0;
+//	static U32 index = 0;
 	static U32 A_index = 0;
 	static U32 Soft_index = 0;
 	
-	static U32 send_num = 0;
+//	static U32 send_num = 0;
 	
-	static U32 i = 0;
+//	static U32 i = 0;
 	
 	//static U8 frame_5_end = 0;
 	//static U16 pay[256];
@@ -1551,7 +1551,7 @@ Called By:phy_rx_func
 */
 static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 {
-	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+//	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	static RxMediaStates RxMediaState = WAITINGABAB;
 	static U32  RxMedia_IsFillingNext16 = 0;
 	static U32  RxAMBE_IsFillingNext8 = 0;
@@ -1569,10 +1569,10 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 	volatile static U8 Item_ID = 0;
 	volatile static U32	Item_Length = 0;
 	
-	static U8  HT_index = 0;
+//	static U8  HT_index = 0;
 	static U8 SDV_Index = 0;
 	
-	static U8 _flag = 1;//0xABCDC014时，_flag为0；
+//	static U8 _flag = 1;//0xABCDC014时，_flag为0；
 						//0xABCDC010时，_flag为1；
 			
 	//payload_ptr_t *AMBE_payload_ptr;		
@@ -1604,7 +1604,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 			//if (((payload_rx_channel->dword[0]  & 0x0000F000) != 0x00001000) //media data from mic or speaker
 			//&&((payload_rx_channel->dword[0]  & 0x0000F000) != 0x00002000))
 			//break;   //Skip on non-DATA.
-			//log("mic data:");
+			//mylog("mic data:");
 			//PAYLOAD_DATA_ENH (0x0c)
 			//—Data routed to Option Board or to radio's main board, the data contents depend on Item field contained in payload bits.
 			//if (((payload_rx_channel->dword[0]  & 0x0000F000) == 0x00005000)

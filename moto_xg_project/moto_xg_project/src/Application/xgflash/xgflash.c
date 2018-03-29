@@ -95,11 +95,11 @@ start:
 				return FALSE;
 			}
 			current_message_index = 0;
-			log("\r\n----create csbk message info okay!----\r\n");
+			mylog("\r\n----create csbk message info okay!----\r\n");
 		}
 		else//success
 		{
-			log("\nLABEL: %s\n", str);
+			mylog("\nLABEL: %s\n", str);
 			//Get the current voice index
 			return_code = data_flash_read_block(MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH, &current_message_index);								
 			if(return_code == DF_OK)
@@ -107,7 +107,7 @@ start:
 				//Calculates the offset address of the current stored message
 				if(current_message_index != 0){
 					
-					log("current_message_index: %d\n", current_message_index);
+					mylog("current_message_index: %d\n", current_message_index);
 					memset(str, 0x00, sizeof(str));	
 					address = XG_MESSAGE_INFO_HEADER_START_ADD + ((current_message_index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
 					return_code = data_flash_read_block(address, XG_MESSAGE_INFO_HEADER_LENGTH, (U8 *)str);			
@@ -117,10 +117,10 @@ start:
 						if(ptr->numb == current_message_index)
 						{
 							current_save_message_offset = ptr->address + ptr->offset;
-							log("current_save_message_offset : %X\n", current_save_message_offset);
+							mylog("current_save_message_offset : %X\n", current_save_message_offset);
 							if(current_save_message_offset > XG_MESSAGE_DATA_BOUNDARY_ADD){
 										
-								log("\r\n----message storage is full!!!----\r\n");
+								mylog("\r\n----message storage is full!!!----\r\n");
 								//xgflash erase
 
 								return_code = data_flash_erase_block(0, DF_BLOCK_ALL);
@@ -132,12 +132,12 @@ start:
 						}
 						else
 						{
-							log("\r\n----message storage is err!!!----\r\n");
+							mylog("\r\n----message storage is err!!!----\r\n");
 							goto ERASE;
 						}
 					}
 				}
-				log("\r\n----xoxo read message info okay!----\r\n");
+				mylog("\r\n----xoxo read message info okay!----\r\n");
 			}
 			else
 				return FALSE;
@@ -192,7 +192,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 	//save data
 	if(current_save_message_offset > XG_MESSAGE_DATA_BOUNDARY_ADD)//The message data is out of boundary
 	{
-		log("\r\n----message data is Out of bounds!!!\r\n----");
+		mylog("\r\n----message data is Out of bounds!!!\r\n----");
 		current_bytes_remained = 0;
 		xSemaphoreGive(xgflash_mutex );//unlock
 		return XG_OUT_BOUNDARY;
@@ -208,7 +208,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 	}
 	
 	current_save_message_offset+=data_len;
-	log("current_save_message_offset : %X\n", current_save_message_offset);
+	mylog("current_save_message_offset : %X\n", current_save_message_offset);
 		
 	MessageList_Info_t ptr;
 		
@@ -222,7 +222,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		address = XG_MESSAGE_INFO_HEADER_START_ADD + ((current_message_index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
 		if(address > XG_MESSAGE_LISTINFO_BOUNDARY_ADD)//The number of messages is out of bounds
 		{
-			log("\r\n----info list is Out of bounds!!!\r\n----");
+			mylog("\r\n----info list is Out of bounds!!!\r\n----");
 			current_bytes_remained = 0;
 			xSemaphoreGive(xgflash_mutex );//unlock
 			return XG_OUT_BOUNDARY;
@@ -309,11 +309,11 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 		}
 		else
 		{
-			log("Err flash data\n");
-			//log("ptr->numb : %x\n", ptr->numb);
-			//log("ptr->offset : %x\n", ptr->offset);
-			//log("ptr->address : %x\n", ptr->address);
-			//log("message_index : %x\n",message_index);
+			mylog("Err flash data\n");
+			//mylog("ptr->numb : %x\n", ptr->numb);
+			//mylog("ptr->offset : %x\n", ptr->offset);
+			//mylog("ptr->address : %x\n", ptr->address);
+			//mylog("message_index : %x\n",message_index);
 			
 			//xSemaphoreGive(xgflash_mutex);//unlock
 			status = 8;
@@ -327,13 +327,13 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 			return_code = data_flash_write((U8 *)&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
 			if (return_code != DF_WRITE_COMPLETED)
 			{
-				log("data_flash_write 1...\n");
+				mylog("data_flash_write 1...\n");
 				status = XG_FLASH_WRITE_FAIL;
 			}
 			//return_code = data_flash_write((U8 *)str, info_address, XG_MESSAGE_INFO_HEADER_LENGTH);
 			//if (return_code != DF_WRITE_COMPLETED)
 			//{	
-				//log("data_flash_write 2...\n");
+				//mylog("data_flash_write 2...\n");
 				//status = XG_FLASH_WRITE_FAIL;
 			//}
 					//
@@ -342,7 +342,7 @@ xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, boo
 			current_save_message_offset-=32;//出错在这...如果掉线，未执行，则会出现存储碎片
 			//if (return_code != DF_WRITE_COMPLETED)
 			//{
-				//log("data_flash_write 3...\n");
+				//mylog("data_flash_write 3...\n");
 				//status = XG_FLASH_WRITE_FAIL;
 			//}
 					
@@ -398,25 +398,25 @@ void runXGFlashTestSAVE( void *pvParameters )
 		//Enable_interrupt_level(1);
 		//if (flashc_is_lock_error() || flashc_is_programming_error())
 		//{
-		//log("XG flashc_memcpy err...\n");
+		//mylog("XG flashc_memcpy err...\n");
 		//}
 		//else
 		nop();
 		nop();
 		nop();
 		//water_value = uxTaskGetStackHighWaterMark(NULL);
-		//log("water_value: %d\n", water_value);
-		//log("XG save okay!\n");
+		//mylog("water_value: %d\n", water_value);
+		//mylog("XG save okay!\n");
 		memset(&data_ptr.data.XG_Time.Minute, 0x01, 1);
 		status = xgflash_message_save(&data_ptr, sizeof(Message_Protocol_t), TRUE);
 		if(status == XG_OK)
 		{
-			log("XG save okay!\n");
+			mylog("XG save okay!\n");
 			data_ptr.data.XG_Time.Second+=1;
 		}
 		else
 		{
-			log("save message err : %d\n", status);
+			mylog("save message err : %d\n", status);
 		}
 	}
 	
@@ -442,21 +442,21 @@ void runXGFlashTestREAD( void *pvParameters )
 		message_count = xgflash_get_message_count();
 		if(message_count != 0)
 		{
-			log("message_count : %d\n", message_count);
+			mylog("message_count : %d\n", message_count);
 			status = xgflash_get_message_data(message_count, data_ptr, true);
 			if(status == XG_OK)
 			{
-				log("read out data : %d\n", data_ptr->data.XG_Time.Second);
+				mylog("read out data : %d\n", data_ptr->data.XG_Time.Second);
 				
 				return_err = scan_patrol(SN);
 				if(return_err == 0){
 					
-					log("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
+					mylog("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
 				}
 			}
 			else
 			{
-				log("get message err : %d\n", status);
+				mylog("get message err : %d\n", status);
 			}
 		}
 		else
@@ -464,7 +464,7 @@ void runXGFlashTestREAD( void *pvParameters )
 		
 	}
 	vPortFree(data_ptr);
-	log("data_ptr == NULL,exit runXGFlashTestREAD\n");
+	mylog("data_ptr == NULL,exit runXGFlashTestREAD\n");
 	
 }
 
@@ -501,14 +501,14 @@ void xg_flashc_init(void)
 	xgflash_mutex = xSemaphoreCreateMutex();
 	if (xgflash_mutex == NULL)
 	{
-		log("Create the xgflash_mutex semaphore failure\n");
+		mylog("Create the xgflash_mutex semaphore failure\n");
 	}
 	
 	/* Create the binary semaphore to Synchronize other threads.*/
 	vSemaphoreCreateBinary(xBinarySemaphore);
 	if (xBinarySemaphore == NULL)
 	{
-		log("Create the xBinarySemaphore semaphore failure\n");
+		mylog("Create the xBinarySemaphore semaphore failure\n");
 	}
 	
 	/* Create the SendM_Counting semaphore to Synchronize the event of resend-message.*/
@@ -520,7 +520,7 @@ void xg_flashc_init(void)
 	//SendM_CountingSemaphore = xSemaphoreCreateCounting(10, 0);
 	//if (SendM_CountingSemaphore == NULL)
 	//{
-		//log("Create the SendM_Counting semaphore failure\n");
+		//mylog("Create the SendM_Counting semaphore failure\n");
 	//}
 	
 	xg_resend_queue = xQueueCreate(270, sizeof(U32));
@@ -560,7 +560,7 @@ void xg_flashc_init(void)
 		//memset(ret_buff, 0x00, sizeof(ret_buff));
 	//}
 	//
-	//log("flag : %d", flag);
+	//mylog("flag : %d", flag);
 	//flashc_lock_all_regions(false);
 	
 	xgflash_list_info_init();

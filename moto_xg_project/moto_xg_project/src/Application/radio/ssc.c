@@ -102,7 +102,7 @@ Description: Before using the SSC receiver, the PIO controller must be
     dedicate the SSC,transmitter I/O lines to the SSC peripheral mode. [23.6.1]
 Called By: void ssc_init(void) -- ssc.c
 */
-void local_start_SSC(void)
+static void local_start_SSC(void)
 {
     /*Assign GPIO to SSC.
     gpio_enable_module
@@ -171,7 +171,7 @@ Function: local_start_PDC
 Description: none
 Called By: void ssc_init(void) -- ssc.c
 */
-void local_start_PDC(void)
+static void local_start_PDC(void)
 {
     /*Toggle Index*/	
     BufferIndex = 1;

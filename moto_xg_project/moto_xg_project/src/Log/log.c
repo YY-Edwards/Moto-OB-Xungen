@@ -25,15 +25,15 @@
 xQueueHandle logQueue;
 
 	
-static void task_log(void * pvParameters);
+static void task_mylog(void * pvParameters);
 
-char *  PrintChar(char c, char * str)
+static char *  PrintChar(char c, char * str)
 {
 	*str++ = c;
 	return str;
 }
 
-char * PrintDec(int i, char len, char * str)
+static char * PrintDec(int i, char len, char * str)
 {
 	char * p = str;
 	
@@ -73,7 +73,7 @@ char * PrintDec(int i, char len, char * str)
 	return str;
 }
 
-char * PrintHex(int i,char len, char * str)
+static char * PrintHex(int i,char len, char * str)
 {
 	char * p = str;
 	char s[12];
@@ -136,7 +136,7 @@ void log_init(void)
 	logQueue  = xQueueCreate(50, sizeof(char *));
 	
 	xTaskCreate(
-	task_log
+	task_mylog
 	,  (const signed portCHAR *)"LOG"
 	,  100//384
 	,  NULL
@@ -145,7 +145,7 @@ void log_init(void)
 	
 }
 
-int log(char * content, ...)
+int mylog(char * content, ...)
 {
 	
 	
@@ -159,7 +159,7 @@ int log(char * content, ...)
 	char* str = content;
 	int x;
 	char y;
-	float f;
+//	float f;
 	//char* s;
 	char length= 0;
 		
@@ -203,7 +203,7 @@ int log(char * content, ...)
 							case('F'):
 							//f = va_arg(arg_ptr,int);
 							//strTmp = PrintDec(x, len, strTmp);
-							log("I need float.");
+							mylog("I need float.");
 							break;
 							
 							
@@ -231,7 +231,7 @@ int log(char * content, ...)
 							break;
 							
 							default:
-							log("I need relax.");
+							mylog("I need relax.");
 						}
 						str++;
 						
@@ -269,7 +269,7 @@ int log(char * content, ...)
 	
 	xQueueSend( logQueue, &p, 5);
 	
-	
+	return 0;
 }
 	
 	
@@ -343,7 +343,7 @@ int logFromISR(char * content, ...)
 					//PrintChar('%');
 					break;
 					default:
-					log("I need relax.");
+					mylog("I need relax.");
 				}
 				str++;
 				
@@ -388,9 +388,10 @@ int logFromISR(char * content, ...)
 		//{
 			////taskYIELD();
 		//}
+	return 0;
 	}
 //portTickType log_water_value =0;	
-static void task_log(void * pvParameters)
+static void task_mylog(void * pvParameters)
 {
 	char * str;
 	//char str[MAX_LOG_LINE_SIZE];

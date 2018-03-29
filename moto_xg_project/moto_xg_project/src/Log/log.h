@@ -35,7 +35,7 @@
 
 
 extern xQueueHandle logQueue;
-int log(char * content, ...);
+int mylog(char * content, ...);
 int logFromISR(char * content, ...);
 
 #ifdef _PRINT_LOG

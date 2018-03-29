@@ -5,7 +5,6 @@
  *  Author: JHDEV2
  */ 
 #include "app.h"
-#include "../Log/log.h"
 
 #include <xcmp.h>
 #include <payload.h>
@@ -54,7 +53,7 @@ extern volatile  xSemaphoreHandle xBinarySemaphore;
 volatile U32 global_count =0;
 volatile xSemaphoreHandle count_mutex = NULL;
 volatile xnl_information_t xnl_information;
-volatile char XCMP_Version[4];
+volatile char XCMP_Version[4] ={0};
 
 
 //app func--list
@@ -64,9 +63,12 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		/*point to xcmp payload*/
 		DeviceInitializationStatus_brdcst_t *ptr = (DeviceInitializationStatus_brdcst_t* )xcmp->u8;
 		
-		//log("DeviceInitializationStatus_brdcst...\n");
-		
-		memcpy(XCMP_Version, (ptr->XCMPVersion), sizeof(XCMP_Version));
+		//mylog("DeviceInitializationStatus_brdcst...\n");
+		XCMP_Version[0]= ptr->XCMPVersion[0];
+		XCMP_Version[1]= ptr->XCMPVersion[1];
+		XCMP_Version[2]= ptr->XCMPVersion[2];
+		XCMP_Version[3]= ptr->XCMPVersion[3];
+		//memcpy(&XCMP_Version[0], (ptr->XCMPVersion), sizeof(XCMP_Version));
 		
 		if (ptr->DeviceInitType == Device_Init_Complete)
 		{
@@ -79,11 +81,11 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		}
 		else//Device_Status_Update
 		{
-			//log("DeviceInitType : %x\n", ptr->DeviceInitType);
-			//log("Device Type : %x\n", ptr->DeviceStatusInfo.DeviceType);
-			//log("Device Status : %x\n", ptr->DeviceStatusInfo.DeviceStatus[1]);
-			//log("Descriptor size : %x\n", ptr->DeviceStatusInfo.DeviceDescriptorSize);
-			//log("Descriptor : %x\n", ptr->DeviceStatusInfo.DeviceDescriptor[0]);
+			//mylog("DeviceInitType : %x\n", ptr->DeviceInitType);
+			//mylog("Device Type : %x\n", ptr->DeviceStatusInfo.DeviceType);
+			//mylog("Device Status : %x\n", ptr->DeviceStatusInfo.DeviceStatus[1]);
+			//mylog("Descriptor size : %x\n", ptr->DeviceStatusInfo.DeviceDescriptorSize);
+			//mylog("Descriptor : %x\n", ptr->DeviceStatusInfo.DeviceDescriptor[0]);
 		}
 	//if (xcmp->u8[4] == 0x01)
 	//{
@@ -104,9 +106,9 @@ void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
 		temp  = ptr->Device_Type << 8;
 		temp |= ptr->XCMP_Device_ID;
 			
-		//log("DeviceManagement_brdcst...\n");
-		//log("temp: %x\n", temp);
-		//log("xnl_information.logical_address: %x\n", xnl_information.logical_address);
+		//mylog("DeviceManagement_brdcst...\n");
+		//mylog("temp: %x\n", temp);
+		//mylog("xnl_information.logical_address: %x\n", xnl_information.logical_address);
 		if (temp == xnl_information.logical_address)
 		{
 			if (xcmp->u8[0] == 0x01)
@@ -117,11 +119,11 @@ void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
 			else
 			{
 				//Disable Option Board.
-				//log("Device State : %d\n", );
+				//mylog("Device State : %d\n", );
 				bunchofrandomstatusflags &= 0xFFFFFFFD;
 			}
-			//log("Function : %d\n", ptr->Function);
-			//log("Device State : %d\n", ptr->Device_State);
+			//mylog("Function : %d\n", ptr->Function);
+			//mylog("Device State : %d\n", ptr->Device_State);
 		}	
 		//U8 temp = 0;
 		//temp  = xcmp->u8[1] << 8;
@@ -143,12 +145,12 @@ void ToneControl_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{		
-		log("Tone OK\n");
+		mylog("Tone OK\n");
 		//fl_write("/test.txt", FILE_END, (void *)"send tone ok\r\n", sizeof("send tone ok\r\n") - 1);
 	}
 	else
 	{
-		log("Tone error");
+		mylog("Tone error");
 	}
 }
 
@@ -158,23 +160,23 @@ void dcm_reply_func(xcmp_fragment_t * xcmp)
 	{
 		if(xcmp->u8[1] == DCM_ENTER)
 		{
-			log("\n\r Dcm-Enter OK \n\r");
+			mylog("\n\r Dcm-Enter OK \n\r");
 			
 		}
 		else if (xcmp->u8[1] == DCM_EXIT)
 		{
-			log("\n\r Dcm-Exit OK \n\r");
+			mylog("\n\r Dcm-Exit OK \n\r");
 		}
 		else
 		{
-			log("\n\r Dcm-Revoke \n\r");
+			mylog("\n\r Dcm-Revoke \n\r");
 		}
 		
-		log("dcm OK-mo%X", xcmp->u8[3]);
+		mylog("dcm OK-mo%X", xcmp->u8[3]);
 	}
 	else
 	{
-		log("dcm error");
+		mylog("dcm error");
 	}
 }
 
@@ -185,10 +187,10 @@ void dcm_brdcst_func(xcmp_fragment_t * xcmp)
 	/*point to xcmp payload*/
 	DeviceControlMode_brdcst_t *ptr = (DeviceControlMode_brdcst_t* )xcmp->u8;
 	
-	log("\n\r Dcm_brdcst \n\r");		
-	log("\n\r Function: %x \n\r " ,  ptr->Function);
-	log("\n\r ControlType: %x \n\r " ,  ptr->ControlType);
-	log("\n\r ControlTypeSize: %x \n\r " ,  ptr->ControlTypeSize);
+	mylog("\n\r Dcm_brdcst \n\r");		
+	mylog("\n\r Function: %x \n\r " ,  ptr->Function);
+	mylog("\n\r ControlType: %x \n\r " ,  ptr->ControlType);
+	mylog("\n\r ControlTypeSize: %x \n\r " ,  ptr->ControlTypeSize);
 	
 	
 }
@@ -198,23 +200,23 @@ void mic_reply_func(xcmp_fragment_t * xcmp)
 	/*point to xcmp payload*/
 	MicControl_reply_t *ptr = (MicControl_reply_t* )xcmp->u8;
 	
-	log("\n\r Mic_reply \n\r");
+	mylog("\n\r Mic_reply \n\r");
 	if (ptr->Result == 0x00)
 	{
 		
 		if (ptr->Function == Mic_Disable)
 		{
 		
-			log("\n\r Mic_close_ok \n\r " );
-			log("\n\r Mic_type: %x \n\r " ,  ptr->Mic_Type);
-			log("\n\r Signaling_type: %x \n\r " ,  ptr->Signaling_Type);
-			log("\n\r Mic_state: %x \n\r " ,  ptr->Mic_State);
-			log("\n\r Gain_offset: %x \n\r " ,  ptr->Gain_Offset);
+			mylog("\n\r Mic_close_ok \n\r " );
+			mylog("\n\r Mic_type: %x \n\r " ,  ptr->Mic_Type);
+			mylog("\n\r Signaling_type: %x \n\r " ,  ptr->Signaling_Type);
+			mylog("\n\r Mic_state: %x \n\r " ,  ptr->Mic_State);
+			mylog("\n\r Gain_offset: %x \n\r " ,  ptr->Gain_Offset);
 			
 		}
 		else
 		{
-			log("\n\r Mic_function: %x \n\r ", ptr->Function );
+			mylog("\n\r Mic_function: %x \n\r ", ptr->Function );
 		}
 		
 		
@@ -223,7 +225,7 @@ void mic_reply_func(xcmp_fragment_t * xcmp)
 	{
 		
 	
-		log("\n\r Mic error \n\r");
+		mylog("\n\r Mic error \n\r");
 		
 	}
 	
@@ -235,17 +237,17 @@ void mic_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	/*point to xcmp payload*/
 	MicControl_brdcast_t *ptr = (MicControl_brdcast_t* )xcmp->u8;
-	//log("\n\r Mic_brdcst \n\r");		
-	//log("\n\r Mic_type: %x \n\r " ,  ptr->Mic_Type);
-	//log("\n\r Signal_type: %x \n\r " ,  ptr->Signaling_Type);
+	//mylog("\n\r Mic_brdcst \n\r");		
+	//mylog("\n\r Mic_type: %x \n\r " ,  ptr->Mic_Type);
+	//mylog("\n\r Signal_type: %x \n\r " ,  ptr->Signaling_Type);
 	if (ptr->Mic_State == 0x00)
 	{
-		log("\n\r Mic_Disabled \n\r");	
+		mylog("\n\r Mic_Disabled \n\r");	
 		Mic_is_Enabled = 0;
 	} 
 	if(ptr->Mic_State == 0x11)
 	{
-		log("\n\r Mic_Enabled \n\r");
+		mylog("\n\r Mic_Enabled \n\r");
 		Mic_is_Enabled = 1;
 		
 		if ((Mic_is_Enabled == 1) && (Call_Begin == 1))
@@ -255,8 +257,8 @@ void mic_brdcst_func(xcmp_fragment_t * xcmp)
 		}
 		
 	}
-	//log("\n\r Mic_state: %x \n\r " ,  ptr->Mic_State);
-	//log("\n\r Gain_offset: %x \n\r " ,  ptr->Gain_Offset);
+	//mylog("\n\r Mic_state: %x \n\r " ,  ptr->Mic_State);
+	//mylog("\n\r Gain_offset: %x \n\r " ,  ptr->Gain_Offset);
 			
 	
 }
@@ -272,13 +274,13 @@ void spk_reply_func(xcmp_fragment_t * xcmp)
 			
 			//Silent_flag = 1;
 		}
-		log("spk OK -st%2x", xcmp->u8[4] );
+		mylog("spk OK -st%2x", xcmp->u8[4] );
 		
 	}
 	else
 	{
 		Speaker_is_unmute = 0;
-		log("spk error");
+		mylog("spk error");
 	}
 }
 
@@ -288,7 +290,7 @@ void spk_brdcst_func(xcmp_fragment_t * xcmp)
 	{
 		Speaker_is_unmute =0;
 		//Silent_flag = 0;
-		log("spk_s_close ");
+		mylog("spk_s_close ");
 		
 		
 	}
@@ -296,7 +298,7 @@ void spk_brdcst_func(xcmp_fragment_t * xcmp)
 	{
 		//Silent_flag = 1;
 		Speaker_is_unmute = 1;
-		log("spk_s_open ");	
+		mylog("spk_s_open ");	
 		
 	}
 	
@@ -316,14 +318,14 @@ void Volume_reply_func(xcmp_fragment_t * xcmp)
 		{
 			if (ptr->Function == Enable_IntelligentAudio)
 			{
-				log("\n\r Enable_IA OK \n\r");
-				log("\n\r Attenuator_Number: %x \n\r",  ((ptr->Attenuator_Number[0]<<8) | (ptr->Attenuator_Number[1])) );
+				mylog("\n\r Enable_IA OK \n\r");
+				mylog("\n\r Attenuator_Number: %x \n\r",  ((ptr->Attenuator_Number[0]<<8) | (ptr->Attenuator_Number[1])) );
 	
 			}
 			else
 			{
 				
-				log("\n\r VolumeControl: %x \n\r", ptr->Function);
+				mylog("\n\r VolumeControl: %x \n\r", ptr->Function);
 				
 			}
 			
@@ -332,7 +334,7 @@ void Volume_reply_func(xcmp_fragment_t * xcmp)
 		
 		else
 		{
-			log("\n\r Enable_IA error \n\r");
+			mylog("\n\r Enable_IA error \n\r");
 		}
 	
 	
@@ -344,9 +346,9 @@ void Volume_brdcst_func(xcmp_fragment_t * xcmp)
 	/*point to xcmp payload*/
 //	VolumeControl_brdcst_t *ptr = (VolumeControl_brdcst_t* )xcmp->u8;
 	
-	//log("Attenuator_Number: %x \n",  ((ptr->Attenuator_Number[0]<<8) | (ptr->Attenuator_Number[1])) );
+	//mylog("Attenuator_Number: %x \n",  ((ptr->Attenuator_Number[0]<<8) | (ptr->Attenuator_Number[1])) );
 	
-	//log("Audio_Parameter: %x \n", ptr->Audio_Parameter);
+	//mylog("Audio_Parameter: %x \n", ptr->Audio_Parameter);
 	
 	
 }
@@ -356,7 +358,7 @@ void AudioRoutingControl_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{
-		log("AudioRouting OK");
+		mylog("AudioRouting OK");
 		//xcmp_IdleTestTone();//提示通道配置成功
 		//xcmp_IdleTestTone();
 		//xcmp_IdleTestTone();
@@ -364,8 +366,8 @@ void AudioRoutingControl_reply_func(xcmp_fragment_t * xcmp)
 	}
 	else
 	{
-		log("AudioRouting error");
-		//log("\n\r AudioRouting result: %x \n\r", xcmp->u8[0]);
+		mylog("AudioRouting error");
+		//mylog("\n\r AudioRouting result: %x \n\r", xcmp->u8[0]);
 		
 	}
 }
@@ -378,19 +380,19 @@ void AudioRoutingControl_brdcst_func(xcmp_fragment_t * xcmp)
 //	U8 j = 0 ;
 	
 	num_routings = ((xcmp->u8[0]<< 8) | (xcmp->u8[1]) );
-	//log("\n\r num_routings: %d \n\r", num_routings);
+	//mylog("\n\r num_routings: %d \n\r", num_routings);
 	
 	//for(j = 0; j< num_routings ; j++ )
 	//{
 		//
 		//
-		//log("\n\r Audio-Input: %x \n\r", xcmp->u8[2+j*2]);
-		//log("\n\r Audio-Output: %x \n\r", xcmp->u8[3+j*2]);
+		//mylog("\n\r Audio-Input: %x \n\r", xcmp->u8[2+j*2]);
+		//mylog("\n\r Audio-Output: %x \n\r", xcmp->u8[3+j*2]);
 		//
 		//
 	//}
 	//
-	//log("\n\r Audio-Function: %x \n\r", xcmp->u8[3+j*2-1]);
+	//mylog("\n\r Audio-Function: %x \n\r", xcmp->u8[3+j*2-1]);
 	
 	
 	
@@ -407,10 +409,10 @@ void TransmitControl_reply_func(xcmp_fragment_t * xcmp)
 	if (ptr->Result == xcmp_Res_Success)
 	{
 		
-		log("\n\r  TransmitControl OK \n\r ");
-		log("\n\r Function: %x \n\r", ptr->Function);
-		log("\n\r Mode of Operation: %x \n\r", ptr->Mode_Of_Operation);
-		log("\n\r State: %x \n\r", ptr->State);
+		mylog("\n\r  TransmitControl OK \n\r ");
+		mylog("\n\r Function: %x \n\r", ptr->Function);
+		mylog("\n\r Mode of Operation: %x \n\r", ptr->Mode_Of_Operation);
+		mylog("\n\r State: %x \n\r", ptr->State);
 		
 		if (ptr->Function == KEY_UP)
 		{
@@ -430,7 +432,7 @@ void TransmitControl_reply_func(xcmp_fragment_t * xcmp)
 	}
 	else
 	{
-		log("TransmitControl error");
+		mylog("TransmitControl error");
 	}
 	
 
@@ -443,21 +445,21 @@ void TransmitControl_brdcst_func(xcmp_fragment_t * xcmp)
 	//Speaker_is_unmute = 1;
 	
 	TransmitControl_brdcast_t *ptr = (TransmitControl_brdcast_t* )xcmp->u8;
-	//log("\n\r  TransmitControl broadcast \n\r ");
-	//log("\n\r  Mode_Of_Operation: %x \n\r ", ptr->Mode_Of_Operation );
+	//mylog("\n\r  TransmitControl broadcast \n\r ");
+	//mylog("\n\r  Mode_Of_Operation: %x \n\r ", ptr->Mode_Of_Operation );
 	if (ptr->State == 0x00)
 	{
-		log("\n\r  Standby-Receive \n\r ");
+		mylog("\n\r  Standby-Receive \n\r ");
 		Radio_Transmit_State = 0;
 	}
 	if (ptr->State == 0x01)
 	{
-		log("\n\r  Transmit \n\r ");
+		mylog("\n\r  Transmit \n\r ");
 		Radio_Transmit_State = 1;
 		
 	}
-	//log("\n\r  State: %x \n\r ", ptr->State );
-	//log("\n\r  State_change_reason: %x \n\r ", ptr->State_change_reason );
+	//mylog("\n\r  State: %x \n\r ", ptr->State );
+	//mylog("\n\r  State_change_reason: %x \n\r ", ptr->State_change_reason );
 	//
 	
 	
@@ -470,9 +472,9 @@ void CallControl_brdcst_func(xcmp_fragment_t * xcmp)
 	//Speaker_is_unmute = 1;
 	
 	CallControl_brdcst_t *ptr = (CallControl_brdcst_t* )xcmp->u8;
-	//log("\n\r  CallControl brst \n\r ");
-	//log("\n\r  Call_type: %x \n\r ", ptr->Calltype );
-	log("\n\r  Call_state: %x \n\r ", ptr->Callstate );
+	//mylog("\n\r  CallControl brst \n\r ");
+	//mylog("\n\r  Call_type: %x \n\r ", ptr->Calltype );
+	mylog("\n\r  Call_state: %x \n\r ", ptr->Callstate );
 	if (ptr->Callstate == Call_Ended)//0x03
 	{
 		//恢复正常语音路径通道
@@ -499,17 +501,17 @@ void DataSession_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{
-		log("DATArep OK \n");
-		//log("Func: %X \n", xcmp->u8[1]);
-		//log("ID: %X \n", xcmp->u8[2]);
+		mylog("DATArep OK \n");
+		//mylog("Func: %X \n", xcmp->u8[1]);
+		//mylog("ID: %X \n", xcmp->u8[2]);
 		
 	}
 	else
 	{	
-		log("DATArep error \n");
-		log("Result:  %X \n", xcmp->u8[0]);
-		log("Func:  %X \n", xcmp->u8[1]);
-		log("ID:  %X \n", xcmp->u8[2]);
+		mylog("DATArep error \n");
+		mylog("Result:  %X \n", xcmp->u8[0]);
+		mylog("Func:  %X \n", xcmp->u8[1]);
+		mylog("ID:  %X \n", xcmp->u8[2]);
 	}
 	
 }
@@ -517,12 +519,12 @@ void ShutDown_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == Shut_Down_Device)
 	{
-		log("Shut_Down_Device \n");
+		mylog("Shut_Down_Device \n");
 		
 	}
 	else if(xcmp->u8[0] == Reset_Device)
 	{
-		log("Reset_Device \n");
+		mylog("Reset_Device \n");
 	}
 	
 	
@@ -534,12 +536,12 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 	/*point to xcmp payload*/
 	BatteryLevel_brdcast_t *ptr = (BatteryLevel_brdcast_t* )(xcmp->u8);
 	if(ptr->State == Battery_Okay)
-		;//log("\n Battery Okay\n");
+		;//mylog("\n Battery Okay\n");
 	else
-		log("\n Battery Low !!!\n");
+		mylog("\n Battery Low !!!\n");
 		
-	//log("\n Battery charge: %X \n" , ptr->Charge);
-	//log("\n Battery voltage: %X \n" , ptr->Voltage);
+	//mylog("\n Battery charge: %X \n" , ptr->Charge);
+	//mylog("\n Battery voltage: %X \n" , ptr->Voltage);
 	
 	Battery_Flag = ptr->State;
 
@@ -559,31 +561,31 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	if (ptr->State == CSBK_DATA_RX_Suc)
 	{
 		
-		log("\n\r CSBK_RX OK \n\r");
+		mylog("\n\r CSBK_RX OK \n\r");
 		Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];
 		
 		data_length = (ptr->DataPayload.DataPayload_Length[0]<<8) | (ptr->DataPayload.DataPayload_Length[1]);//( xcmp->u8[2]<<8) | (xcmp->u8[3]);
 
-		log("\n\r Session_ID: %x \n\r",Session_number );
-		log("\n\r paylaod_length: %d \n\r",data_length );
+		mylog("\n\r Session_ID: %x \n\r",Session_number );
+		mylog("\n\r paylaod_length: %d \n\r",data_length );
 		for(i=0; i<data_length; i++)
 		{
 			
-			//log("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
-			log("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
+			//mylog("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
+			mylog("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
 			
 		}
 		
 	}
 	else
 	{
-		//log("\n\r State: 0x %X \n\r", xcmp->u8[0]);
+		//mylog("\n\r State: 0x %X \n\r", xcmp->u8[0]);
 		Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];				
 		data_length = (ptr->DataPayload.DataPayload_Length[0]<<8) | (ptr->DataPayload.DataPayload_Length[1]);//( xcmp->u8[2]<<8) | (xcmp->u8[3]);
-		log("State: %X \n", ptr->State);
+		mylog("State: %X \n", ptr->State);
 		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
-			log("data transmit success\n");
+			mylog("data transmit success\n");
 			vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
 			xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
 
@@ -593,8 +595,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//Message_Protocol_t  *xgmessage = (Message_Protocol_t  *)ptr->DataPayload.DataPayload;
 			Message_Protocol_t  xgmessage;
 			memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
-			//log("data transmit failure\n");
-			//log("xgmessage.XG_Time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+			//mylog("data transmit failure\n");
+			//mylog("xgmessage.XG_Time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
 			//xgmessage.data.XG_Time.Year, xgmessage.data.XG_Time.Month, xgmessage.data.XG_Time.Day,
 			//xgmessage.data.XG_Time.Hour, xgmessage.data.XG_Time.Minute, xgmessage.data.XG_Time.Second);
 
@@ -605,7 +607,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 				//xQueueSend(xg_resend_queue, &myptr, 0);
 				if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
 				{
-					log("xg_resend_queue: full\n" );
+					mylog("xg_resend_queue: full\n" );
 					xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
 					vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
 					xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
@@ -619,7 +621,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			}
 			else
 			{
-				log("myptr: err\n\r" );
+				mylog("myptr: err\n\r" );
 			}
 			xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
 			
@@ -630,19 +632,19 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//if( xSemaphoreGive( SendM_CountingSemaphore ) != pdTRUE )
 			if( xSemaphoreGive( xBinarySemaphore ) != pdTRUE )
 			{
-				log("xSemaphoreGive: err\n\r" );
+				mylog("xSemaphoreGive: err\n\r" );
 			}
 		}
 		
 			
 			
-		//log("Session_ID: %x \n\r",Session_number );
-		//log("paylaod_length: %d \n\r",data_length );
+		//mylog("Session_ID: %x \n\r",Session_number );
+		//mylog("paylaod_length: %d \n\r",data_length );
 		//for(i=0; i<data_length; i++)
 		//{
 				//
-			////log("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
-			//log("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
+			////mylog("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
+			//mylog("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
 				//
 		//}
 		
@@ -656,15 +658,15 @@ void ButtonConfig_reply_func(xcmp_fragment_t * xcmp)
 	ButtonConfig_reply_t *ptr = (ButtonConfig_reply_t* )(xcmp->u8);
 	if (ptr->Result == xcmp_Res_Success)
 	{
-		log("\n\r Button_Config OK \n\r");
+		mylog("\n\r Button_Config OK \n\r");
 		
-		log("\n\r Function: %X \n\r" , ptr->Function );
+		mylog("\n\r Function: %X \n\r" , ptr->Function );
 		
 	}
 	
 	else
 	{
-		log("\n\r Button_Request error \n\r");
+		mylog("\n\r Button_Request error \n\r");
 	}
 	
 }
@@ -686,10 +688,10 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 	PUI_State_Min_Value = xcmp->u8[5];
 	PUI_State_Max_Value = xcmp->u8[6];
 	
-	log("PhysicalUserInput_broadcast  \n\r"  );
+	mylog("PhysicalUserInput_broadcast  \n\r"  );
 	
 	if((PUI_ID == 0x0060) && (PUI_State = 0x02) && (connect_flag == 1)){
-		//log("send message\n");
+		//mylog("send message\n");
 		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_9);//set tone to indicate the scan!!!
 			
 		vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
@@ -697,12 +699,12 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 		//rfid_sendID_message();//send message		
 		scan_rfid_save_message();
 	}
-	//log("\n\r PUI_Source: %X \n\r" , PUI_Source);
-	//log("\n\r PUI_Type: %X \n\r" , PUI_Type);
-	//log("\n\r PUI_ID: %X \n\r" , PUI_ID);
-	//log("\n\r PUI_State: %X \n\r" , PUI_State);
-	//log("\n\r PUI_State_Min_Value: %X \n\r" , PUI_State_Min_Value);
-	//log("\n\r PUI_State_Max_Value: %X \n\r" , PUI_State_Max_Value);
+	//mylog("\n\r PUI_Source: %X \n\r" , PUI_Source);
+	//mylog("\n\r PUI_Type: %X \n\r" , PUI_Type);
+	//mylog("\n\r PUI_ID: %X \n\r" , PUI_ID);
+	//mylog("\n\r PUI_State: %X \n\r" , PUI_State);
+	//mylog("\n\r PUI_State_Min_Value: %X \n\r" , PUI_State_Min_Value);
+	//mylog("\n\r PUI_State_Max_Value: %X \n\r" , PUI_State_Max_Value);
 	
 }
 
@@ -716,30 +718,30 @@ void ButtonConfig_brdcst_func(xcmp_fragment_t * xcmp)
 	
 	Num_Button = ptr->NumOfButtons;
 	
-	log("\n\r ButtonConfig_broadcast  \n\r"  );
+	mylog("\n\r ButtonConfig_broadcast  \n\r"  );
 	
-	log("\n\r Function: %X \n\r" , ptr->Function );
+	mylog("\n\r Function: %X \n\r" , ptr->Function );
 	
-	log("\n\r NumOfButtons: %d \n\r" , Num_Button );
+	mylog("\n\r NumOfButtons: %d \n\r" , Num_Button );
 	
-	log("\n\r ButtonInfoStructSize: %x \n\r" , ptr->ButtoInfoStructSize );
+	mylog("\n\r ButtonInfoStructSize: %x \n\r" , ptr->ButtoInfoStructSize );
 	
 	for (; i<Num_Button; i++)
 	{
-		log("\n\r ButtonInfo[%d].Bt_Identifier: %x \n\r" , i, 
+		mylog("\n\r ButtonInfo[%d].Bt_Identifier: %x \n\r" , i, 
 				(ptr->ButtonInfo[i].ButtonIdentifier[0]<<8) | (ptr->ButtonInfo[i].ButtonIdentifier[1]) );
 				
-		log("\n\r ButtonInfo[%d].S_PressFeature: %x \n\r" , i,
+		mylog("\n\r ButtonInfo[%d].S_PressFeature: %x \n\r" , i,
 				 (ptr->ButtonInfo[i].ShortPressFeature[0]<<8 )| (ptr->ButtonInfo[i].ShortPressFeature[1]) );
 				 
-		log("\n\r ButtonInfo[%d].Reserved1: %x \n\r" , i, 
+		mylog("\n\r ButtonInfo[%d].Reserved1: %x \n\r" , i, 
 				(ptr->ButtonInfo[i].Reserved1[0]<<8) |  (ptr->ButtonInfo[i].Reserved1[1]));
 		
-		log("\n\r ButtonInfo[%d].L_PressFeature: %x \n\r" , i,
+		mylog("\n\r ButtonInfo[%d].L_PressFeature: %x \n\r" , i,
 				 (ptr->ButtonInfo[i].LongPressFeature[0]<<8) | (ptr->ButtonInfo[i].LongPressFeature[1]));
 				 
 		
-		log("\n\r ButtonInfo[%d].Reserved2: %x \n\r" , i, 
+		mylog("\n\r ButtonInfo[%d].Reserved2: %x \n\r" , i, 
 				(ptr->ButtonInfo[i].Reserved2[0]<<8) | (ptr->ButtonInfo[i].Reserved2[1]));
 		
 	}
@@ -753,15 +755,15 @@ void SingleDetection_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == 0x11)
 	{
-		log("\n\r DMR_CSBK OK \n\r");
+		mylog("\n\r DMR_CSBK OK \n\r");
 		get_time_okay = TRUE;
 		
 	}
 	//if(xcmp->u8[1] == 0x11)
 	else
 	{
-		log("SIGBRCST error\n");
-		log("Signal_type: %X \n\r", xcmp->u8[0] );
+		mylog("SIGBRCST error\n");
+		mylog("Signal_type: %X \n\r", xcmp->u8[0] );
 	}
 	
 
@@ -774,32 +776,32 @@ void EnOB_reply_func(xcmp_fragment_t * xcmp)
 {
 		/*point to xcmp payload*/
 	//En_OB_Control_reply_t *ptr = (En_OB_Control_reply_t* )xcmp->u8;
-	//log("\n\r Xcmp_opcode: %x \n\r", xcmp->xcmp_opcode);
+	//mylog("\n\r Xcmp_opcode: %x \n\r", xcmp->xcmp_opcode);
 	
 	if (xcmp->u8[0]== xcmp_Res_Success)
 	{
 		if (xcmp->u8[1] == EN_OB_Enter)
 		{
 		
-			log("\n\r En_OB_Enter OK \n\r");
+			mylog("\n\r En_OB_Enter OK \n\r");
 			
 		}
 		else if (xcmp->u8[1] == EN_OB_Exit )
 		{
-			log("\n\r En_OB_Exit OK \n\r");
+			mylog("\n\r En_OB_Exit OK \n\r");
 		}
 		else
 		{
 			
-			log("\n\r En_OB_Control: %x \n\r", xcmp->u8[1]);
+			mylog("\n\r En_OB_Control: %x \n\r", xcmp->u8[1]);
 		}
 		
 	}
 	
 	else
 	{
-		log("\n\r En_OB_Control error \n\r");
-		log("\n\r En_OB_result: %x \n\r", xcmp->u8[0]);
+		mylog("\n\r En_OB_Control error \n\r");
+		mylog("\n\r En_OB_result: %x \n\r", xcmp->u8[0]);
 		
 	}
 	
@@ -810,7 +812,7 @@ void EnOB_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	
 	
-	log("\n\r En_OB Broadcast \n\r");
+	mylog("\n\r En_OB Broadcast \n\r");
 }
 
 
@@ -818,7 +820,7 @@ void EnOB_brdcst_func(xcmp_fragment_t * xcmp)
 void FD_request_func(xcmp_fragment_t * xcmp)
 {
 	
-	log("\n\r Forward Data Request \n\r");
+	mylog("\n\r Forward Data Request \n\r");
 	
 	
 }
@@ -826,7 +828,7 @@ void FD_request_func(xcmp_fragment_t * xcmp)
 void FD_reply_func(xcmp_fragment_t * xcmp)
 {
 	
-	log("\n\r Forward Data Reply \n\r");
+	mylog("\n\r Forward Data Reply \n\r");
 	
 	
 }
@@ -835,7 +837,7 @@ void FD_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	
 	
-	log("\n\r Forward Data Broadcast \n\r");
+	mylog("\n\r Forward Data Broadcast \n\r");
 	
 }
 
@@ -850,8 +852,8 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
     {NULL, NULL, NULL},// 0x403 --
     {NULL, NULL, NULL},// 0x404 --
     {NULL, NULL, (void *)Phyuserinput_brdcst_func},// 0x405 -- Physical User Input Broadcast
-    {NULL, (void *)Volume_reply_func, Volume_brdcst_func},// 0x406 -- Volume Control
-    {NULL, (void *)spk_reply_func, spk_brdcst_func},// 0x407 -- Speaker Control
+    {NULL, (void *)Volume_reply_func, (void *)Volume_brdcst_func},// 0x406 -- Volume Control
+    {NULL, (void *)spk_reply_func, (void *)spk_brdcst_func},// 0x407 -- Speaker Control
     {NULL, NULL, NULL},// 0x408 -- Transmit Power Level
     {NULL, (void *)ToneControl_reply_func, NULL},// 0x409 -- Tone Control
     {NULL, NULL, (void *)ShutDown_brdcst_func},// 0x40A -- Shut Down
@@ -950,8 +952,7 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
     {NULL, NULL, NULL},// 0x467 --
 	{NULL, NULL, NULL},// 0x468 --
 	{NULL, NULL, NULL},// 0x469 --	
-														
-		
+															
 };
 
 U8 message[20]={
@@ -971,7 +972,7 @@ U8 message[20]={
 };
 void app_init(void)
 {	
-	xcmp_register_app_list(the_app_list);
+	xcmp_register_app_list((void *)the_app_list);
 	
 	//将app_payload_rx_proc更改为PCM加密功能
 	payload_init( app_payload_rx_proc , app_payload_tx_proc );
@@ -980,7 +981,7 @@ void app_init(void)
 	count_mutex = xSemaphoreCreateMutex();
 	if (count_mutex == NULL)
 	{
-		log("Create the count_mutex semaphore failure\n");
+		mylog("Create the count_mutex semaphore failure\n");
 	}
 	
 	static portBASE_TYPE res = 0;
@@ -1015,13 +1016,13 @@ static void send_message(void * pvParameters)
 	static U16 message_count =0;
 	U32 destination = DEST;
 	static  portTickType xLastWakeTime;
-	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
-	U16  * data_ptr;
+	//const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
+//	U16  * data_ptr;
 	Message_Protocol_t *m_buff = (Message_Protocol_t *) pvPortMalloc(sizeof(Message_Protocol_t));
 	static xgflash_status_t status = XG_ERROR;
 	
 	xLastWakeTime = xTaskGetTickCount();
-	static  portTickType water_value;
+//	static  portTickType water_value;
 	/*clear xBinarySemaphore and wait Datasession broadcast reply*/
 	xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
 	
@@ -1031,7 +1032,7 @@ static void send_message(void * pvParameters)
 		message_count = xgflash_get_message_count();
 		if( (message_count!=0) && (Battery_Flag == Battery_Okay) && (connect_flag))//有缓存且电量充足，需发送短信
 		{
-			log("Current_total_message_count: %d\n", message_count);
+			mylog("Current_total_message_count: %d\n", message_count);
 			if(m_buff==NULL)break;
 			status = xgflash_get_message_data(message_count, m_buff, TRUE);
 			if(status == XG_OK)
@@ -1041,38 +1042,38 @@ static void send_message(void * pvParameters)
 				//if(xSemaphoreTake(SendM_CountingSemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
 				if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
 				{
-					log("xSemaphoreTake okay!\n");
+					mylog("xSemaphoreTake okay!\n");
 					vTaskDelay((2000*2) / portTICK_RATE_MS);
 				}
 				else//短信丢失，手台未响应，超时后默认再次重发
 				{
-					log("xSemaphoreTake failure!\n");
+					mylog("xSemaphoreTake failure!\n");
 					xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
-					status = xgflash_message_save(m_buff, sizeof(Message_Protocol_t), TRUE);
+					status = xgflash_message_save((U8 *)m_buff, sizeof(Message_Protocol_t), TRUE);
 					if(status == XG_OK)
 					{
-						log("save message-2 okay\n");
+						mylog("save message-2 okay\n");
 					}
 					else
 					{
-						log("!!!save message err : %d\n", status);
+						mylog("!!!save message err : %d\n", status);
 					}
 				
 				}
 			}
 			else
 			{
-				log("get message err : %d\n", status);
+				mylog("get message err : %d\n", status);
 			}
 		
 		}
 		else if (Battery_Flag == Battery_Low)
 		{
-			log("The device battery level is low !\n");
+			mylog("The device battery level is low !\n");
 		}
 		
 		//water_value = uxTaskGetStackHighWaterMark(NULL);
-		//log("send-thread water_value: %d\n", water_value);
+		//mylog("send-thread water_value: %d\n", water_value);
 		vTaskDelayUntil(&xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	
 	}
@@ -1080,17 +1081,17 @@ static void send_message(void * pvParameters)
 
 static __app_Thread_(app_cfg)
 {
-	static int coun=0;
+//	static int coun=0;
 	static int run_counter=0;
 	static  portTickType xLastWakeTime;
-	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
-	U8 Burst_ID = 0;
-	char card_id[4]={0};
+//	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
+//	U8 Burst_ID = 0;
+//	char card_id[4]={0};
 	U16  * data_ptr;
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
-	static  portTickType water_value;
+//	static  portTickType water_value;
 		
 	for(;;)
 	{
@@ -1104,10 +1105,10 @@ static __app_Thread_(app_cfg)
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
 					OB_State = OB_CONNECTEDWAITTINGSYNTIME;
-					log("connect OB okay!\n");
-					log("XCMP_Version: %d.%d.%d.%d\n", XCMP_Version[0],  XCMP_Version[1],
+					mylog("connect OB okay!\n");
+					mylog("XCMP_Version: %d.%d.%d.%d\n", XCMP_Version[0],  XCMP_Version[1],
 					XCMP_Version[2],  XCMP_Version[3]);
-					log("OB_Firmware_Version: %d.%d.%d\n", OB_Firmware_Version[0],  OB_Firmware_Version[1], OB_Firmware_Version[2]);
+					mylog("OB_Firmware_Version: %d.%d.%d\n", OB_Firmware_Version[0],  OB_Firmware_Version[1], OB_Firmware_Version[2]);
 
 					
 				}
@@ -1117,8 +1118,8 @@ static __app_Thread_(app_cfg)
 					nop();
 					nop();
 					//xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
-					log("connecting...\n");
-					log("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+					mylog("connecting...\n");
+					mylog("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
 					Current_time.Year, Current_time.Month, Current_time.Day,
 					Current_time.Hour, Current_time.Minute, Current_time.Second);
 				}
@@ -1129,7 +1130,7 @@ static __app_Thread_(app_cfg)
 						if(get_time_okay){
 							
 							OB_State = OB_WAITINGAPPTASK;
-							log("get time okay!\n");
+							mylog("get time okay!\n");
 							//vTaskResume(save_handle);
 						}
 						else
@@ -1144,22 +1145,22 @@ static __app_Thread_(app_cfg)
 					{
 						if(data_ptr!=NULL){//save message
 							
-							log("receive okay!\n");
+							mylog("receive okay!\n");
 							xSemaphoreTake(count_mutex, portMAX_DELAY);
 							global_count--;
 							xSemaphoreGive(count_mutex);
-							log("global_count:%d\n", global_count);
+							mylog("global_count:%d\n", global_count);
 							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-							status = xgflash_message_save(data_ptr, sizeof(Message_Protocol_t), TRUE);
-							//log("receive data : %d", ptr->data.XG_Time.Second);
+							status = xgflash_message_save((U8 *)data_ptr, sizeof(Message_Protocol_t), TRUE);
+							//mylog("receive data : %d", ptr->data.XG_Time.Second);
 							//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
 							if(status == XG_OK)
 							{
-								log("save message okay\n");
+								mylog("save message okay\n");
 							}
 							else
 							{
-								log("!!! save message err : %d\n", status);
+								mylog("!!! save message err : %d\n", status);
 									
 							}
 							set_message_store(data_ptr);
@@ -1172,8 +1173,8 @@ static __app_Thread_(app_cfg)
 						run_counter++;			
 						nop();
 						//water_value = uxTaskGetStackHighWaterMark(NULL);
-						//log("app-thread water_value: %d\n", water_value);
-						log("app task run:%d\n", run_counter);
+						//mylog("app-thread water_value: %d\n", water_value);
+						mylog("app task run:%d\n", run_counter);
 					}
 				
 			break;
@@ -1182,10 +1183,10 @@ static __app_Thread_(app_cfg)
 				
 		} //End of switch on OB_State.
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
-		//log("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
+		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
-	log("app exit:err\n");
+	mylog("app exit:err\n");
 }
 
 
@@ -1198,9 +1199,9 @@ static void app_payload_rx_proc(void  * payload)
 	if (times_counter == 3)
 	{
 		times_counter = 0 ;
-		log("\n\r w: \n\r");
+		mylog("\n\r w: \n\r");
 	}
-	//log("\n\r w: \n\r");
+	//mylog("\n\r w: \n\r");
 	if (AMBE_tx_flag)//本地发送方的mic录音
 	{
 		//fl_write("AMBEvo.bit", FILE_END, payload, MAX_PAYLOAD_BUFF_SIZE * 2);
@@ -1218,7 +1219,7 @@ static void app_payload_rx_proc(void  * payload)
 
 static void app_payload_tx_proc(void  * payload)
 {
-  log("R");
+  mylog("R");
   
   //if (AMBE_flag)
   //{

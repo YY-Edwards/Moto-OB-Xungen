@@ -17,7 +17,7 @@ History:
 
 typedef xnl_content_data_msg_t xcmp_fragment_t;
 
-#define MAX_APP_FUNC 0x0069
+#define MAX_APP_FUNC 0x006A
 /*For the XNL Channel, the total data length includes the checksum bytes in
 each fragment while for the Payload Channel the checksum bytes do not exist. Note
 that the total data length does not include the payload padding byte for both XNL

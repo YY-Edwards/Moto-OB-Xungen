@@ -1,17 +1,7 @@
 src/Application/app/app.d src/Application/app/app.o \
  src/Application/app/app.o: ../src/Application/app/app.c \
- ../src/Application/app/app.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h \
- e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/include/stddef.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h \
- ../src/config/FreeRTOSConfig.h ../src/ASF/common/boards/board.h \
- ../src/ASF/avr32/utils/compiler.h \
- ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
- ../src/ASF/avr32/utils/preprocessor/tpaste.h \
- ../src/ASF/avr32/utils/preprocessor/stringz.h \
- ../src/ASF/avr32/utils/preprocessor/mrepeat.h \
- ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
- ../src/ASF/common/utils/parts.h \
+ ../src/Application/app/app.h ../src/Log/log.h \
+ ../src/ASF/avr32/drivers/usart/usart.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/io.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/uc3b0512.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/core_sc0_143.h \
@@ -36,8 +26,16 @@ src/Application/app/app.d src/Application/app/app.o \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/usart_400.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/usbb_3101.h \
  E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/wdt_2311.h \
+ ../src/ASF/avr32/utils/compiler.h \
+ ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
+ ../src/ASF/avr32/utils/preprocessor/tpaste.h \
+ ../src/ASF/avr32/utils/preprocessor/stringz.h \
+ ../src/ASF/avr32/utils/preprocessor/mrepeat.h \
+ ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
+ ../src/ASF/common/utils/parts.h \
  ../src/ASF/avr32/utils/header_files/uc3d_defines_fix.h \
  ../src/ASF/avr32/utils/header_files/uc3l3_l4_defines_fix.h \
+ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/include/stddef.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/stdlib.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/_ansi.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/newlib.h \
@@ -58,18 +56,21 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/ASF/common/utils/interrupt/interrupt_avr32.h \
  ../src/ASF/avr32/utils/preprocessor/tpaste.h \
  ../src/ASF/avr32/drivers/intc/intc.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h \
+ ../src/config/FreeRTOSConfig.h ../src/ASF/common/boards/board.h \
  ../src/ASF/common/boards/user_board/user_board.h \
  ../src/config/conf_board.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/portable.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/task.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/list.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
  e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
  ../src/Application/timers/timer.h \
  ../src/ASF/common/services/clock/sysclk.h ../src/config/conf_clock.h \
  ../src/ASF/common/services/clock/uc3b0_b1/sysclk.h \
@@ -85,7 +86,6 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/gpio/gpio.h \
  ../src/Application/flash/data_flash.h ../src/Application/radio/xcmp.h \
  ../src/Application/radio/xnl.h ../src/config/../Log/log.h \
- ../src/ASF/avr32/drivers/usart/usart.h ../src/Log/log.h \
  ../src/Application/myrtc/xgrtc.h ../src/ASF/avr32/drivers/rtc/rtc.h \
  ../src/Application/xgflash/xgflash.h ../src/Application/radio/xnl.h \
  ../src/Application/radio/payload.h ../src/ASF/avr32/drivers/rtc/rtc.h \
@@ -93,29 +93,9 @@ src/Application/app/app.d src/Application/app/app.o \
 
 ../src/Application/app/app.h:
 
-../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h:
+../src/Log/log.h:
 
-e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/include/stddef.h:
-
-../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h:
-
-../src/config/FreeRTOSConfig.h:
-
-../src/ASF/common/boards/board.h:
-
-../src/ASF/avr32/utils/compiler.h:
-
-../src/ASF/avr32/utils/preprocessor/preprocessor.h:
-
-../src/ASF/avr32/utils/preprocessor/tpaste.h:
-
-../src/ASF/avr32/utils/preprocessor/stringz.h:
-
-../src/ASF/avr32/utils/preprocessor/mrepeat.h:
-
-../src/ASF/avr32/utils/preprocessor/preprocessor.h:
-
-../src/ASF/common/utils/parts.h:
+../src/ASF/avr32/drivers/usart/usart.h:
 
 E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/io.h:
 
@@ -165,9 +145,25 @@ E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B051
 
 E:\Program\ x86\Atmel\Studio\7.0\Packs\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512/avr32/wdt_2311.h:
 
+../src/ASF/avr32/utils/compiler.h:
+
+../src/ASF/avr32/utils/preprocessor/preprocessor.h:
+
+../src/ASF/avr32/utils/preprocessor/tpaste.h:
+
+../src/ASF/avr32/utils/preprocessor/stringz.h:
+
+../src/ASF/avr32/utils/preprocessor/mrepeat.h:
+
+../src/ASF/avr32/utils/preprocessor/preprocessor.h:
+
+../src/ASF/common/utils/parts.h:
+
 ../src/ASF/avr32/utils/header_files/uc3d_defines_fix.h:
 
 ../src/ASF/avr32/utils/header_files/uc3l3_l4_defines_fix.h:
+
+e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/include/stddef.h:
 
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/stdlib.h:
 
@@ -209,6 +205,14 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/ASF/avr32/drivers/intc/intc.h:
 
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h:
+
+../src/config/FreeRTOSConfig.h:
+
+../src/ASF/common/boards/board.h:
+
 ../src/ASF/common/boards/user_board/user_board.h:
 
 ../src/config/conf_board.h:
@@ -218,6 +222,8 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h:
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
 
@@ -230,8 +236,6 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
 
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h:
-
-../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
 
 ../src/Application/timers/timer.h:
 
@@ -272,10 +276,6 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/Application/radio/xnl.h:
 
 ../src/config/../Log/log.h:
-
-../src/ASF/avr32/drivers/usart/usart.h:
-
-../src/Log/log.h:
 
 ../src/Application/myrtc/xgrtc.h:
 

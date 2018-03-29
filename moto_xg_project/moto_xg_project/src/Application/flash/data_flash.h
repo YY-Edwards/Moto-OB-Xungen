@@ -137,7 +137,7 @@ df_status_t data_flash_write(U8 *data_ptr, U32 address, U16 data_length);
 df_status_t data_flash_write_block(U8 *data_ptr, U32 address, U16 data_length);
 df_status_t data_flash_write_page(U8 *data_ptr, U32 address, U16 length);
 df_status_t data_flash_read_block(U32 address, U16 length, U8 *data_ptr);
-uint8_t serial_flash_test();
+uint8_t serial_flash_test(void);
 
 #endif
 

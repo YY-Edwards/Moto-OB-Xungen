@@ -35,7 +35,7 @@ U8 RC522_WriteByte(U8 Data)
 }
 U8 RC522_ReadByte(void)
 {
-	U16 *Data ;
+	U16 *Data =NULL ;
 
 	//必须这样才能正常读写
 	//spi_selectChip(spi, DF_SPI_PCS_0);
@@ -124,9 +124,9 @@ void RC522_SPI_SetSpeedHi(void)
 
 
 
-void static spi_init()
+void static spi_init(void)
 {
-	U16 status = 0xff;
+//	U16 status = 0xff;
 
 	static const gpio_map_t RC522_SPI_GPIO_MAP =
 	{

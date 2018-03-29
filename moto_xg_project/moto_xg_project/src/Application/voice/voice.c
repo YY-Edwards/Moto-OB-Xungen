@@ -81,11 +81,11 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 				return FALSE;
 			}
 			current_voice_index = 0;
-			log("\r\n----create voice info okay!----\r\n");
+			mylog("\r\n----create voice info okay!----\r\n");
 		}
 		else//success
 		{
-			log("\nLABEL: %s\n", str);
+			mylog("\nLABEL: %s\n", str);
 			//Get the current voice index
 			return_code = data_flash_read_block(VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH, &current_voice_index);
 			if(return_code == DF_OK)
@@ -102,10 +102,10 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 						if(ptr->numb == current_voice_index)
 						{
 							current_save_voice_offset = ptr->address + ptr->offset;
-							log("current_save_voice_offset : %X\n", current_save_voice_offset);
+							mylog("current_save_voice_offset : %X\n", current_save_voice_offset);
 							if(current_save_voice_offset > 0x7bc000){
 								
-								log("\r\n----voice storage is full!!!----\r\n");
+								mylog("\r\n----voice storage is full!!!----\r\n");
 								//chip erase
 								return_code = data_flash_erase_block(0, DF_BLOCK_ALL);
 								if(return_code == DF_ERASE_COMPLETED)goto start;
@@ -115,13 +115,13 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 						}
 						else
 						{
-							log("\r\n----voice storage is err!!!----\r\n");
+							mylog("\r\n----voice storage is err!!!----\r\n");
 							goto ERASE;
 							//return FALSE;
 						}
 					}
 				}
-				log("\r\n----read voice info okay!----\r\n");
+				mylog("\r\n----read voice info okay!----\r\n");
 			}
 			else
 			return FALSE;
@@ -301,7 +301,7 @@ Bool voc_save_data(void *data_ptr, U16 data_len, U8 voice_end_flag)
 	if(current_save_voice_offset > DF_MAX_ADDR)//The voice data is out of bounds
 	{
 		return FALSE;
-		log("\r\n----voice data is Out of bounds!!!\r\n----");
+		mylog("\r\n----voice data is Out of bounds!!!\r\n----");
 	}
 	return_code = data_flash_write((U8 *)data_ptr, current_save_voice_offset, data_len);
 	if(return_code != DF_WRITE_COMPLETED)
@@ -328,7 +328,7 @@ Bool voc_save_data(void *data_ptr, U16 data_len, U8 voice_end_flag)
 			//free(ptr);
 			//ptr = NULL;
 			//return FALSE;
-			//log("\r\n----info list is Out of bounds!!!\r\n----");
+			//mylog("\r\n----info list is Out of bounds!!!\r\n----");
 		//}
 		////set a voice info by current_voice_index
 		//return_code = data_flash_write((U8 *)ptr, address, VOICE_INFO_LENGTH);
@@ -370,7 +370,7 @@ Bool voc_save_info(VoiceList_Info_t * voice)
 		if(address > VOICE_LIST_BOUNDARY)//The number of messages is out of bounds
 		{
 			return FALSE;
-			log("\r\n----info list is Out of bounds!!!\r\n----");
+			mylog("\r\n----info list is Out of bounds!!!\r\n----");
 		}
 		//set a voice info by current_voice_index
 		return_code = data_flash_write((U8 *)voice, address, VOICE_INFO_LENGTH);

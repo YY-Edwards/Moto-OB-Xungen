@@ -32,7 +32,7 @@
 volatile avr32_spi_t *spi;
 static Bool data_flash_check_device_id(void);
 static void test_data_flash(Bool bReadOnlyTest);
-void create_data_flash_test_task();
+void create_data_flash_test_task(void);
 void runDataFlashTest( void *pvParameters );
 U8 data_flash_failure = 0;
 
@@ -95,7 +95,7 @@ void W25Q64_SPI_SetSpeedHi(void)
 *******************************************************************************/
 void data_flash_init(void)
 {
-	U16 status = 0xff;
+//	U16 status = 0xff;
 
 	static const gpio_map_t DF_SPI_GPIO_MAP =
 	{
@@ -361,7 +361,7 @@ U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length)
 * 27-Feb-10   mdpq74    none        Initial draft
 *
 *******************************************************************************/
-int data_flash_test(U8 value)
+static int data_flash_test(U8 value)
 {
 	/* write 0x5555 or 0xAAAA to address 0x00001002 then read it back */
 	U8 data_write_in[2] = {value, value};
@@ -475,7 +475,7 @@ void test_data_flash(Bool bReadOnlyTest)
 		send_flash_command(READ_ARRAY, test_address, data_read_out, 2);
 		if((data_read_out[0] !=0xFF) | ((data_read_out[1] !=0xFF)) )
 		{
-			log("\n----flash erase fail----\n");			
+			mylog("\n----flash erase fail----\n");			
 		}
 		
 		send_flash_command(WRITE_ENABLE, 0, NULL, 0);
@@ -505,12 +505,12 @@ void test_data_flash(Bool bReadOnlyTest)
 
 	    if ((data_read_out[0] == 0x5A) || (data_read_out[1] == 0x5A))
 	    {
-	    	log("\n----Flash r/w test pass----\n");
+	    	mylog("\n----Flash r/w test pass----\n");
 			//print_text_time("Flash r/w test pass", 4);
 	    }
 	    else
 	    {
-			log("\n----Flash r/w test fail----\n");
+			mylog("\n----Flash r/w test fail----\n");
 	    	//print_text_time("Flash r/w test fail", 4);
 	    }
 
@@ -525,11 +525,11 @@ void test_data_flash(Bool bReadOnlyTest)
 	    if ((data_read_out[0] != 0x5A) || (data_read_out[1] != 0x5A))
 	    {
 	    	//print_text_time("Flash test fail", 4);
-			log("\n----Flash read test fail----\n");
+			mylog("\n----Flash read test fail----\n");
 		}
 	    else
 	    {
-	    	log("\n----Flash read test pass----\n");
+	    	mylog("\n----Flash read test pass----\n");
 			//print_text_time("Flash test pass", 4);
 	    }
 	}
@@ -561,7 +561,7 @@ void test_data_flash(Bool bReadOnlyTest)
 * 10-Feb-10   a21961    none        Initial draft
 *
 *******************************************************************************/
-void create_data_flash_test_task()
+void create_data_flash_test_task(void)
 {
 	xTaskCreate(
 			runDataFlashTest
@@ -665,7 +665,7 @@ void runDataFlashTest( void *pvParameters )
    same location and read back to compare . if not same , then write Factory Test
    Reply byte 2 as fail. otherwise , write it as success. */
 
-uint8_t serial_flash_test()
+uint8_t serial_flash_test(void)
 {
 	if (data_flash_failure == 0)
 	{

@@ -11,12 +11,11 @@ History:
 */
 
 #include <stdbool.h>
-
+#include "log.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "intc.h"
 #include "timer.h"
-#include "log.h"
 #include "xcmp.h"
 #include "xgrtc.h"
 #include "xgflash.h"
@@ -37,7 +36,7 @@ int main (void)
 	INTC_init_interrupts();
 		
 	log_init();//usart2
-	log("----start debug----");
+	mylog("----start debug----");
 	
 	xg_flashc_init();
 		

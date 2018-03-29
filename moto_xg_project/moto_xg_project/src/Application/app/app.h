@@ -8,7 +8,7 @@
 
 #ifndef APP_H_
 #define APP_H_
-
+#include "log.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
@@ -93,6 +93,7 @@ void EnOB_brdcst_func(xcmp_fragment_t * xcmp);
 void FD_request_func(xcmp_fragment_t * xcmp);
 void FD_reply_func(xcmp_fragment_t * xcmp);
 void FD_brdcst_func(xcmp_fragment_t * xcmp);
+void vApplicationIdleHook( void );
 
 
 #endif /* APP_H_ */
