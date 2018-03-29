@@ -61,6 +61,7 @@ Calls:
 	xnl_tx -- xnl.c
 Called By: ...
 */
+extern volatile U8 connect_flag; 
 static void xcmp_tx( U8 * data_ptr, U32 data_len)
 //static void xcmp_tx( xcmp_fragment_t * xcmp, U8 payload_len)
 {
@@ -96,6 +97,7 @@ static void xcmp_tx( U8 * data_ptr, U32 data_len)
 	//xSemaphoreTake(xcmp_mutex, portMAX_DELAY);
 	if(q != 0)//ษฬ
 	{//need to send data in a sub package 
+		mylog("need to send data in a sub package\n");
 		int idx=0;
 		fragement_type = 0x100;//first fragment
 		for (; idx<q; idx++)
@@ -116,6 +118,7 @@ static void xcmp_tx( U8 * data_ptr, U32 data_len)
 	}
 	if(r!=0)//ำเสý
 	{
+	
 		/*
 		Length :
 		= checksum + xnl header + data_len
@@ -130,6 +133,8 @@ static void xcmp_tx( U8 * data_ptr, U32 data_len)
 		
 		/* send xnl frame*/
 		xnl_tx(&xnl_frame);
+		//if(connect_flag)
+			//mylog("xcmp no need sub package\n");
 
 	}
 	

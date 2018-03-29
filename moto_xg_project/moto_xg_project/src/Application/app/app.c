@@ -15,7 +15,7 @@
 static __app_Thread_(app_cfg);
 static void send_message(void * pvParameters);
 
-U32 bunchofrandomstatusflags;
+volatile U32 bunchofrandomstatusflags;
 
 volatile U8 Speaker_is_unmute = 0;
 volatile U8 Silent_flag = 0;
@@ -34,7 +34,7 @@ volatile U8 Battery_Flag = Battery_Okay;
 unsigned long ulIdleCycleCount = 0UL;
 
 volatile U8  allocated_session_ID =0;
-static volatile U8 connect_flag =0; 
+volatile U8 connect_flag =0; 
 static volatile U8 get_time_okay =TRUE; 
 
 
