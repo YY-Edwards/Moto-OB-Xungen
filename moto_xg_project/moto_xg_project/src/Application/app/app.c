@@ -592,49 +592,45 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
-			//Message_Protocol_t  *xgmessage = (Message_Protocol_t  *)ptr->DataPayload.DataPayload;
-			Message_Protocol_t  xgmessage;
-			memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
-			//mylog("data transmit failure\n");
-			//mylog("xgmessage.XG_Time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
-			//xgmessage.data.XG_Time.Year, xgmessage.data.XG_Time.Month, xgmessage.data.XG_Time.Day,
-			//xgmessage.data.XG_Time.Hour, xgmessage.data.XG_Time.Minute, xgmessage.data.XG_Time.Second);
-
-			Message_Protocol_t * myptr = get_message_store();	
-			if(NULL != myptr)
-			{
-				memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));			
-				//xQueueSend(xg_resend_queue, &myptr, 0);
-				if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
-				{
-					mylog("xg_resend_queue: full\n" );
-					xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
-					vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
-					xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
-				}
-				else
-				{
-					xSemaphoreTake(count_mutex, portMAX_DELAY);
-					global_count++;
-					xSemaphoreGive(count_mutex);
-				}
-			}
-			else
-			{
-				mylog("myptr: err\n\r" );
-			}
+			mylog("data transmit failure\n");
+			//Message_Protocol_t  xgmessage;
+			//memcpy(&xgmessage, ptr->DataPayload.DataPayload, sizeof(Message_Protocol_t));
+			
+			//Message_Protocol_t * myptr = get_message_store();	
+			//if(NULL != myptr)
+			//{
+				//memcpy(myptr, &xgmessage, sizeof(Message_Protocol_t));			
+				////xQueueSend(xg_resend_queue, &myptr, 0);
+				//if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
+				//{
+					//mylog("xg_resend_queue: full\n" );
+					//xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
+					//vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+					//xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
+				//}
+				//else
+				//{
+					//xSemaphoreTake(count_mutex, portMAX_DELAY);
+					//global_count++;
+					//xSemaphoreGive(count_mutex);
+				//}
+			//}
+			//else
+			//{
+				//mylog("myptr: err\n\r" );
+			//}
 			xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
 			
 		}
 		
-		if((ptr->State == DATA_SESSION_TX_Fail) || (ptr->State == DATA_SESSION_TX_Suc))
-		{		
-			//if( xSemaphoreGive( SendM_CountingSemaphore ) != pdTRUE )
-			if( xSemaphoreGive( xBinarySemaphore ) != pdTRUE )
-			{
-				mylog("xSemaphoreGive: err\n\r" );
-			}
-		}
+		//if((ptr->State == DATA_SESSION_TX_Fail) || (ptr->State == DATA_SESSION_TX_Suc))
+		//{		
+			////if( xSemaphoreGive( SendM_CountingSemaphore ) != pdTRUE )
+			//if( xSemaphoreGive( xBinarySemaphore ) != pdTRUE )
+			//{
+				//mylog("xSemaphoreGive: err\n\r" );
+			//}
+		//}
 		
 			
 			
@@ -993,13 +989,13 @@ void app_init(void)
 	,  2
 	,  NULL );
 	
-	 res = xTaskCreate(
-	 send_message
-	 ,  (const signed portCHAR *)"SEND_M"
-	 ,  800
-	 ,  NULL
-	 ,  1
-	 ,  NULL );
+	 //res = xTaskCreate(
+	 //send_message
+	 //,  (const signed portCHAR *)"SEND_M"
+	 //,  800
+	 //,  NULL
+	 //,  1
+	 //,  NULL );
 	
 }
 
@@ -1092,6 +1088,15 @@ static __app_Thread_(app_cfg)
 	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
 //	static  portTickType water_value;
+	int i =0;
+	char test[120]={0};
+	for (i; i<120;i++)
+	{
+		{
+			test[i] = i;//注意取值范围
+		}
+
+	}
 		
 	for(;;)
 	{
@@ -1172,6 +1177,11 @@ static __app_Thread_(app_cfg)
 					{						
 						run_counter++;			
 						nop();
+						if(run_counter == 1)
+						{
+							mylog("send test csbk data...\n");
+							//package_usartdata_to_csbkdata(test, sizeof(test));
+						}
 						//water_value = uxTaskGetStackHighWaterMark(NULL);
 						//mylog("app-thread water_value: %d\n", water_value);
 						mylog("app task run:%d\n", run_counter);
@@ -1184,7 +1194,7 @@ static __app_Thread_(app_cfg)
 		} //End of switch on OB_State.
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (3000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	mylog("app exit:err\n");
 }
@@ -1277,18 +1287,26 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 			memcpy(csbk_t_array[idx].csbk_data, (usart_payload+data_ptr_index), remaining_len);//拷贝CSBK数据
 			remaining_len =0;//清零剩余数据长度，并退出循环
 		}
-		else
+		else//整包
 		{
-			csbk_t_array[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;
 			memcpy(csbk_t_array[idx].csbk_data, (usart_payload+data_ptr_index), CSBK_Payload_Length);//拷贝CSBK数据
 			data_ptr_index+=CSBK_Payload_Length;//地址指针偏移
 			remaining_len-=CSBK_Payload_Length;//剩余数据长度
+			if(remaining_len == 0)
+			{
+				csbk_t_array[idx].csbk_header.csbk_LB = CSBK_LB_TRUE;//负载数据的最后一包
+			}
+			else
+			{
+				csbk_t_array[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;
+			}
 		}
 		
 	} while (remaining_len!=0);
 
+	 mylog("send csbk data len:%d\n", sizeof(CSBK_Pro_t)*(idx+1));
 	 
-	 xcmp_data_session_csbk_raw_req(csbk_t_array, sizeof(CSBK_Pro_t)*(idx+1), 65520);
+	 xcmp_data_session_csbk_raw_req(csbk_t_array, sizeof(CSBK_Pro_t)*(idx+1), 3);
 	
 
 	

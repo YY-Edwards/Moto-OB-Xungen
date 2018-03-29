@@ -133,7 +133,7 @@ void log_init(void)
 	// Initialize USART in RS232 mode.
 	usart_init_rs232(EXAMPLE_USART, &USART_OPTIONS, EXAMPLE_TARGET_PBACLK_FREQ_HZ);			
 			
-	logQueue  = xQueueCreate(50, sizeof(char *));
+	logQueue  = xQueueCreate(256, sizeof(char *));
 	
 	xTaskCreate(
 	task_mylog

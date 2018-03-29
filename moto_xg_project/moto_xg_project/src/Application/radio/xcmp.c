@@ -97,35 +97,64 @@ static void xcmp_tx( U8 * data_ptr, U32 data_len)
 	//xSemaphoreTake(xcmp_mutex, portMAX_DELAY);
 	if(q != 0)//商
 	{//need to send data in a sub package 
-		mylog("need to send data in a sub package\n");
-		int idx=0;
-		fragement_type = 0x100;//first fragment
-		for (; idx<q; idx++)
-		{
-			xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
-			/*insert xcmp frame data*/
-			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
-			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;	
+		//mylog("need to send data in a sub package\n");
+		//fragement_type = 0x100;//first fragment
+		//xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+		///*insert xcmp frame data*/
+		//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
+		//xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
+		///* send xnl frame*/
+		//xnl_tx(&xnl_frame);
+		//
+		////clear
+		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
+		//data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
+		//
+		//int idx=1;
+		//for (; idx<q; idx++)//发送中间包
+		//{
+			//fragement_type = 0x200;//middle fragment
+			//xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+			///*insert xcmp frame data*/
+			//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
+			//xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;	
+			//
+			///* send xnl frame*/	
+			//xnl_tx(&xnl_frame);
+			//
+			////clear 
+			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
+			//data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
+	//
+		//}
+		//
+		//if(r==0)
+		//{	
+			////clear
+			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
+			//fragement_type = 0x300;//last fragment
+			//xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+			///*insert xcmp frame data*/
+			//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
+			//xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
+			///* send xnl frame*/
+			//xnl_tx(&xnl_frame);
+		//}
 			
-			/* send xnl frame*/	
-			xnl_tx(&xnl_frame);
-			
-			//clear 
-			memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
-			data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
-			fragement_type = 0x200;//middle fragment
-		}
 	}
 	if(r!=0)//余数
 	{
-	
+		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
 		/*
 		Length :
 		= checksum + xnl header + data_len
 		= checksum + xnl header + xcmp opcode + xcmp payload
 		= 0x02 + 0x0C + 0x02 + xcmp payload
 		*/
-		
+		if(q != 0)
+		{
+			fragement_type = 0x300;//last fragment
+		}
 		xnl_frame.phy_header.phy_control  = ((0x4000 | fragement_type) + (sizeof(xnl_frame.phy_header.check_sum) + sizeof(xnl_header_t) + r));
 		
 		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, r);
