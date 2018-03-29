@@ -55,10 +55,10 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 	start:
 
 	/* bytes remained less than one page */
-	return_code = data_flash_read_block(LABEL_ADDRESS, LABEL_LENGTH, str);
+	return_code = data_flash_read_block(LABEL_ADDRESS, LABEL_LENGTH, (U8 *)str);
 	if(return_code == DF_OK)
 	{
-		if(memcmp(FlashLabel, str, sizeof(FlashLabel)-1) != 0)//compare label
+		if(memcmp((U8*)FlashLabel, str, sizeof(FlashLabel)-1) != 0)//compare label
 		{
 			ERASE:
 			//erase
@@ -72,10 +72,10 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 				address+=65536;//64k*1024=65536bytes
 			}
 			//set label
-			return_code = data_flash_write(FlashLabel, LABEL_ADDRESS, LABEL_LENGTH);
+			return_code = data_flash_write((U8 *)FlashLabel, LABEL_ADDRESS, LABEL_LENGTH);
 			//set current_voice_index
 			memset(str, 0x00, sizeof(str));
-			return_code = data_flash_write(str, VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH);
+			return_code = data_flash_write((U8 *)str, VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH);
 			if(return_code != DF_WRITE_COMPLETED)
 			{
 				return FALSE;
@@ -87,7 +87,7 @@ static Bool voice_list_info_init(U8 *voice_count_ptr)
 		{
 			mylog("\nLABEL: %s\n", str);
 			//Get the current voice index
-			return_code = data_flash_read_block(VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH, &current_voice_index);
+			return_code = data_flash_read_block(VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH, (U8*)&current_voice_index);
 			if(return_code == DF_OK)
 			{
 				//Calculates the offset address of the current stored voice
@@ -282,7 +282,7 @@ Bool voc_save_data(void *data_ptr, U16 data_len, U8 voice_end_flag)
 {
 	if(!list_init_success_flag)return FALSE;
 	
-	U32 address = 0;
+//	U32 address = 0;
 	//static U32 bytes_remained = 0;
 	df_status_t return_code = DF_WRITE_COMPLETED;
 	
@@ -375,7 +375,7 @@ Bool voc_save_info(VoiceList_Info_t * voice)
 		//set a voice info by current_voice_index
 		return_code = data_flash_write((U8 *)voice, address, VOICE_INFO_LENGTH);
 		//set voice numbers
-		return_code = data_flash_write(&current_voice_index, VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH);
+		return_code = data_flash_write((U8*)&current_voice_index, VOICE_NUMBERS_ADDRESS, VOICE_NUMBERS_LENGTH);
 		if(return_code != DF_WRITE_COMPLETED)
 		{
 			return FALSE;

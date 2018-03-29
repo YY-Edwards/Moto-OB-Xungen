@@ -141,7 +141,7 @@ void xnl_send_device_master_query(void)
 	Fragment Type:0
 	Length :12 + 2(xnl length(12) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = (0x4000 | 12 + 2);
+	xnl_frame.phy_header.phy_control = ((0x4000 | 12) + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
@@ -210,7 +210,7 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	Fragment Type:0
 	Length :12 + 2(xnl length(12) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = (0x4000 | 12 + 2);
+	xnl_frame.phy_header.phy_control = ((0x4000 | 12) + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
@@ -312,7 +312,7 @@ static void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 	Fragment Type:0
 	Length :24 + 2(xnl length(24) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = (0x4000 | 24 + 2);
+	xnl_frame.phy_header.phy_control = ((0x4000 | 24) + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
@@ -444,7 +444,7 @@ static void xnl_send_msg_ack(xnl_header_t * hdr)
 	Fragment Type:0
 	Length :12 + 2(xnl length(12) + checksum(2)) 
 	*/
-	xnl_frame.phy_header.phy_control = (0x4000 | 12 + 2);
+	xnl_frame.phy_header.phy_control = ((0x4000 | 12) + 2);
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
@@ -533,24 +533,24 @@ void xnl_register_xcmp_func( void ( *func)(xnl_content_data_msg_t))
 Define a function list, and register the corresponding function is used to 
 deal with XNL instructions
 */
-static const volatile xnl_proc_list_t xnl_proc_list[]=
-{
+static const volatile xnl_proc_list_t xnl_proc_list[20]={
+	
 	NULL,							/*-0x0-XNL_INVALID*/
 	NULL,							/*-0x1-XNL_INVALID*/
 
-	xnl_master_status_brdcst_func,	/*-0x2-XNL_MASTER_STATUS_BRDCST*/
+	(void *)xnl_master_status_brdcst_func,	/*-0x2-XNL_MASTER_STATUS_BRDCST*/
 	NULL,							/*-0x3-XNL_DEVICE_MASTER_QUERY*/
 	NULL,							/*-0x4-XNL_DEVICE_AUTH_KEY_REQUEST*/
-	xnl_device_auth_reply_func,		/*-0x5-XNL_DEVICE_AUTH_KEY_REPLY*/
+	(void *)xnl_device_auth_reply_func,		/*-0x5-XNL_DEVICE_AUTH_KEY_REPLY*/
 	NULL,							/*-0x6-XNL_DEVICE_CONN_REQUEST*/
-	xnl_device_conn_reply_func,		/*-0x7-XNL_DEVICE_CONN_REPLY*/
+	(void *)xnl_device_conn_reply_func,		/*-0x7-XNL_DEVICE_CONN_REPLY*/
 	NULL,							/*-0x8-XNL_DEVICE_SYSMAP_REQUEST*/
 	NULL,							/*-0x9-XNL_DEVICE_SYSMAP_BRDCST*/
 
 	NULL,							/*-0xA-XNL_INVALID*/
 
-	xnl_data_msg_func,				/*-0xB-XNL_DATA_MSG*/
-	xnl_get_msg_ack_func			/*-0xC-XNL_DATA_MSG_ACK*/
+	(void *)xnl_data_msg_func,				/*-0xB-XNL_DATA_MSG*/
+	(void *)xnl_get_msg_ack_func			/*-0xC-XNL_DATA_MSG_ACK*/
 };
 
 /**
@@ -563,7 +563,7 @@ Called By: ...
 void xnl_tx(xnl_fragment_t * xnl)
 {
 	/*variables are used to store the push result in interrupt*/
-	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	//portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	
 	/*
 	Value ranging from 0-7. This value is incremented for each new data 
@@ -635,13 +635,13 @@ Called By: task
 static void xnl_tx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
-	static xnl_fragment_t xnl_frame;
+//	static xnl_fragment_t xnl_frame;
 	
 	/*send status*/
 	static xnl_tx_state_t xnl_tx_state = WAITING_FOR_TX;
 	
 	/*the times of timeout*/
-	static xnl_send_times = 0;
+	static U32 xnl_send_times = 0;
 	
 	//static xnl_fragment_t * xnl_ptr;
 	static  xnl_fragment_t * ptr;//是否可以修缮为静态变量？请关注

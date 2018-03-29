@@ -371,6 +371,7 @@ void xnl_init(void);
 /*register the xcmp function(callback function)*/
 void xnl_register_xcmp_func( void ( *func)(xnl_content_data_msg_t));
 
+void xnl_send_device_master_query(void);
 /*send xnl(resend when timeout)*/
 void xnl_tx(xnl_fragment_t * xnl);
 

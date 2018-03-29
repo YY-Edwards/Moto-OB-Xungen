@@ -28,8 +28,8 @@ volatile ssc_fragment_t TxBuffer[2];
 /*
 Defines the interface function (callback function) is used to send/receive SSC 
 data*/
-volatile void (*phy_rx_exec)(void *) = NULL;
-volatile void (*phy_tx_exec)(void *) = NULL;
+ void (*phy_rx_exec)(void *) = NULL;
+ void (*phy_tx_exec)(void *) = NULL;
 //extern volatile  xSemaphoreHandle xBinarySemaphore;
 
 

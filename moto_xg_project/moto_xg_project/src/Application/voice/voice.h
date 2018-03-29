@@ -90,7 +90,7 @@ typedef struct //16bytes;
 {
 	unsigned int Offset;
 	unsigned int Length;
-	unsigned char Rev[8]
+	unsigned char Rev[8];
 }VoicePayload_t;
 
 typedef struct // 80bytes

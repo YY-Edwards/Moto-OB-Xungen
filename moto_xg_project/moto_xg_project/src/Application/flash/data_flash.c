@@ -737,7 +737,7 @@ df_status_t data_flash_erase_block(U32 address, df_block_size_t block_size)
 	else/*(block_size == DF_BLOCK_ALL)*/
 		erase_commond = CHIP_ERASE;
 
-	while(status = send_flash_command(READ_STATUS_REG, 0, NULL, 0) == STATUS_BUSY);
+	while((status = send_flash_command(READ_STATUS_REG, 0, 0, 0)) == STATUS_BUSY);
 	//status = send_flash_command(READ_STATUS_REG, 0, NULL, 0);
 	//if ((status & STATUS_BUSY) != 0)
 	//{
@@ -976,7 +976,7 @@ df_status_t data_flash_write_page(U8 *data_ptr, U32 address, U16 length)
 		return DF_INVALID_PARAM;
 	}
 
-	while(status = send_flash_command(READ_STATUS_REG, 0, NULL, 0) == STATUS_BUSY);
+	while((status = send_flash_command(READ_STATUS_REG, 0, 0, 0)) == STATUS_BUSY);
 	//if ((status & STATUS_BUSY) != 0)
 	//{
 		//return DF_DEVICE_BUSY;

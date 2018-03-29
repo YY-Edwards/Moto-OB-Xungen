@@ -89,7 +89,7 @@ char *print_i(char *str, unsigned int n)
   return &str[i];
 }
 
-static void RTC_Test()
+static void RTC_Test(void)
 {
 	
 	temp_time.Year		= 18;

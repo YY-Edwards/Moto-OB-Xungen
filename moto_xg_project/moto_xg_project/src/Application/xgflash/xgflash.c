@@ -60,7 +60,7 @@ void flash_rw_example(const char *caption, nvram_data_t *nvram_data)
 static xgflash_status_t xgflash_list_info_init(void)
 {
 	df_status_t return_code = DF_OK;
-	static U32 current_page_number =0;
+	//static U32 current_page_number =0;
 	unsigned int i = 0;
 	unsigned int address =0x00000000;
 	static char str[80];
@@ -69,9 +69,9 @@ static xgflash_status_t xgflash_list_info_init(void)
 start:
 	
 	 //bytes remained less than one page 
-	return_code = data_flash_read_block(LABEL_ADDRESS, LABEL_LENGTH, str);
+	return_code = data_flash_read_block(LABEL_ADDRESS, LABEL_LENGTH, (U8*)str);
 	{
-		if(memcmp(XGFlashLabel, str, sizeof(XGFlashLabel)-1) != 0)//compare label
+		if(memcmp((U8*)XGFlashLabel, str, sizeof(XGFlashLabel)-1) != 0)//compare label
 		{
 			ERASE:
 			//erase list
@@ -85,11 +85,11 @@ start:
 				address+=65536;//64k*1024=65536bytes
 			}
 			//set label
-			return_code = data_flash_write(XGFlashLabel, LABEL_ADDRESS, LABEL_LENGTH);
+			return_code = data_flash_write((U8*)XGFlashLabel, LABEL_ADDRESS, LABEL_LENGTH);
 			
 			//set current_voice_index
 			memset(str, 0x00, sizeof(str));
-			return_code = data_flash_write(str, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
+			return_code = data_flash_write((U8*)str, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
 			if(return_code != DF_WRITE_COMPLETED)
 			{
 				return FALSE;
@@ -101,7 +101,7 @@ start:
 		{
 			mylog("\nLABEL: %s\n", str);
 			//Get the current voice index
-			return_code = data_flash_read_block(MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH, &current_message_index);								
+			return_code = data_flash_read_block(MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH, (U8*)&current_message_index);								
 			if(return_code == DF_OK)
 			{
 				//Calculates the offset address of the current stored message
@@ -169,7 +169,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 
 	if(!list_init_success_flag)return XG_ERROR;
 	U32 address = 0;
-	static U32 bytes_remained = 0;
+	//static U32 bytes_remained = 0;
 	static U32 current_bytes_remained = 0;
 	df_status_t return_code = DF_WRITE_COMPLETED;
 	
@@ -232,7 +232,7 @@ xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_fl
 		//set a message info by current_message_index	
 		return_code = data_flash_write((U8 *)&ptr, address, XG_MESSAGE_INFO_HEADER_LENGTH);
 		//set message numbers
-		return_code = data_flash_write(&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
+		return_code = data_flash_write((U8*)&current_message_index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
 		if(return_code != DF_WRITE_COMPLETED)
 		{
 			current_bytes_remained = 0;
@@ -374,13 +374,13 @@ xgflash_status_t xgflash_erase_info_region(void)
 
 void runXGFlashTestSAVE( void *pvParameters )
 {
-	Bool firstTest = TRUE;
+//	Bool firstTest = TRUE;
 	static  portTickType xLastWakeTime;
 	static xgflash_status_t status = XG_ERROR;
 	const portTickType xFrequency = 20000;//2s,定时问题已经修正。2s x  2000hz = 4000
 	Message_Protocol_t data_ptr;
 	static const uint8_t write_data[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
-	static  portTickType water_value;
+//	static  portTickType water_value;
 	
 	xLastWakeTime = xTaskGetTickCount();
 	while(1)
@@ -408,7 +408,7 @@ void runXGFlashTestSAVE( void *pvParameters )
 		//mylog("water_value: %d\n", water_value);
 		//mylog("XG save okay!\n");
 		memset(&data_ptr.data.XG_Time.Minute, 0x01, 1);
-		status = xgflash_message_save(&data_ptr, sizeof(Message_Protocol_t), TRUE);
+		status = xgflash_message_save((U8*)&data_ptr, sizeof(Message_Protocol_t), TRUE);
 		if(status == XG_OK)
 		{
 			mylog("XG save okay!\n");

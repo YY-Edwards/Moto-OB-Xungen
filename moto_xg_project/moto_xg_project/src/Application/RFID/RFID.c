@@ -123,7 +123,7 @@ U8 scan_rfid_save_message(void)
 			data_buffer.RFID_ID[i*4+3] = 0x00;
 		}
 		
-		memcpy(&data_buffer.XG_Time.Year, &Current_time.Year, sizeof(DateTime_t))	;
+		memcpy(&data_buffer.XG_Time.Year, &(Current_time), sizeof(DateTime_t))	;
 		
 		header.length = (0x0008 + sizeof(Message_Data_t));
 		
@@ -219,7 +219,7 @@ U8 rfid_sendID_message(void)
 			 data_buffer.RFID_ID[i*4+3] = 0x00; 
 		}
 		
-		memcpy(&data_buffer.XG_Time.Year, &Current_time.Year, sizeof(DateTime_t))	;
+		memcpy(&data_buffer.XG_Time.Year, &(Current_time), sizeof(DateTime_t))	;
 	
 		header.length = (0x0008 + sizeof(Message_Data_t));
 	
