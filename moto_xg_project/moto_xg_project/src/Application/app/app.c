@@ -66,7 +66,7 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		
 		//log("DeviceInitializationStatus_brdcst...\n");
 		
-		memcpy(XCMP_Version, &(ptr->XCMPVersion[0]), sizeof(XCMP_Version));
+		memcpy(XCMP_Version, (ptr->XCMPVersion), sizeof(XCMP_Version));
 		
 		if (ptr->DeviceInitType == Device_Init_Complete)
 		{
@@ -342,7 +342,7 @@ void Volume_reply_func(xcmp_fragment_t * xcmp)
 void Volume_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	/*point to xcmp payload*/
-	VolumeControl_brdcst_t *ptr = (VolumeControl_brdcst_t* )xcmp->u8;
+//	VolumeControl_brdcst_t *ptr = (VolumeControl_brdcst_t* )xcmp->u8;
 	
 	//log("Attenuator_Number: %x \n",  ((ptr->Attenuator_Number[0]<<8) | (ptr->Attenuator_Number[1])) );
 	
@@ -375,7 +375,7 @@ void AudioRoutingControl_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	
 	U16 num_routings = 0;
-	U8 j = 0 ;
+//	U8 j = 0 ;
 	
 	num_routings = ((xcmp->u8[0]<< 8) | (xcmp->u8[1]) );
 	//log("\n\r num_routings: %d \n\r", num_routings);
@@ -549,9 +549,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 Session_number = 0;
 	U16 data_length = 0;
-	U32 card_id =0;
+//	U32 card_id =0;
 	U8 i = 0;
-	xgflash_status_t return_value = XG_ERROR;
+//	xgflash_status_t return_value = XG_ERROR;
 	
 	/*point to xcmp payload*/
 	DataSession_brdcst_t *ptr = (DataSession_brdcst_t* )xcmp->u8;
@@ -724,7 +724,7 @@ void ButtonConfig_brdcst_func(xcmp_fragment_t * xcmp)
 	
 	log("\n\r ButtonInfoStructSize: %x \n\r" , ptr->ButtoInfoStructSize );
 	
-	for (i; i<Num_Button; i++)
+	for (; i<Num_Button; i++)
 	{
 		log("\n\r ButtonInfo[%d].Bt_Identifier: %x \n\r" , i, 
 				(ptr->ButtonInfo[i].ButtonIdentifier[0]<<8) | (ptr->ButtonInfo[i].ButtonIdentifier[1]) );
@@ -844,47 +844,47 @@ void FD_brdcst_func(xcmp_fragment_t * xcmp)
 static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
 {
     /*XCMP_REQUEST,XCMP_REPLY,XCMP_BOARDCAST-*/
-    {NULL, NULL, DeviceInitializationStatus_brdcst_func},// 0x400 -- Device Initialization Status
+    {NULL, NULL, (void *)DeviceInitializationStatus_brdcst_func},// 0x400 -- Device Initialization Status
     {NULL, NULL, NULL},// 0x401 -- Display Text
     {NULL, NULL, NULL},// 0x402 -- Indicator Update
     {NULL, NULL, NULL},// 0x403 --
     {NULL, NULL, NULL},// 0x404 --
-    {NULL, NULL, Phyuserinput_brdcst_func},// 0x405 -- Physical User Input Broadcast
-    {NULL, Volume_reply_func, Volume_brdcst_func},// 0x406 -- Volume Control
-    {NULL, spk_reply_func, spk_brdcst_func},// 0x407 -- Speaker Control
+    {NULL, NULL, (void *)Phyuserinput_brdcst_func},// 0x405 -- Physical User Input Broadcast
+    {NULL, (void *)Volume_reply_func, Volume_brdcst_func},// 0x406 -- Volume Control
+    {NULL, (void *)spk_reply_func, spk_brdcst_func},// 0x407 -- Speaker Control
     {NULL, NULL, NULL},// 0x408 -- Transmit Power Level
-    {NULL, ToneControl_reply_func, NULL},// 0x409 -- Tone Control
-    {NULL, NULL, ShutDown_brdcst_func},// 0x40A -- Shut Down
+    {NULL, (void *)ToneControl_reply_func, NULL},// 0x409 -- Tone Control
+    {NULL, NULL, (void *)ShutDown_brdcst_func},// 0x40A -- Shut Down
     {NULL, NULL, NULL},// 0x40B --
     {NULL, NULL, NULL},// 0x40C -- Monitor Control
     {NULL, NULL, NULL},// 0x40D -- Channel Zone Selection
-    {NULL, mic_reply_func, mic_brdcst_func},// 0x40E -- Microphone Control
+    {NULL, (void *)mic_reply_func, (void *)mic_brdcst_func},// 0x40E -- Microphone Control
     {NULL, NULL, NULL},// 0x40F -- Scan Control
-    {NULL, NULL, BatteryLevel_brdcst_func},// 0x410 -- Battery Level
+    {NULL, NULL, (void *)BatteryLevel_brdcst_func},// 0x410 -- Battery Level
     {NULL, NULL, NULL},// 0x411 -- Brightness
-    {NULL, ButtonConfig_reply_func, ButtonConfig_brdcst_func},// 0x412 -- Button Configuration
+    {NULL, (void *)ButtonConfig_reply_func, (void *)ButtonConfig_brdcst_func},// 0x412 -- Button Configuration
     {NULL, NULL, NULL},// 0x413 -- Emergency Control
-    {NULL, AudioRoutingControl_reply_func, AudioRoutingControl_brdcst_func},// 0x414 -- Audio Routing Control
-    {NULL, TransmitControl_reply_func, TransmitControl_brdcst_func},// 0x415 -- Transmit Control
+    {NULL, (void *)AudioRoutingControl_reply_func, (void *)AudioRoutingControl_brdcst_func},// 0x414 -- Audio Routing Control
+    {NULL, (void *)TransmitControl_reply_func, (void *)TransmitControl_brdcst_func},// 0x415 -- Transmit Control
     {NULL, NULL, NULL},// 0x416 --
     {NULL, NULL, NULL},// 0x417 --
     {NULL, NULL, NULL},// 0x418 --
     {NULL, NULL, NULL},// 0x419 --
     {NULL, NULL, NULL},// 0x41A --
-    {NULL, NULL, SingleDetection_brdcst_func},// 0x41B -- Signal Detection Broadcast
+    {NULL, NULL, (void *)SingleDetection_brdcst_func},// 0x41B -- Signal Detection Broadcast
     {NULL, NULL, NULL},// 0x41C -- Remote Radio Control
-    {NULL, DataSession_reply_func, DataSession_brdcst_func},// 0x41D -- Data Session
-    {NULL, NULL, CallControl_brdcst_func},// 0x41E -- Call Control
+    {NULL, (void *)DataSession_reply_func, (void *)DataSession_brdcst_func},// 0x41D -- Data Session
+    {NULL, NULL, (void *)CallControl_brdcst_func},// 0x41E -- Call Control
     {NULL, NULL, NULL},// 0x41F -- Menu or List Navigation
     {NULL, NULL, NULL},// 0x420 -- Menu Control
-    {NULL, dcm_reply_func, dcm_brdcst_func},// 0x421 -- Device Control Mode
+    {NULL, (void *)dcm_reply_func, (void *)dcm_brdcst_func},// 0x421 -- Device Control Mode
     {NULL, NULL, NULL},// 0x422 -- Display Mode Control
     {NULL, NULL, NULL},// 0x423 --
     {NULL, NULL, NULL},// 0x424 --
     {NULL, NULL, NULL},// 0x425 --
     {NULL, NULL, NULL},// 0x426 --
     {NULL, NULL, NULL},// 0x427 --
-    {NULL, NULL, DeviceManagement_brdcst_func},// 0x428 -- Device Management
+    {NULL, NULL, (void *)DeviceManagement_brdcst_func},// 0x428 -- Device Management
     {NULL, NULL, NULL},// 0x429 --
     {NULL, NULL, NULL},// 0x42A --
     {NULL, NULL, NULL},// 0x42B --
@@ -932,7 +932,7 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
 	{NULL, NULL, NULL},// 0x455 --
 	{NULL, NULL, NULL},// 0x456 --
 	{NULL, NULL, NULL},// 0x457 --
-	{FD_request_func, FD_reply_func ,FD_brdcst_func},// 0x458 -- Forward Data
+	{(void *)FD_request_func, (void *)FD_reply_func ,(void *)FD_brdcst_func},// 0x458 -- Forward Data
 	{NULL, NULL, NULL},// 0x459 --
 	{NULL, NULL, NULL},// 0x45A --
 	{NULL, NULL, NULL},// 0x45B --
@@ -945,7 +945,7 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
 	{NULL, NULL, NULL},// 0x462 --
 	{NULL, NULL, NULL},// 0x463 --
 	{NULL, NULL, NULL},// 0x464 --
-	{NULL, EnOB_reply_func, EnOB_brdcst_func},// 0x465 --Enhanced Option Board Mode
+	{NULL, (void *)EnOB_reply_func, (void *)EnOB_brdcst_func},// 0x465 --Enhanced Option Board Mode
 	{NULL, NULL, NULL},// 0x466 --
     {NULL, NULL, NULL},// 0x467 --
 	{NULL, NULL, NULL},// 0x468 --

@@ -125,6 +125,10 @@ typedef enum
 #define BEYOND_PAGE_BOUNDARY(addr, size)    ((addr + size) > ((addr & 0x7FFF00)+DF_PAGE_SIZE) ? TRUE : FALSE)//huayi
 //#define BYTES_TO_NEXT_PAGE_BOUNDARY(addr)   (DF_PAGE_SIZE - (addr & 0x7FFF00))
 #define BYTES_TO_NEXT_PAGE_BOUNDARY(addr)   (DF_PAGE_SIZE - (addr & 0xFF))//huayi
+void W25Q64_SPI_SetSpeed(U16 SPI_BaudRatePrescaler);
+void W25Q64_SPI_SetSpeedLow(void);
+void W25Q64_SPI_SetSpeedHi(void);
+
 
 void data_flash_init(void);
 U16 send_flash_command(U16 command, U32 address, U8 *data_ptr, U16 length);

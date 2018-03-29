@@ -175,7 +175,7 @@ Description: process while receive master status boardcast.
 Calls:xSemaphoreGive--freestos,xnl_tx
 Register:xnl_proc_list exec in xnl_rx_process
 */
-void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
+static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 {	
 	/*XNL frame will be send*/	
 	xnl_fragment_t xnl_frame;
@@ -244,7 +244,7 @@ Description: process while receive device auth reply.
 Calls:xSemaphoreGive--freestos,xnl_tx
 Register:xnl_proc_list exec in xnl_rx_process
 */
-void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
+static void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 {
 	U32 v_vector[2], w_vector[2];
 	
@@ -377,7 +377,7 @@ Description: process while receive device conn reply.
 Calls:xSemaphoreGive--freestos
 Register:xnl_proc_list exec in xnl_rx_process
 */
-void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
+static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 {
 	/*Bool MasterAuthenticate;
 	The reply to the Device Connection Request contains a result code 
@@ -476,7 +476,7 @@ Description: process while receive data message.
 Calls:xnl_send_msg_ack, xcmp_exec(function in xcmp)
 Register:xnl_proc_list exec in xnl_rx_process
 */
-void xnl_data_msg_func(xnl_fragment_t * xnl)
+static void xnl_data_msg_func(xnl_fragment_t * xnl)
 {
 	/*
 	Try to schedule ACK.
@@ -497,7 +497,7 @@ Description: process while receive msg ack.
 Calls:xSemaphoreGive--freertos
 Register:xnl_proc_list exec in xnl_rx_process
 */
-void xnl_get_msg_ack_func(xnl_fragment_t * xnl)
+static void xnl_get_msg_ack_func(xnl_fragment_t * xnl)
 {
 	U16 DestinationAddress;
 	U16 TransactionID;

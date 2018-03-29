@@ -64,5 +64,35 @@ extern xQueueHandle_t x_queue_list;
 
 void app_init( void );
 void app_start( void );
+void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp);
+void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp);
+void ToneControl_reply_func(xcmp_fragment_t * xcmp);
+void dcm_reply_func(xcmp_fragment_t * xcmp);
+void dcm_brdcst_func(xcmp_fragment_t * xcmp);
+void mic_reply_func(xcmp_fragment_t * xcmp);
+void mic_brdcst_func(xcmp_fragment_t * xcmp);
+void spk_brdcst_func(xcmp_fragment_t * xcmp);
+void spk_reply_func(xcmp_fragment_t * xcmp);
+void Volume_reply_func(xcmp_fragment_t * xcmp);
+void Volume_brdcst_func(xcmp_fragment_t * xcmp);
+void AudioRoutingControl_reply_func(xcmp_fragment_t * xcmp);
+void AudioRoutingControl_brdcst_func(xcmp_fragment_t * xcmp);
+void TransmitControl_reply_func(xcmp_fragment_t * xcmp);
+void TransmitControl_brdcst_func(xcmp_fragment_t * xcmp);
+void CallControl_brdcst_func(xcmp_fragment_t * xcmp);
+void DataSession_reply_func(xcmp_fragment_t * xcmp);
+void ShutDown_brdcst_func(xcmp_fragment_t * xcmp);
+void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp);
+void DataSession_brdcst_func(xcmp_fragment_t * xcmp);
+void ButtonConfig_reply_func(xcmp_fragment_t * xcmp);
+void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp);
+void ButtonConfig_brdcst_func(xcmp_fragment_t * xcmp);
+void SingleDetection_brdcst_func(xcmp_fragment_t * xcmp);
+void EnOB_reply_func(xcmp_fragment_t * xcmp);
+void EnOB_brdcst_func(xcmp_fragment_t * xcmp);
+void FD_request_func(xcmp_fragment_t * xcmp);
+void FD_reply_func(xcmp_fragment_t * xcmp);
+void FD_brdcst_func(xcmp_fragment_t * xcmp);
+
 
 #endif /* APP_H_ */
