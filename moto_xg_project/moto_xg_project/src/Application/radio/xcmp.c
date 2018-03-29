@@ -49,6 +49,8 @@ volatile app_exec_t clone_read= {NULL, NULL, NULL};
 /*if opcode & 0x0400 == 0x0400*/	
 volatile app_exec_t * app_list;
 
+//static volatile xSemaphoreHandle xcmp_mutex = NULL;
+
 /**
 Function: xcmp_tx
 Parameters: 
@@ -90,7 +92,8 @@ static void xcmp_tx( void * data_ptr, U32 data_len)
 	xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 	xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 	
-	
+	//逻辑上不会出现包不连续发送
+	//xSemaphoreTake(xcmp_mutex, portMAX_DELAY);
 	if(q != 0)//商
 	{//need to send data in a sub package 
 		int idx=0;
@@ -129,6 +132,8 @@ static void xcmp_tx( void * data_ptr, U32 data_len)
 		xnl_tx(&xnl_frame);
 
 	}
+	
+	//xSemaphoreGive(xcmp_mutex);
 }
 
 /**
@@ -297,6 +302,13 @@ Called By: main -- main.c
 */
 void xcmp_init(void)
 {
+	///* Create the mutex semaphore to ensure that fragmented payloads are sent contiguously.*/
+	//xcmp_mutex = xSemaphoreCreateMutex();
+	//if (xcmp_mutex == NULL)
+	//{
+		//log("Create the xcmp_mutex failure\n");
+	//}
+	
 	/*register the xcmp function(callback function)*/
 	xnl_register_xcmp_func( xcmp_rx );
 	
@@ -349,7 +361,7 @@ void xcmp_opcode_not_supported( void )
 	xcmp_farme.u8[0] = xcmp_Res_Opcode_Not_Supported;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, 1);
+	xcmp_tx( &xcmp_farme, 1 + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 extern volatile char XCMP_Version[4];
@@ -407,7 +419,7 @@ void xcmp_DeviceInitializationStatus_request(void)
 	
 	/*send xcmp frame*/
 	xcmp_tx( &xcmp_farme
-		, sizeof(DeviceInitializationStatus_brdcst_t) - MAX_DEVICE_DESC_SIZE);
+		, sizeof(DeviceInitializationStatus_brdcst_t) - MAX_DEVICE_DESC_SIZE + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -449,7 +461,7 @@ void xcmp_IdleTestTone(U8 type, U16 toneID)
 	
 	/*send xcmp frame*/
 	//note:length <=238bytes
-	xcmp_tx( &xcmp_farme, sizeof(ToneControl_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(ToneControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -484,7 +496,7 @@ void xcmp_audio_route_mic(void)
 	ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;
 		//
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t));
+	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -576,7 +588,7 @@ void xcmp_data_session_req(void *message, U16 length, U32 dest)
 	
 	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
 	
-	xcmp_tx(&xcmp_farme, sizeof(DataSession_req_t) - (256 - length));
+	xcmp_tx(&xcmp_farme, sizeof(DataSession_req_t) - (256 - length) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -620,7 +632,7 @@ void xcmp_data_session_brd( void *message, U16 length, U8 SessionID)
 	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
 
 		
-	xcmp_tx( &xcmp_farme, sizeof(DataSession_brdcst_t)-(sizeof(DataPayload_t) - length));
+	xcmp_tx( &xcmp_farme, sizeof(DataSession_brdcst_t)-(sizeof(DataPayload_t) - length) + sizeof(xcmp_farme.xcmp_opcode));
 
 	
 }
@@ -670,7 +682,7 @@ void xcmp_button_config(void)
 		
 		
 		/*send xcmp frame*///注意！！！！！！！！！！
-		xcmp_tx( &xcmp_farme, sizeof(ButtonConfig_req_t));
+		xcmp_tx( &xcmp_farme, sizeof(ButtonConfig_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 	
 }
 
@@ -696,7 +708,7 @@ void xcmp_enter_enhanced_OB_mode(void)
 	ptr->Function = EN_OB_Enter;
 		
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(En_OB_Control_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(En_OB_Control_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -720,7 +732,7 @@ void xcmp_exit_enhanced_OB_mode(void)
 	ptr->Function = EN_OB_Exit;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(En_OB_Control_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(En_OB_Control_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -751,7 +763,7 @@ void xcmp_volume_control(void)
 
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(VolumeControl_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(VolumeControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -797,7 +809,7 @@ void xcmp_audio_route_speaker(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 		
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t));
+	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -834,7 +846,7 @@ void xcmp_audio_route_revert(void)
 	//ptr->RoutingData[0].audioOutput = OUT_Microphone_Data;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t));
+	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -899,7 +911,7 @@ void xcmp_audio_route_AMBE(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t));
+	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
 
 	
 }
@@ -967,7 +979,7 @@ void xcmp_audio_route_encoder_AMBE(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t));
+	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -1034,7 +1046,7 @@ void xcmp_audio_route_decoder_AMBE(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t));
+	xcmp_tx( &xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -1063,7 +1075,7 @@ void xcmp_enter_device_control_mode(void)
 	//ptr->ControlType = DCM_SPEAKER_CTRL;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(DeviceControlMode_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -1090,7 +1102,7 @@ void xcmp_exit_device_control_mode(void)
 	ptr->ControlType = 0x03;//DCM_SPEAKER_CTRL;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(DeviceControlMode_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -1116,7 +1128,7 @@ void xcmp_transmit_control( void )
 	ptr->TT_Source = 0x00;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(TransmitControl_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(TransmitControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -1140,7 +1152,7 @@ void xcmp_transmit_dekeycontrol(void)
 	
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(TransmitControl_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(TransmitControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 	
 	
 	
@@ -1171,7 +1183,7 @@ void xcmp_function_mic( void )
 	ptr->Gain_Offset = 0x17;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(MicControl_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(MicControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 
@@ -1201,7 +1213,7 @@ void xcmp_unmute_speaker( void )
 	ptr->Function[1] = UNMUTED & 0xFF;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(SpeakerControl_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(SpeakerControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
 
 /**
@@ -1229,5 +1241,5 @@ void xcmp_mute_speaker( void )
 	ptr->Function[1] = MUTED & 0xFF;
 	
 	/*send xcmp frame*/
-	xcmp_tx( &xcmp_farme, sizeof(SpeakerControl_req_t));
+	xcmp_tx( &xcmp_farme, sizeof(SpeakerControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
 }
