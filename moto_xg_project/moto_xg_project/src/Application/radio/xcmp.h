@@ -1062,6 +1062,7 @@ An XCMP device can initiate multiple data sessions at one time.
 #define  LRRP_Ver_1_1         (unsigned char)0x00   //Location Request & Response Protocol.
 #define  TMP_Ver_1_1         (unsigned char)0x20	//Text Messaging Protocol.
 #define  Raw_Data         (unsigned char)0x50		//User-Defined Raw Data.
+#define  CSBK_Raw_Data         (unsigned char)0x54		//User-Defined Raw Data in Broadcast CSBK.
 #define  DMR_CSBK_Data         (unsigned char)0x70		//DMR Control Signal Block Data.
 #define  DMR_Message_Data        (unsigned char)0x80		//Digital Mobile Radio Message Data.
 
@@ -1096,6 +1097,33 @@ An XCMP device can initiate multiple data sessions at one time.
 
 //#define MAX_ADDRESS_SIZE		10
 //volatile U8  MAX_ADDRESS_SIZE = 0;
+
+#define CSBK_PF_TRUE		0x1
+#define CSBK_PF_FALSE		0x0
+#define CSBK_LB_TRUE		0x1
+#define CSBK_LB_FALSE		0x0
+#define CSBK_Opcade			0x3f
+#define CSBK_Third_PARTY	0x20
+#define CSBK_Payload_Length	0x8
+
+
+typedef struct
+{
+	U8 csbk_LB		:1;
+	U8 csbk_PF		:1;
+	U8 csbk_opcode	:6;
+	
+}CSBK_Header_t;
+
+
+typedef struct
+{
+	CSBK_Header_t csbk_header;
+	U8 csbk_manufacturing_id;
+	U8 csbk_data[8];
+	
+}CSBK_Pro_t;
+
 typedef struct
 {
 	U8 Remote_Address_Type;
@@ -1115,7 +1143,7 @@ typedef struct
 {
 	U8 Session_ID_Number;
 	U8 DataPayload_Length[2];
-	U8 DataPayload[256];
+	U8 DataPayload[1024];
 }DataPayload_t;
 
 #pragma pack(1)
@@ -1715,5 +1743,6 @@ void xcmp_exit_enhanced_OB_mode(void);
 void xcmp_audio_route_encoder_AMBE(void);
 void xcmp_audio_route_decoder_AMBE(void);
 void xcmp_audio_route_AMBE(void);
+void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest);
 
 #endif /* XCMP_H_ */

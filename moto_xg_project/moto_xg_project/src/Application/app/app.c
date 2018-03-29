@@ -1244,3 +1244,52 @@ void vApplicationIdleHook( void )
 }
 
 
+void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
+{
+	
+	CSBK_Pro_t csbk_t_array[100];//一个xcmp指令最大可以拥有100个csbk—pakage
+	memset(csbk_t_array, 0x00, sizeof(csbk_t_array));
+	U32 remaining_len =payload_len;
+	U32 idx =0;
+	U32 data_ptr_index=0;
+
+	//打包CSBK数据
+	//第一包数据放置协议信息
+	csbk_t_array[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value
+	csbk_t_array[idx].csbk_header.csbk_opcode =CSBK_Opcade;//fixed value
+	csbk_t_array[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value
+	csbk_t_array[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;
+	//考虑放入校验等数据，未填充字段默认设置为0；
+	csbk_t_array[idx].csbk_data[0] = payload_len & 0xff;//数据长度低字节
+	csbk_t_array[idx].csbk_data[1] = ((payload_len >> 8) &0x00ff);////数据长度高字节，且默认数据长度双字节最大65535
+	
+
+	do//将负载数据打包到CSBK数据的中间包数据和最后一包数据 
+	{
+		idx++;	
+		csbk_t_array[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value
+		csbk_t_array[idx].csbk_header.csbk_opcode =CSBK_Opcade;//fixed value
+		csbk_t_array[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value
+		
+		if(remaining_len < CSBK_Payload_Length)//不超过8个字节
+		{				
+			csbk_t_array[idx].csbk_header.csbk_LB = CSBK_LB_TRUE;//负载数据的最后一包
+			memcpy(csbk_t_array[idx].csbk_data, (usart_payload+data_ptr_index), remaining_len);//拷贝CSBK数据
+			remaining_len =0;//清零剩余数据长度，并退出循环
+		}
+		else
+		{
+			csbk_t_array[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;
+			memcpy(csbk_t_array[idx].csbk_data, (usart_payload+data_ptr_index), CSBK_Payload_Length);//拷贝CSBK数据
+			data_ptr_index+=CSBK_Payload_Length;//地址指针偏移
+			remaining_len-=CSBK_Payload_Length;//剩余数据长度
+		}
+		
+	} while (remaining_len!=0);
+
+	 
+	 xcmp_data_session_csbk_raw_req(csbk_t_array, sizeof(CSBK_Pro_t)*(idx+1), 65520);
+	
+
+	
+}

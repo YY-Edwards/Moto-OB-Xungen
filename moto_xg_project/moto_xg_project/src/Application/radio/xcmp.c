@@ -356,16 +356,16 @@ Called By:...
 void xcmp_opcode_not_supported( void )
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REPLY;
+	xcmp_fragment.xcmp_opcode = XCMP_REPLY;
 	
 	/*The radio does not support this opcode.*/
-	xcmp_farme.u8[0] = xcmp_Res_Opcode_Not_Supported;
+	xcmp_fragment.u8[0] = xcmp_Res_Opcode_Not_Supported;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, 1 + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, 1 + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 extern volatile char XCMP_Version[4];
@@ -379,14 +379,14 @@ Called By:...
 void xcmp_DeviceInitializationStatus_request(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 		
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_BRDCAST | DEVICE_INITIALIZATION_STATUS;
+	xcmp_fragment.xcmp_opcode = XCMP_BRDCAST | DEVICE_INITIALIZATION_STATUS;
 	
 	/*point to xcmp payload*/
 	DeviceInitializationStatus_brdcst_t * ptr 
-						 = (DeviceInitializationStatus_brdcst_t *)xcmp_farme.u8;
+						 = (DeviceInitializationStatus_brdcst_t *)xcmp_fragment.u8;
 	
 	/*xcmp version 8.1.0.5*///版本号未正确填写，纠正
 	ptr->XCMPVersion[0] = XCMP_Version[0];
@@ -422,8 +422,8 @@ void xcmp_DeviceInitializationStatus_request(void)
 	ptr->DeviceStatusInfo.DeviceDescriptorSize = 0x00;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme
-		, sizeof(DeviceInitializationStatus_brdcst_t) - MAX_DEVICE_DESC_SIZE + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment
+		, sizeof(DeviceInitializationStatus_brdcst_t) - MAX_DEVICE_DESC_SIZE + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -436,13 +436,13 @@ Called By:...
 void xcmp_IdleTestTone(U8 type, U16 toneID)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | TONE_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | TONE_CONTROL;
 	
 	/*point to xcmp payload*/
-	ToneControl_req_t * ptr = (ToneControl_req_t *)xcmp_farme.u8;
+	ToneControl_req_t * ptr = (ToneControl_req_t *)xcmp_fragment.u8;
 	
 	/*Starts the specific tone*/	
 	ptr->Function = type;
@@ -465,7 +465,7 @@ void xcmp_IdleTestTone(U8 type, U16 toneID)
 	
 	/*send xcmp frame*/
 	//note:length <=238bytes
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(ToneControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(ToneControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -478,13 +478,13 @@ Called By:...
 void xcmp_audio_route_mic(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
 	
 	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_farme.u8;
+	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
 			
 	ptr->Function = Routing_Func_Update_Source;
 	
@@ -500,7 +500,7 @@ void xcmp_audio_route_mic(void)
 	ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;
 		//
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -542,6 +542,56 @@ U8 DataPayload[20]={//注意payload的格式很重要，//Each CSBK can carry 10 bytes as
 
 extern U8  MAX_ADDRESS_SIZE;
 
+
+
+void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
+{
+
+	xcmp_fragment_t xcmp_fragment;
+
+	/*insert XCMP opcode*/
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
+
+	/*point to xcmp payload*/
+	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
+
+	if (data_ength > 800)
+	{
+		mylog("csbk data is to long!!!\n");
+		return ;
+	}
+
+	ptr->Function = Single_Data_Uint;//0x01
+
+	ptr->DataDefinition.Data_Protocol_Version = CSBK_Raw_Data;//0x54
+
+	ptr->DataDefinition.Dest_Address.Remote_Address_Type = Remote_IPV4_Address;//0x02
+
+	ptr->DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;//0x04
+
+	unsigned int addr = 0x0C000000 | (dest & 0x00FFFFFF);
+	memcpy(ptr->DataDefinition.Dest_Address.Remote_Address, &addr, Remote_IPV4_Address_Size);
+	//ptr->DataDefinition.Dest_Address.Remote_Address[0] = 0x0C;//12
+	//ptr->DataDefinition.Dest_Address.Remote_Address[1] = 0x00;//0
+	//ptr->DataDefinition.Dest_Address.Remote_Address[2] = 0x00;//0
+	//ptr->DataDefinition.Dest_Address.Remote_Address[3] = 0x02;//2
+
+	ptr->DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
+	ptr->DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
+
+
+	ptr->DataPayload.Session_ID_Number = Session_ID;//0x00
+
+	ptr->DataPayload.DataPayload_Length[0] =(data_ength >> 8) & 0xFF ;//可能会变化
+	ptr->DataPayload.DataPayload_Length[1] =data_ength & 0xFF  ;//可能会变化
+
+	memcpy(&(ptr->DataPayload.DataPayload[0]), data, data_ength);
+
+	xcmp_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
+	
+
+}
+
 /**
 Function: xcmp_data_session_req
 Parameters:cmd
@@ -556,13 +606,13 @@ void xcmp_data_session_req(void *message, U16 length, U32 dest)
 	
 	//U8 SizeofAddress = Remote_Mototrbo_Address_Size;// 3;//可能会变化
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
 	
 	/*point to xcmp payload*/
-	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_farme.u8;
+	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
 	
 	if (length > 256)return ;
 	
@@ -592,7 +642,7 @@ void xcmp_data_session_req(void *message, U16 length, U32 dest)
 	
 	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
 	
-	xcmp_tx((U8 *)&xcmp_farme, sizeof(DataSession_req_t) - (256 - length) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (256 - length) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -608,13 +658,13 @@ void xcmp_data_session_brd( void *message, U16 length, U8 SessionID)
 	//static U8 SessionID = 0;
 	
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_BRDCAST | DATA_SESSION;
+	xcmp_fragment.xcmp_opcode = XCMP_BRDCAST | DATA_SESSION;
 	
 	/*point to xcmp payload*/
-	DataSession_brdcst_t * ptr = (DataSession_brdcst_t *)xcmp_farme.u8;
+	DataSession_brdcst_t * ptr = (DataSession_brdcst_t *)xcmp_fragment.u8;
 	
 	
 	ptr->State = Data_Session_Start;//0x10
@@ -636,7 +686,7 @@ void xcmp_data_session_brd( void *message, U16 length, U8 SessionID)
 	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
 
 		
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(DataSession_brdcst_t)-(sizeof(DataPayload_t) - length) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DataSession_brdcst_t)-(sizeof(DataPayload_t) - length) + sizeof(xcmp_fragment.xcmp_opcode));
 
 	
 }
@@ -652,13 +702,13 @@ Called By:...
 void xcmp_button_config(void)
 {
 		/*xcmp frame will be sent*/
-		xcmp_fragment_t xcmp_farme;
+		xcmp_fragment_t xcmp_fragment;
 		
 		/*insert XCMP opcode*/
-		xcmp_farme.xcmp_opcode = XCMP_REQUEST | BTN_CONFIG_REQUEST;
+		xcmp_fragment.xcmp_opcode = XCMP_REQUEST | BTN_CONFIG_REQUEST;
 		
 		/*point to xcmp payload*/
-		ButtonConfig_req_t * ptr = (ButtonConfig_req_t *)xcmp_farme.u8;
+		ButtonConfig_req_t * ptr = (ButtonConfig_req_t *)xcmp_fragment.u8;
 		
 		//ptr->ButtonInfo = (U8 *)malloc(sizeof(U8) * 1);//使用的时候再分配内存空间？测试看是否可行
 		
@@ -686,7 +736,7 @@ void xcmp_button_config(void)
 		
 		
 		/*send xcmp frame*///注意！！！！！！！！！！
-		xcmp_tx( (U8 *)&xcmp_farme, sizeof(ButtonConfig_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+		xcmp_tx( (U8 *)&xcmp_fragment, sizeof(ButtonConfig_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 	
 }
 
@@ -701,18 +751,18 @@ Called By:...
 void xcmp_enter_enhanced_OB_mode(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
 	
 	/*point to xcmp payload*/
-	En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_farme.u8;
+	En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = EN_OB_Enter;
 		
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(En_OB_Control_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(En_OB_Control_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -725,18 +775,18 @@ Called By:...
 void xcmp_exit_enhanced_OB_mode(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
 	
 	/*point to xcmp payload*/
-	En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_farme.u8;
+	En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = EN_OB_Exit;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(En_OB_Control_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(En_OB_Control_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -749,13 +799,13 @@ Called By:...
 void xcmp_volume_control(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | VOLUME_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | VOLUME_CONTROL;
 	
 	/*point to xcmp payload*/
-	VolumeControl_req_t * ptr = (VolumeControl_req_t *)xcmp_farme.u8;
+	VolumeControl_req_t * ptr = (VolumeControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Attenuator_Number[0] = (All_Speakers >> 8) & 0xFF;
 	ptr->Attenuator_Number[1] = All_Speakers & 0xff;
@@ -767,7 +817,7 @@ void xcmp_volume_control(void)
 
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(VolumeControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(VolumeControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -781,13 +831,13 @@ Called By:...
 void xcmp_audio_route_speaker(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 		
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
 		
 	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_farme.u8;
+	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
 		
 	ptr->Function = Routing_Func_Update_Source;
 		
@@ -813,7 +863,7 @@ void xcmp_audio_route_speaker(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 		
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -827,13 +877,13 @@ Called By:...
 void xcmp_audio_route_revert(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
 	
 	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_farme.u8;
+	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = Routing_Func_Default_Source;
 	
@@ -850,7 +900,7 @@ void xcmp_audio_route_revert(void)
 	//ptr->RoutingData[0].audioOutput = OUT_Microphone_Data;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -858,13 +908,13 @@ void xcmp_audio_route_AMBE(void)
 {
 
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
 	
 	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_farme.u8;
+	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = Routing_Func_Update_Source;
 	
@@ -915,7 +965,7 @@ void xcmp_audio_route_AMBE(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
 
 	
 }
@@ -931,13 +981,13 @@ Called By:...
 void xcmp_audio_route_encoder_AMBE(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
 	
 	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_farme.u8;
+	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = Routing_Func_Update_Source;
 	
@@ -983,7 +1033,7 @@ void xcmp_audio_route_encoder_AMBE(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -996,13 +1046,13 @@ Called By:...
 void xcmp_audio_route_decoder_AMBE(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
 	
 	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_farme.u8;
+	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = Routing_Func_Update_Source;
 	
@@ -1050,7 +1100,7 @@ void xcmp_audio_route_decoder_AMBE(void)
 	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -1065,13 +1115,13 @@ Called By:...
 void xcmp_enter_device_control_mode(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
 	
 	/*point to xcmp payload*/
-	DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_farme.u8;
+	DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = DCM_ENTER;
 	ptr->ControlTypeSize = 1;
@@ -1079,7 +1129,7 @@ void xcmp_enter_device_control_mode(void)
 	//ptr->ControlType = DCM_SPEAKER_CTRL;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -1093,20 +1143,20 @@ Called By:...
 void xcmp_exit_device_control_mode(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
 	
 	/*point to xcmp payload*/
-	DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_farme.u8;
+	DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = DCM_EXIT;
 	ptr->ControlTypeSize = 1;
 	ptr->ControlType = 0x03;//DCM_SPEAKER_CTRL;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -1119,20 +1169,20 @@ Called By:...
 void xcmp_transmit_control( void )
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | KEYREQ;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | KEYREQ;
 	
 	/*point to xcmp payload*/
-	TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_farme.u8;
+	TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = KEY_UP ;
 	ptr->Mode_Of_Operation = MODE_VOICE;
 	ptr->TT_Source = 0x00;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(TransmitControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(TransmitControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -1141,13 +1191,13 @@ void xcmp_transmit_control( void )
 void xcmp_transmit_dekeycontrol(void)
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | KEYREQ;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | KEYREQ;
 	
 	/*point to xcmp payload*/
-	TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_farme.u8;
+	TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = DE_KEY ;
 	ptr->Mode_Of_Operation = MODE_VOICE;
@@ -1156,7 +1206,7 @@ void xcmp_transmit_dekeycontrol(void)
 	
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(TransmitControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(TransmitControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 	
 	
 	
@@ -1173,13 +1223,13 @@ Called By:...
 void xcmp_function_mic( void )
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | MIC_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | MIC_CONTROL;
 	
 	/*point to xcmp payload*/
-	MicControl_req_t * ptr = (MicControl_req_t *)xcmp_farme.u8;
+	MicControl_req_t * ptr = (MicControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->Function = Mic_Disable;
 	ptr->Mic_Type = Mic_External;
@@ -1187,7 +1237,7 @@ void xcmp_function_mic( void )
 	ptr->Gain_Offset = 0x17;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(MicControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(MicControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 
@@ -1202,13 +1252,13 @@ Called By:...
 void xcmp_unmute_speaker( void )
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
 	
 	/*point to xcmp payload*/
-	SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_farme.u8;
+	SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->SpeakerNumber[0] = (All >> 8) & 0xFF;
 	ptr->SpeakerNumber[1] = All & 0xFF;
@@ -1217,7 +1267,7 @@ void xcmp_unmute_speaker( void )
 	ptr->Function[1] = UNMUTED & 0xFF;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(SpeakerControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(SpeakerControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -1230,13 +1280,13 @@ Called By:...
 void xcmp_mute_speaker( void )
 {
 	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_farme;
+	xcmp_fragment_t xcmp_fragment;
 	
 	/*insert XCMP opcode*/
-	xcmp_farme.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
+	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
 	
 	/*point to xcmp payload*/
-	SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_farme.u8;
+	SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_fragment.u8;
 	
 	ptr->SpeakerNumber[0] = (All >> 8) & 0xFF;
 	ptr->SpeakerNumber[1] = All & 0xFF;
@@ -1245,5 +1295,5 @@ void xcmp_mute_speaker( void )
 	ptr->Function[1] = MUTED & 0xFF;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_farme, sizeof(SpeakerControl_req_t) + sizeof(xcmp_farme.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(SpeakerControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
 }
