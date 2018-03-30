@@ -417,7 +417,7 @@ void xcmp_init(void)
 	xTaskCreate(
 	xcmp_rx_process
 	,  (const signed portCHAR *)"XCMP_RX"
-	, 1024//750//1024//800//384
+	, 800//750//1024//800//384
 	,  NULL
 	,  tskXCMP_PRIORITY
 	,  NULL
