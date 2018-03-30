@@ -64,20 +64,22 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		DeviceInitializationStatus_brdcst_t *ptr = (DeviceInitializationStatus_brdcst_t* )xcmp->u8;
 		
 		//mylog("DeviceInitializationStatus_brdcst...\n");
-		XCMP_Version[0]= ptr->XCMPVersion[0];
-		XCMP_Version[1]= ptr->XCMPVersion[1];
-		XCMP_Version[2]= ptr->XCMPVersion[2];
-		XCMP_Version[3]= ptr->XCMPVersion[3];
 		//memcpy(&XCMP_Version[0], (ptr->XCMPVersion), sizeof(XCMP_Version));
 		
 		if (ptr->DeviceInitType == Device_Init_Complete)
 		{
 			bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
+			mylog("device init complete...\n");
 		}
 		else if(ptr->DeviceInitType  == Device_Init_Status)
 		{
 			bunchofrandomstatusflags  &= 0xFFFFFFFC; //Device Init no longer Complete.
+			XCMP_Version[0]= ptr->XCMPVersion[0];
+			XCMP_Version[1]= ptr->XCMPVersion[1];
+			XCMP_Version[2]= ptr->XCMPVersion[2];
+			XCMP_Version[3]= ptr->XCMPVersion[3];
 			xcmp_DeviceInitializationStatus_request();
+			mylog("device init request..\n");
 		}
 		else//Device_Status_Update
 		{
@@ -115,12 +117,14 @@ void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
 			{
 				//Enable Option Board
 				bunchofrandomstatusflags |= 0x00000002;
+				mylog("Enable Option Board\n");
 			}
 			else
 			{
 				//Disable Option Board.
 				//mylog("Device State : %d\n", );
 				bunchofrandomstatusflags &= 0xFFFFFFFD;
+				mylog("Disable Option Board\n");
 			}
 			//mylog("Function : %d\n", ptr->Function);
 			//mylog("Device State : %d\n", ptr->Device_State);
@@ -1004,7 +1008,9 @@ extern U32 tc_tick;
 extern volatile DateTime_t Current_time;
 extern volatile  xTaskHandle save_handle; 
 //extern portTickType water_value;
-//extern portTickType tx_water_value;
+extern portTickType xnl_rx_water_value;
+extern portTickType xcmp_rx_water_value;
+extern portTickType xnl_tx_water_value;
 //extern portTickType log_water_value;
 static void send_message(void * pvParameters)
 {
@@ -1087,19 +1093,25 @@ static __app_Thread_(app_cfg)
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
-//	static  portTickType water_value;
+	static  portTickType water_value;
 	int i =0;
-	char test[120]={0};
-	for (i; i<120;i++)
+	char test[300]={0};
+	for (i; i<300;i++)
 	{
+		if(i<255)
 		{
 			test[i] = i;//注意取值范围
 		}
-
+		else
+		{
+			test[i] = 0xaa;//注意取值范围
+			
+		}
 	}
 		
 	for(;;)
 	{
+		water_value = uxTaskGetStackHighWaterMark(NULL);
 		switch(OB_State)
 		{
 			case OB_UNCONNECTEDWAITINGSTATUS:
@@ -1127,6 +1139,8 @@ static __app_Thread_(app_cfg)
 					mylog("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
 					Current_time.Year, Current_time.Month, Current_time.Day,
 					Current_time.Hour, Current_time.Minute, Current_time.Second);
+					/*send device_master_query to connect radio*/
+					xnl_send_device_master_query();
 				}
 								
 			break;
@@ -1177,14 +1191,18 @@ static __app_Thread_(app_cfg)
 					{						
 						run_counter++;			
 						nop();
-						if(run_counter == 1)
+						if(run_counter == 2)
 						{
 							mylog("send test csbk data...\n");
-							//package_usartdata_to_csbkdata(test, sizeof(test));
+							package_usartdata_to_csbkdata(test, sizeof(test));
 						}
-						//water_value = uxTaskGetStackHighWaterMark(NULL);
-						//mylog("app-thread water_value: %d\n", water_value);
 						mylog("app task run:%d\n", run_counter);
+						if(0x00000003 != (bunchofrandomstatusflags & 0x00000003))//可能断开
+						{
+							connect_flag =0;
+							OB_State = OB_UNCONNECTEDWAITINGSTATUS;
+						}
+					
 					}
 				
 			break;
@@ -1192,6 +1210,12 @@ static __app_Thread_(app_cfg)
 			break;
 				
 		} //End of switch on OB_State.
+		
+			mylog("app-thread water_value: %d\n", water_value);
+			mylog("xnl rx water_value: %d\n", xnl_rx_water_value);
+			mylog("xnl tx water_value: %d\n", xnl_tx_water_value);
+			mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
+		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		vTaskDelayUntil( &xLastWakeTime, (3000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。

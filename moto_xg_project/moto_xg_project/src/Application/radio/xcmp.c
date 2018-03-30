@@ -62,7 +62,71 @@ Calls:
 Called By: ...
 */
 extern volatile U8 connect_flag; 
-static void xcmp_tx( U8 * data_ptr, U32 data_len)
+
+//void xcmp_multi_tx( U8 * data_ptr, U32 data_len)
+//{
+	///*xnl frame will be sent*/
+	//xnl_fragment_t xnl_frame;
+//
+	///*
+	//Data Type 0x4000
+	//*/
+	//U32 q= 0;
+	//U32 r = 0;
+	//U16 fragement_type =0x0000;//default SINGLE_FRAGMENT
+	//
+	//q = data_len/MAX_XCMP_DATA_LENGTH;
+	//r = data_len%MAX_XCMP_DATA_LENGTH;
+	//
+		//
+	///*If the value is DEFAULT_VALUE, then say the value will be modified in 
+	//the xnl_tx*/
+	//xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
+	//
+	///*Insert opcode*/
+	//xnl_frame.xnl_header.opcode = XNL_DATA_MSG;
+	//
+	///*If the value is DEFAULT_VALUE, then say the value will be modified in 
+	//the xnl_tx*/
+	//xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+	//xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+	//xnl_frame.xnl_header.source = DEFAULT_VALUE;	
+	//xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
+	//
+	////逻辑上不会出现包不连续发送
+//
+	//if(q != 0)//商
+	//{//need to send data in a sub package 
+		//mylog("need to send data in a sub package\n");
+	//}
+	//if(r!=0)//余数
+	//{
+		////memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
+		///*
+		//Length :
+		//= checksum + xnl header + data_len
+		//= checksum + xnl header + xcmp opcode + xcmp payload
+		//= 0x02 + 0x0C + 0x02 + xcmp payload
+		//*/
+		//if(q != 0)
+		//{
+			//fragement_type = 0x300;//last fragment
+		//}
+		//xnl_frame.phy_header.phy_control  = ((0x4000 | fragement_type) + (sizeof(xnl_frame.phy_header.check_sum) + sizeof(xnl_header_t) + r));
+		//
+		//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, r);
+		//xnl_frame.xnl_header.payload_length = r;
+		//
+		///* send xnl frame*/
+		//xnl_tx(&xnl_frame);
+		////if(connect_flag)
+		////mylog("no need sub xcmp\n");
+//
+	//}
+	//
+	//
+//}
+void xcmp_tx( U8 * data_ptr, U32 data_len)
 //static void xcmp_tx( xcmp_fragment_t * xcmp, U8 payload_len)
 {
 	/*xnl frame will be sent*/
@@ -98,53 +162,53 @@ static void xcmp_tx( U8 * data_ptr, U32 data_len)
 	if(q != 0)//商
 	{//need to send data in a sub package 
 		//mylog("need to send data in a sub package\n");
-		//fragement_type = 0x100;//first fragment
-		//xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
-		///*insert xcmp frame data*/
-		//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
-		//xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
-		///* send xnl frame*/
-		//xnl_tx(&xnl_frame);
-		//
-		////clear
-		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
-		//data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
-		//
-		//int idx=1;
-		//for (; idx<q; idx++)//发送中间包
-		//{
-			//fragement_type = 0x200;//middle fragment
-			//xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
-			///*insert xcmp frame data*/
-			//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
-			//xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;	
-			//
-			///* send xnl frame*/	
-			//xnl_tx(&xnl_frame);
-			//
-			////clear 
-			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
-			//data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
-	//
-		//}
-		//
-		//if(r==0)
-		//{	
-			////clear
-			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
-			//fragement_type = 0x300;//last fragment
-			//xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
-			///*insert xcmp frame data*/
-			//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
-			//xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
-			///* send xnl frame*/
-			//xnl_tx(&xnl_frame);
-		//}
+		fragement_type = 0x100;//first fragment
+		xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+		/*insert xcmp frame data*/
+		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
+		xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
+		/* send xnl frame*/
+		xnl_tx(&xnl_frame);
+		
+		//clear
+		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg));
+		data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
+		
+		int idx=1;
+		for (; idx<q; idx++)//发送中间包
+		{
+			fragement_type = 0x200;//middle fragment
+			xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+			/*insert xcmp frame data*/
+			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
+			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;	
+			
+			/* send xnl frame*/	
+			xnl_tx(&xnl_frame);
+			
+			//clear 
+			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg));
+			data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
+	
+		}
+		
+		if(r==0)
+		{	
+			//clear
+			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg));
+			fragement_type = 0x300;//last fragment
+			xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+			/*insert xcmp frame data*/
+			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
+			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
+			/* send xnl frame*/
+			xnl_tx(&xnl_frame);
+		}
 			
 	}
 	if(r!=0)//余数
 	{
-		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame));
+		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg.u8) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg.u8));
 		/*
 		Length :
 		= checksum + xnl header + data_len
@@ -163,7 +227,7 @@ static void xcmp_tx( U8 * data_ptr, U32 data_len)
 		/* send xnl frame*/
 		xnl_tx(&xnl_frame);
 		//if(connect_flag)
-			//mylog("xcmp no need sub package\n");
+			//mylog("n sub\n");
 
 	}
 	
@@ -246,6 +310,7 @@ Calls: xQueueReceive -- freerots
 	xcmp_exec_func
 Called By: task
 */
+portTickType xcmp_rx_water_value = 0;
 static void xcmp_rx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
@@ -264,8 +329,8 @@ static void xcmp_rx_process(void * pvParameters)
 			
 			//mylog("\n\r R_xcmp : %4x \n\r",ptr->xcmp_opcode);//log:R_xcmp指令	
 			//static  portTickType water_value;
-			//water_value = uxTaskGetStackHighWaterMark(NULL);
-			//mylog("water_value: %d\n", water_value);			
+			xcmp_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
+			//mylog("xcmp_rx_water_value: %d\n", water_value);			
 			switch(ptr->xcmp_opcode & 0x0FFF)
 			{
 				case RADIO_STATUS:				
@@ -451,8 +516,7 @@ void xcmp_DeviceInitializationStatus_request(void)
 	ptr->DeviceStatusInfo.DeviceDescriptorSize = 0x00;
 	
 	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment
-		, sizeof(DeviceInitializationStatus_brdcst_t) - MAX_DEVICE_DESC_SIZE + sizeof(xcmp_fragment.xcmp_opcode));
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DeviceInitializationStatus_brdcst_t) - MAX_DEVICE_DESC_SIZE + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**
@@ -575,7 +639,7 @@ extern U8  MAX_ADDRESS_SIZE;
 
 void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 {
-
+	mylog("send xcmp_data_session_csbk_raw_req\n");
 	xcmp_fragment_t xcmp_fragment;
 
 	/*insert XCMP opcode*/
@@ -616,6 +680,8 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 
 	memcpy(&(ptr->DataPayload.DataPayload[0]), data, data_ength);
 
+	//xcmp_multi_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
+	
 	xcmp_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
 	
 

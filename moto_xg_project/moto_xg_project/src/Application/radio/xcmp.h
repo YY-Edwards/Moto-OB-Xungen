@@ -1710,6 +1710,11 @@ initialize the xnl layer
 initialize the queue
 Create the corresponding task;
 */
+
+void xcmp_multi_tx( U8 * data_ptr, U32 data_len);
+
+void xcmp_tx( U8 * data_ptr, U32 data_len);
+
 void xcmp_init(void);
 
 /*register the app function(callback function)*/

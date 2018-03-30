@@ -84,7 +84,7 @@ void phy_init( void )
 	ssc_init();
 	
 	/*send device_master_query to connect radio*/
-	xnl_send_device_master_query();
+	//xnl_send_device_master_query();
 	
 }
 
