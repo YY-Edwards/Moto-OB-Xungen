@@ -988,7 +988,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  750//1024//800//384
+	,  1024//1024//800//384
 	,  NULL
 	,  2
 	,  NULL );
@@ -1095,8 +1095,8 @@ static __app_Thread_(app_cfg)
 	xLastWakeTime = xTaskGetTickCount();
 	static  portTickType water_value;
 	int i =0;
-	char test[300]={0};
-	for (i; i<300;i++)
+	char test[150]={0};
+	for (i; i<150;i++)
 	{
 		if(i<255)
 		{

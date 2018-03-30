@@ -620,6 +620,10 @@ void xnl_tx(xnl_fragment_t * xnl)
 		
 		//vPortFree(ptr);
 	}
+	else
+	{
+		mylog("ptr - failure\n");
+	}
 }
 
 /**

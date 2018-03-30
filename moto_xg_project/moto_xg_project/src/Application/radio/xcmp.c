@@ -170,8 +170,8 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		/* send xnl frame*/
 		xnl_tx(&xnl_frame);
 		
-		//clear
-		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg));
+		//clear,不清除会影响校验数据
+		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg.u8) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg.u8));
 		data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
 		
 		int idx=1;
@@ -187,7 +187,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 			xnl_tx(&xnl_frame);
 			
 			//clear 
-			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg));
+			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg.u8) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg.u8));
 			data_ptr+=MAX_XCMP_DATA_LENGTH;//指针偏移
 	
 		}
@@ -195,7 +195,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		if(r==0)
 		{	
 			//clear
-			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg));
+			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg.u8) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg.u8));
 			fragement_type = 0x300;//last fragment
 			xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
 			/*insert xcmp frame data*/
