@@ -162,7 +162,11 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 	if(q != 0)//商
 	{//need to send data in a sub package 
 		//mylog("need to send data in a sub package\n");
-		fragement_type = 0x100;//first fragment
+		if (r!=0)//整包发送，判断是单包还是分包
+		{
+			fragement_type = 0x100;//first fragment
+		}
+	
 		xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
 		/*insert xcmp frame data*/
 		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
@@ -192,7 +196,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 	
 		}
 		
-		if(r==0)
+		if(r==0 && fragement_type !=0)//判断是单包还是多包，如果是多包且以整包的方式发送
 		{	
 			//clear
 			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg.u8) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg.u8));
@@ -206,7 +210,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		}
 			
 	}
-	if(r!=0)//余数
+	if(r!=0)//余数，非整包方式发送
 	{
 		//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg.u8) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg.u8));
 		/*
@@ -640,13 +644,17 @@ extern U8  MAX_ADDRESS_SIZE;
 void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 {
 	mylog("send xcmp_data_session_csbk_raw_req\n");
-	xcmp_fragment_t xcmp_fragment;
+	//xcmp_fragment_t xcmp_fragment;
 
 	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
 
 	/*point to xcmp payload*/
-	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
+	//DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
+	xcmp_datasession_req_t ptr;//新增结构体，以支持分包发送数据
+	
+	ptr.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
+	
 
 	if (data_ength > 800)
 	{
@@ -654,36 +662,45 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 		return ;
 	}
 
-	ptr->Function = Single_Data_Uint;//0x01
+	ptr.DataSession_req.Function = Single_Data_Uint;//0x01
 
-	ptr->DataDefinition.Data_Protocol_Version = CSBK_Raw_Data;//0x54
+	ptr.DataSession_req.DataDefinition.Data_Protocol_Version = CSBK_Raw_Data;//0x54
 
-	ptr->DataDefinition.Dest_Address.Remote_Address_Type = Remote_IPV4_Address;//0x02
+	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address_Type = Remote_IPV4_Address;//0x02
 
-	ptr->DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;//0x04
+	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;//0x04
 
 	unsigned int addr = 0x0C000000 | (dest & 0x00FFFFFF);
-	memcpy(ptr->DataDefinition.Dest_Address.Remote_Address, &addr, Remote_IPV4_Address_Size);
+	memcpy(ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address, &addr, Remote_IPV4_Address_Size);
 	//ptr->DataDefinition.Dest_Address.Remote_Address[0] = 0x0C;//12
 	//ptr->DataDefinition.Dest_Address.Remote_Address[1] = 0x00;//0
 	//ptr->DataDefinition.Dest_Address.Remote_Address[2] = 0x00;//0
 	//ptr->DataDefinition.Dest_Address.Remote_Address[3] = 0x02;//2
 
-	ptr->DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
-	ptr->DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
+	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
+	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
 
 
-	ptr->DataPayload.Session_ID_Number = Session_ID;//0x00
+	ptr.DataSession_req.DataPayload.Session_ID_Number = Session_ID;//0x00
 
-	ptr->DataPayload.DataPayload_Length[0] =(data_ength >> 8) & 0xFF ;//可能会变化
-	ptr->DataPayload.DataPayload_Length[1] =data_ength & 0xFF  ;//可能会变化
+	ptr.DataSession_req.DataPayload.DataPayload_Length[0] =(data_ength >> 8) & 0xFF ;//可能会变化
+	ptr.DataSession_req.DataPayload.DataPayload_Length[1] =data_ength & 0xFF  ;//可能会变化
 
-	memcpy(&(ptr->DataPayload.DataPayload[0]), data, data_ength);
+	memcpy(&(ptr.DataSession_req.DataPayload.DataPayload[0]), data, data_ength);//不会出现越界现象，DataPayload：1024bytes
 
 	//xcmp_multi_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
 	
-	xcmp_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
-	
+	//目前不支持多包发送，因而需要设定长度限制。
+	U32 xcmp_payload_len = sizeof(xcmp_datasession_req_t) - (1024 - data_ength);//1039-(1024-len)
+	mylog("xcmp_payload_len:%d\n", xcmp_payload_len);
+	//if(xcmp_payload_len>MAX_XCMP_DATA_LENGTH)
+	//{
+		//mylog("xcmp_payload_len overout!!!\n");
+	//}
+	//else
+	{
+		xcmp_tx((U8 *)&ptr, xcmp_payload_len);
+	}
 
 }
 
@@ -709,7 +726,7 @@ void xcmp_data_session_req(void *message, U16 length, U32 dest)
 	/*point to xcmp payload*/
 	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
 	
-	if (length > 256)return ;
+	if (length > 225)return ;//根据指针指向的地址给出判断
 	
 	ptr->Function = Single_Data_Uint;
 	
@@ -737,7 +754,7 @@ void xcmp_data_session_req(void *message, U16 length, U32 dest)
 	
 	memcpy(&(ptr->DataPayload.DataPayload[0]), message, length);
 	
-	xcmp_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (256 - length) + sizeof(xcmp_fragment.xcmp_opcode));
+	xcmp_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - length) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
 /**

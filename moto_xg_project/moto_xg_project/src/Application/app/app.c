@@ -988,7 +988,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  1024//1024//800//384
+	,  1500//1024//800//384
 	,  NULL
 	,  2
 	,  NULL );
@@ -1096,7 +1096,7 @@ static __app_Thread_(app_cfg)
 	static  portTickType water_value;
 	int i =0;
 	char test[150]={0};
-	for (i; i<150;i++)
+	for (i; i<150; i++)
 	{
 		if(i<255)
 		{

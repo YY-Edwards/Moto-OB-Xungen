@@ -1130,21 +1130,21 @@ typedef struct
 	U8 Remote_Address_Size;
 	U8 Remote_Address[4];
 	U8 Remote_Port_Com[2];   
-}Dest_Address_t;
+}Dest_Address_t;//8bytes
 
 
 typedef struct
 {
 	U8 Data_Protocol_Version;
 	Dest_Address_t Dest_Address;
-}DataDefinition_t;
+}DataDefinition_t;//9bytes
 
 typedef struct
 {
 	U8 Session_ID_Number;
 	U8 DataPayload_Length[2];
-	U8 DataPayload[1024];
-}DataPayload_t;
+	U8 DataPayload[1024];//若是单包，并且指针是指向xcmp.u8，那么最大为238bytes，也即是payload最大不能超过225bytes，否则会出现越界的bug
+}DataPayload_t;//1027bytes
 
 #pragma pack(1)
 typedef struct
@@ -1152,7 +1152,15 @@ typedef struct
 	U8 Function;
 	DataDefinition_t DataDefinition;
 	DataPayload_t DataPayload;
-}DataSession_req_t;
+}DataSession_req_t;//1037bytes
+
+typedef struct
+{
+	U16 xcmp_opcode;
+	DataSession_req_t DataSession_req;
+	
+}xcmp_datasession_req_t;//1039bytes
+
 #pragma pack()
 
 typedef struct
