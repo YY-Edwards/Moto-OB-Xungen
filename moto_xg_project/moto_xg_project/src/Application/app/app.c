@@ -1295,13 +1295,17 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	{
 		counts =q+1;//整8个数据包
 	}
+	if(counts>MAX_CSBK_UNIT)//需要拆分为多个datasession指令来发送数据
+	{
+		mylog("usart_payload beyond MAX_CSBK_UNIT\n");
+		return;
+	}
 	
 	CSBK_Pro_t * csbk_t_array_ptr=(CSBK_Pro_t*)pvPortMalloc(counts*sizeof(CSBK_Pro_t));//动态分配堆空间数据
 	if(csbk_t_array_ptr==NULL)
 	{
 		mylog("pvPortMalloc failure!!!\n");
 	}	
-	//memset(csbk_t_array, 0x00, sizeof(csbk_t_array));
 	memset(csbk_t_array_ptr, 0x00, counts*sizeof(CSBK_Pro_t));
 	U32 remaining_len =payload_len;
 	U32 idx =0;
@@ -1350,7 +1354,7 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	
 	mylog("send csbk_ptr data len:%d\n", sizeof(CSBK_Pro_t)*(idx+1));
 	
-	xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);
+	xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);//最多一次只能发送22个csbk数据包
 
 	vPortFree(csbk_t_array_ptr);
 	csbk_t_array_ptr=NULL;

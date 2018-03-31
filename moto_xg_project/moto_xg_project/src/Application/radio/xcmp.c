@@ -703,7 +703,7 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 	ptr.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
 	
 
-	if (data_ength > 800)
+	if (data_ength > (MAX_XCMP_DATA_LENGTH- (sizeof(xcmp_datasession_req_t) - 1024)))
 	{
 		mylog("csbk data is to long!!!\n");
 		return ;
@@ -740,11 +740,11 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 	//目前不支持多包发送，因而需要设定长度限制。
 	U32 xcmp_payload_len = sizeof(xcmp_datasession_req_t) - (1024 - data_ength);//1039-(1024-len)
 	mylog("xcmp_payload_len:%d\n", xcmp_payload_len);
-	//if(xcmp_payload_len>MAX_XCMP_DATA_LENGTH)
-	//{
-		//mylog("xcmp_payload_len overout!!!\n");
-	//}
-	//else
+	if(xcmp_payload_len>MAX_XCMP_DATA_LENGTH)
+	{
+		mylog("xcmp_payload_len overflow!!!\n");
+	}
+	else
 	{
 		xcmp_tx((U8 *)&ptr, xcmp_payload_len);
 	}
