@@ -23,7 +23,7 @@ each fragment while for the Payload Channel the checksum bytes do not exist. Not
 that the total data length does not include the payload padding byte for both XNL
 Channel and Payload Channel*/
 #define MAX_TRANSFER_UNIT 254
-#define MAX_XCMP_DATA_LENGTH (MAX_TRANSFER_UNIT - sizeof(phy_header_t) - sizeof(xnl_header_t)) //256-4-12=240
+#define MAX_XCMP_DATA_LENGTH (MAX_TRANSFER_UNIT - sizeof(xnl_header_t) -2) //254-2-12=240,ณýศฅะฃั้2bytes
 
 typedef struct
 {

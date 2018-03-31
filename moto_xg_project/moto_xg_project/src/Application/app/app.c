@@ -1095,8 +1095,8 @@ static __app_Thread_(app_cfg)
 	xLastWakeTime = xTaskGetTickCount();
 	static  portTickType water_value;
 	int i =0;
-	char test[150]={0};
-	for (i; i<150; i++)
+	char test[300]={0};
+	for (i; i<300; i++)
 	{
 		if(i<255)
 		{
@@ -1131,6 +1131,7 @@ static __app_Thread_(app_cfg)
 				}
 				else
 				{
+					//package_usartdata_to_csbkdata(test, sizeof(test));
 					nop();
 					nop();
 					nop();
@@ -1212,9 +1213,9 @@ static __app_Thread_(app_cfg)
 		} //End of switch on OB_State.
 		
 			mylog("app-thread water_value: %d\n", water_value);
-			mylog("xnl rx water_value: %d\n", xnl_rx_water_value);
-			mylog("xnl tx water_value: %d\n", xnl_tx_water_value);
-			mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
+			//mylog("xnl rx water_value: %d\n", xnl_rx_water_value);
+			//mylog("xnl tx water_value: %d\n", xnl_tx_water_value);
+			//mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//ясЁы300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
@@ -1352,6 +1353,7 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);
 
 	vPortFree(csbk_t_array_ptr);
+	csbk_t_array_ptr=NULL;
 
 #else	
 

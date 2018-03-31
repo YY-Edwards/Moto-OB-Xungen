@@ -106,7 +106,7 @@ static U16 check_sum (xnl_fragment_t * xnl)
 		hWordswithinFrag -= 1;
 	}
 	
-	return -sumScratch;
+	return -sumScratch;//·´Âë
 }
 
 /**
@@ -635,7 +635,7 @@ Calls: xQueueReceive--freertos
 	phy_tx -- physical.c
 Called By: task
 */
-portTickType xnl_tx_water_value =0;
+//portTickType xnl_tx_water_value =0;
 static void xnl_tx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
@@ -653,7 +653,7 @@ static void xnl_tx_process(void * pvParameters)
 	
 	for(;;)
 	{		
-		xnl_tx_water_value = uxTaskGetStackHighWaterMark(NULL);
+		//xnl_tx_water_value = uxTaskGetStackHighWaterMark(NULL);
 		switch(xnl_tx_state)
 		{
 			case WAITING_FOR_TX:
@@ -746,7 +746,7 @@ Description: Receive the XNL
 Calls: 
 Called By:task
 */
-portTickType xnl_rx_water_value =0;
+//portTickType xnl_rx_water_value =0;
 static void xnl_rx_process(void * pvParameters)
 {
 	/*To ptr the elements in the queue*/
@@ -763,7 +763,7 @@ static void xnl_rx_process(void * pvParameters)
 			{
 				xnl_rx(xnl_ptr);
 				set_xnl_idle(xnl_ptr);
-				xnl_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
+				//xnl_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
 				
 			}			
 		}

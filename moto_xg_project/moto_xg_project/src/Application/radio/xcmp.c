@@ -143,19 +143,19 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 	r = data_len%MAX_XCMP_DATA_LENGTH;
 	
 		
-	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
-	the xnl_tx*/
-	xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
-	
-	/*Insert opcode*/
+	///*If the value is DEFAULT_VALUE, then say the value will be modified in 
+	//the xnl_tx*/
+	//xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
+	//
+	///*Insert opcode*/
 	xnl_frame.xnl_header.opcode = XNL_DATA_MSG;
-	
-	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
-	the xnl_tx*/
-	xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
-	xnl_frame.xnl_header.destination = DEFAULT_VALUE;
-	xnl_frame.xnl_header.source = DEFAULT_VALUE;	
-	xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
+	//
+	///*If the value is DEFAULT_VALUE, then say the value will be modified in 
+	//the xnl_tx*/
+	//xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+	//xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+	//xnl_frame.xnl_header.source = DEFAULT_VALUE;	
+	//xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 	
 	//逻辑上不会出现包不连续发送
 	//xSemaphoreTake(xcmp_mutex, portMAX_DELAY);
@@ -171,6 +171,18 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		/*insert xcmp frame data*/
 		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
 		xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
+		
+		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+		the xnl_tx*/
+		xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
+	
+		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+		the xnl_tx*/
+		xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+		xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+		xnl_frame.xnl_header.source = DEFAULT_VALUE;	
+		xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
+		
 		/* send xnl frame*/
 		xnl_tx(&xnl_frame);
 		
@@ -186,6 +198,18 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 			/*insert xcmp frame data*/
 			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
 			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;	
+			
+			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+			the xnl_tx*/
+			xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
+		
+			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+			the xnl_tx*/
+			xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+			xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+			xnl_frame.xnl_header.source = DEFAULT_VALUE;	
+			xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
+		
 			
 			/* send xnl frame*/	
 			xnl_tx(&xnl_frame);
@@ -205,6 +229,18 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 			/*insert xcmp frame data*/
 			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
 			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
+			
+			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+			the xnl_tx*/
+			xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
+	
+			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+			the xnl_tx*/
+			xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+			xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+			xnl_frame.xnl_header.source = DEFAULT_VALUE;	
+			xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
+			
 			/* send xnl frame*/
 			xnl_tx(&xnl_frame);
 		}
@@ -227,6 +263,17 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		
 		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, r);
 		xnl_frame.xnl_header.payload_length = r;
+		
+		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+		the xnl_tx*/
+		xnl_frame.phy_header.check_sum = DEFAULT_VALUE; 
+	
+		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
+		the xnl_tx*/
+		xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+		xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+		xnl_frame.xnl_header.source = DEFAULT_VALUE;	
+		xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 		
 		/* send xnl frame*/
 		xnl_tx(&xnl_frame);
@@ -314,7 +361,7 @@ Calls: xQueueReceive -- freerots
 	xcmp_exec_func
 Called By: task
 */
-portTickType xcmp_rx_water_value = 0;
+//portTickType xcmp_rx_water_value = 0;
 static void xcmp_rx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
@@ -333,7 +380,7 @@ static void xcmp_rx_process(void * pvParameters)
 			
 			//mylog("\n\r R_xcmp : %4x \n\r",ptr->xcmp_opcode);//log:R_xcmp指令	
 			//static  portTickType water_value;
-			xcmp_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
+			//xcmp_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
 			//mylog("xcmp_rx_water_value: %d\n", water_value);			
 			switch(ptr->xcmp_opcode & 0x0FFF)
 			{
@@ -421,7 +468,7 @@ void xcmp_init(void)
 	xTaskCreate(
 	xcmp_rx_process
 	,  (const signed portCHAR *)"XCMP_RX"
-	, 800//750//1024//800//384
+	, 750//750//1024//800//384
 	,  NULL
 	,  tskXCMP_PRIORITY
 	,  NULL
@@ -643,7 +690,7 @@ extern U8  MAX_ADDRESS_SIZE;
 
 void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 {
-	mylog("send xcmp_data_session_csbk_raw_req\n");
+	//mylog("send xcmp_data_session_csbk_raw_req\n");
 	//xcmp_fragment_t xcmp_fragment;
 
 	/*insert XCMP opcode*/
