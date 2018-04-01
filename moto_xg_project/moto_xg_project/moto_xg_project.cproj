@@ -421,6 +421,7 @@
     <Folder Include="src\Application\app\" />
     <Folder Include="src\Application\flash\" />
     <Folder Include="src\Application\myrtc" />
+    <Folder Include="src\Application\myusart" />
     <Folder Include="src\Application\xgflash" />
     <Folder Include="src\Application\RFID" />
     <Folder Include="src\Application\radio\" />
@@ -486,6 +487,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\Application\myrtc\xgrtc.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Application\myusart\myusart.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Application\myusart\myusart.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\Application\radio\ambe.c">
