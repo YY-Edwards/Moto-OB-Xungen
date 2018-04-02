@@ -62,7 +62,7 @@ typedef enum {
 
 extern xQueueHandle_t x_queue_list;
 
-void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len);
+//void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len);
 
 void app_init( void );
 void app_start( void );

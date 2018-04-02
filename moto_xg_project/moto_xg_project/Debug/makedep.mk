@@ -8,6 +8,8 @@ src\Application\flash\data_flash.c
 
 src\Application\myrtc\xgrtc.c
 
+src\Application\myusart\myusart.c
+
 src\Application\radio\ambe.c
 
 src\Application\radio\AMBE_audio.c

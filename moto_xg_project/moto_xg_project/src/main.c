@@ -20,6 +20,7 @@ History:
 #include "xgrtc.h"
 #include "xgflash.h"
 #include "app.h"
+#include "myusart.h"
 
 
 int main (void)
@@ -37,6 +38,8 @@ int main (void)
 		
 	log_init();//usart2
 	mylog("----start debug----");
+	
+	third_party_interface_init();//usart1
 	
 	xg_flashc_init();
 		

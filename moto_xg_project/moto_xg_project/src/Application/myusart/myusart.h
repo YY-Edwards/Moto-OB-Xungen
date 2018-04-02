@@ -5,9 +5,16 @@
  *  Author: Edwards
  */ 
 
-#include <usart.h>
+
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "task.h"
+#include "log.h"
+#include "usart.h"
+#include "gpio.h"
+#include "xcmp.h"
+#include "string.h"
+
 
 #ifndef MYUSART_H_
 #define MYUSART_H_
@@ -32,9 +39,7 @@
 
 void third_party_interface_init(void);
 void usart1_init(void);
-
-volatile xSemaphoreHandle xCountingSem=NULL;
-volatile xQueueHandle usart1_rx_xQueue=NULL;
+void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len);
 
 
 #endif /* MYUSART_H_ */
