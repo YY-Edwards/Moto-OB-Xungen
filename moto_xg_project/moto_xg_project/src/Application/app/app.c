@@ -1011,6 +1011,7 @@ extern volatile  xTaskHandle save_handle;
 extern portTickType xnl_rx_water_value;
 extern portTickType xcmp_rx_water_value;
 extern portTickType xnl_tx_water_value;
+extern volatile  portTickType usart1_task_water_value; 
 //extern portTickType log_water_value;
 static void send_message(void * pvParameters)
 {
@@ -1075,7 +1076,8 @@ static void send_message(void * pvParameters)
 		}
 		
 		//water_value = uxTaskGetStackHighWaterMark(NULL);
-		//mylog("send-thread water_value: %d\n", water_value);
+		mylog("send-thread water_value: %d\n", water_value);
+		
 		vTaskDelayUntil(&xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	
 	}
@@ -1213,6 +1215,7 @@ static __app_Thread_(app_cfg)
 		} //End of switch on OB_State.
 		
 			mylog("app-thread water_value: %d\n", water_value);
+			mylog("usart1_task water_value: %d\n", usart1_task_water_value);
 			//mylog("xnl rx water_value: %d\n", xnl_rx_water_value);
 			//mylog("xnl tx water_value: %d\n", xnl_tx_water_value);
 			//mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
@@ -1284,6 +1287,12 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	
 #if 1
 
+	if(payload_len == 0)//需要拆分为多个datasession指令来发送数据
+	{
+		mylog("payload_len empty!!!\n");
+		return;
+	}
+	
 	U32 q= payload_len/8;
 	U32 r= payload_len%8;
 	U32 counts=0;
@@ -1305,8 +1314,10 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	if(csbk_t_array_ptr==NULL)
 	{
 		mylog("pvPortMalloc failure!!!\n");
-	}	
-	memset(csbk_t_array_ptr, 0x00, counts*sizeof(CSBK_Pro_t));
+	}
+	else	
+		memset(csbk_t_array_ptr, 0x00, counts*sizeof(CSBK_Pro_t));
+		
 	U32 remaining_len =payload_len;
 	U32 idx =0;
 	U32 data_ptr_index=0;
