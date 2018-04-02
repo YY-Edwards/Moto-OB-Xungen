@@ -11,7 +11,12 @@ volatile xSemaphoreHandle xCountingSem=NULL;
 volatile xQueueHandle usart1_rx_xQueue=NULL;
 volatile U8 peer_rx_status_flag = 0;//默认情况下，peer是处于发送状态，mcu是处于接收状态。
 
-static int usart1_test_cts_status()
+static int usart1_test_cts_ic(void)
+{
+	return (APP_USART->csr & AVR32_USART_CSR_CTSIC_MASK);
+}
+
+static int usart1_test_cts_status(void)
 {
   return (APP_USART->csr & AVR32_USART_CSR_CTS_MASK);
 }
@@ -34,7 +39,7 @@ static void usart1_int_handler(void)
 	xHigherPriorityTaskWoken = pdFALSE;
 	static  portBASE_TYPE queue_ret = pdPASS;
 	static int read_ret = USART_RX_EMPTY;
-	int c;
+	static int c =0;
 	//对B设备的发送（A设备接收）来说，如果A设备接收缓冲快满的时发出RTS 信号（意思通知B设备停止发送），
 	//B设备通过CTS 检测到该信号，停止发送；一段时间后A设备接收缓冲有了空余，发出RTS 信号，指示B设备开始发送数据。
 	//A设备发（B设备接收）类似。
@@ -55,15 +60,19 @@ static void usart1_int_handler(void)
 	//usart_write_char(EXAMPLE_USART, c);
 	
 	//CTS中断
-	if (usart1_test_cts_status() == 1)//0->1，模块向MCU发送数据完毕标志，则模块处于接收状态，MCU可以先请求发送.
+	if(usart1_test_cts_ic())
 	{
-		peer_rx_status_flag=1;
-		xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
-		DISENABLE_PEER_SEND_DATA;//禁止peer发送数据；
-	} 
-	else//1->0
-	{
-		peer_rx_status_flag=0;
+		if (usart1_test_cts_status() != 0)//0->1，模块向MCU发送数据完毕标志，则模块处于接收状态，MCU可以先请求发送.
+		{
+			peer_rx_status_flag=1;
+			xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
+			DISENABLE_PEER_SEND_DATA;//禁止peer发送数据；
+		}
+		else//1->0
+		{
+			peer_rx_status_flag=0;
+		}
+	
 	}
 	
 	//rx中断
@@ -203,6 +212,8 @@ void usart1_init(void)
 	gpio_enable_module(USART_GPIO_MAP,
 	sizeof(USART_GPIO_MAP) / sizeof(USART_GPIO_MAP[0]));
 	
+	// Initialize USART in hardware handshaking mode.
+	usart_init_hw_handshaking(APP_USART, &USART_OPTIONS, USART1_TARGET_PBACLK_FREQ_HZ);
 	
 	Disable_global_interrupt();
 	
@@ -210,14 +221,11 @@ void usart1_init(void)
 	AVR32_INTC_INT0);
 	
 	// Enable USART CTS interrupt.
-	APP_USART->ier = AVR32_USART_IER_CTSIC_MASK;
+	APP_USART->ier = AVR32_USART_IER_CTSIC_MASK | AVR32_USART_IER_RXRDY_MASK;
 	// Enable USART Rx interrupt.
-	EXAMPLE_USART->ier = AVR32_USART_IER_RXRDY_MASK;
+	//APP_USART->ier = AVR32_USART_IER_RXRDY_MASK;
 	
 	Enable_global_interrupt();
-	
-	// Initialize USART in hardware handshaking mode.
-	usart_init_hw_handshaking(APP_USART, &USART_OPTIONS, APP_USART_CLOCK_MASK);
 	
 	//gpio_enable_gpio_pin(APP_USART_RTS_PIN);
 	DISENABLE_PEER_SEND_DATA;//默认为高，不允许对端发送数据。
