@@ -126,7 +126,7 @@ static void usart1_int_handler(void)
 		queue_ret = xQueueSendToBackFromISR(usart1_rx_xQueue, &rx_char, &xHigherPriorityTaskWoken);//insert data
 		int remaining_bytes =0;
 		remaining_bytes = uxQueueMessagesWaitingFromISR(usart1_rx_xQueue);//获取队列有效数据个数
-		if(remaining_bytes>=150)//可能触发了信号量，但是任务不是最高级别，因此可能延迟响应，那么此时若继续中断，那么会再次触发信号，因为个数在不断递增
+		if(remaining_bytes>=MAX_USART_RX_QUEUE_DEEP)//可能触发了信号量，但是任务不是最高级别，因此可能延迟响应，那么此时若继续中断，那么会再次触发信号，因为个数在不断递增
 		{
 			xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );//触发信号量，通知打包数据并发送到radio
 			usart_enable_transmitter(APP_USART);
@@ -141,14 +141,10 @@ static void usart1_int_handler(void)
 volatile  portTickType usart1_task_water_value =0;
 static void usart1_rx_data_task(void * pvParameters)
 {
-	//static  portTickType usart1_task_water_value =0;
-	portBASE_TYPE xTaskWokenByReceive = pdFALSE;
 	static int ret =USART_RX_EMPTY;
 	static  portBASE_TYPE queue_ret = pdPASS;
-	//static  portTickType xLastWakeTime;
-	//xLastWakeTime = xTaskGetTickCount();
-	int malloc_size =150;
-	char *usart_temp_ptr=(char *)pvPortMalloc(malloc_size);//动态分配堆空间数据； 最大不超过150bytes
+	int malloc_size =MAX_USART_RX_QUEUE_DEEP;
+	char *usart_temp_ptr=(char *)pvPortMalloc(malloc_size);//动态分配堆空间数据； 最大不超过300bytes
 	if(usart_temp_ptr==NULL)
 	{
 		mylog("pvPortMalloc  usart_temp_ptr failure!!!\n");
@@ -157,7 +153,6 @@ static void usart1_rx_data_task(void * pvParameters)
 	{
 		memset(usart_temp_ptr, 0x00, malloc_size);//清空
 	}
-
 	
 	//允许模块向MCU发送usart数据，并拉低RTS信号
 	usart_enable_receiver(APP_USART);
@@ -187,8 +182,29 @@ static void usart1_rx_data_task(void * pvParameters)
 			
 			if(index!=0)//有数据则打包发送
 			{	
-				//package_usartdata_to_csbkdata(usart_temp_ptr, index);
+			
+				int remaining_send_bytes =index;//需要发送的数据长度
+				int offset =0;
+					
+				do 
+				{
+					if (remaining_send_bytes<=MAX_CSBK_PACKAGE_DEEP)
+					{
+						package_usartdata_to_csbkdata((usart_temp_ptr+offset), remaining_send_bytes);
+						remaining_send_bytes = 0;
+					}
+					else//整包150bytes发送
+					{
+						package_usartdata_to_csbkdata((usart_temp_ptr+offset), MAX_CSBK_PACKAGE_DEEP);
+						remaining_send_bytes -= MAX_CSBK_PACKAGE_DEEP;	
+						offset +=MAX_CSBK_PACKAGE_DEEP;
+					}
+						
+				} while (remaining_send_bytes>0);
+			
 				memset(usart_temp_ptr, 0x00, malloc_size);//清空
+				
+				mylog("send csbk data okay...\n");
 				
 			}
 			else
@@ -219,7 +235,7 @@ void third_party_interface_init(void)
 	}
 	
 	/*initialize the queue*/
-	usart1_rx_xQueue = xQueueCreate(200, sizeof(char));//最大缓冲
+	usart1_rx_xQueue = xQueueCreate((MAX_USART_RX_QUEUE_DEEP+200), sizeof(char));//最大缓冲500
 	if(usart1_rx_xQueue==NULL)
 	{
 		mylog("create usart1_rx_xQueue failure!!!\n");
@@ -230,7 +246,7 @@ void third_party_interface_init(void)
 	portBASE_TYPE res = xTaskCreate(
 	usart1_rx_data_task
 	,  (const signed portCHAR *)"usart_rx"
-	,  750
+	,  1024
 	,  NULL
 	,  tskUSART_PRIORITY
 	,  NULL );
@@ -368,6 +384,7 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	
 	mylog("send csbk_ptr data len:%d\n", sizeof(CSBK_Pro_t)*(idx+1));
 	
+	//注意作为主机，此处需要实现一对多的功能。
 	xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);//最多一次只能发送22个csbk数据包
 
 	vPortFree(csbk_t_array_ptr);

@@ -1097,19 +1097,6 @@ static __app_Thread_(app_cfg)
 	xLastWakeTime = xTaskGetTickCount();
 	static  portTickType water_value;
 	int i =0;
-	char test[300]={0};
-	for (i; i<300; i++)
-	{
-		if(i<255)
-		{
-			test[i] = i;//注意取值范围
-		}
-		else
-		{
-			test[i] = 0xaa;//注意取值范围
-			
-		}
-	}
 		
 	for(;;)
 	{
@@ -1194,11 +1181,11 @@ static __app_Thread_(app_cfg)
 					{						
 						run_counter++;			
 						nop();
-						if(run_counter == 2)
-						{
-							mylog("send test csbk data...\n");
-							//package_usartdata_to_csbkdata(test, sizeof(test));
-						}
+						//if(run_counter == 2)新增代码，可能需要增大栈空间分配值
+						//{
+							////mylog("send test csbk data...\n");
+							////package_usartdata_to_csbkdata(test, sizeof(test));
+						//}
 						mylog("app task run:%d\n", run_counter);
 						if(0x00000003 != (bunchofrandomstatusflags & 0x00000003))//可能断开
 						{

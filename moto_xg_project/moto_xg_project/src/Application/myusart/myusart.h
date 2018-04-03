@@ -33,6 +33,8 @@
 #  define APP_USART_CLOCK_MASK      AVR32_USART1_CLK_PBA
 
 #  define USART1_TARGET_PBACLK_FREQ_HZ 24000000  // PBA clock target frequency, in Hz
+#  define MAX_USART_RX_QUEUE_DEEP      300//bytes
+#  define MAX_CSBK_PACKAGE_DEEP        150//bytes
 
 #define ENABLE_PEER_SEND_DATA		gpio_clr_gpio_pin(APP_USART_RTS_PIN)
 #define DISENABLE_PEER_SEND_DATA	gpio_set_gpio_pin(APP_USART_RTS_PIN)
