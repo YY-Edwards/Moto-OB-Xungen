@@ -11,14 +11,50 @@ volatile xSemaphoreHandle xCountingSem=NULL;
 volatile xQueueHandle usart1_rx_xQueue=NULL;
 volatile U8 peer_rx_status_flag = 0;//默认情况下，peer是处于发送状态，mcu是处于接收状态。
 
-static int usart1_test_cts_ic(void)
+
+//------------------------------------------------------------------------------
+/*! \name ISO7816 Control Functions
+ */
+//! @{
+
+/*! \brief Enables the ISO7816 receiver.
+ *
+ * The ISO7816 transmitter is disabled.
+ *
+ * \param usart   Base address of the USART instance.
+ */
+static void usart_enable_receiver(volatile avr32_usart_t *usart)
 {
-	return (APP_USART->csr & AVR32_USART_CSR_CTSIC_MASK);
+  usart->cr = AVR32_USART_CR_TXDIS_MASK | AVR32_USART_CR_RXEN_MASK;
+  ENABLE_PEER_SEND_DATA;
+  
 }
 
-static int usart1_test_cts_status(void)
+/*! \brief Enables the ISO7816 transmitter.
+ *
+ * The ISO7816 receiver is disabled.
+ *
+ * \param usart   Base address of the USART instance.
+ */
+static void usart_enable_transmitter(volatile avr32_usart_t *usart)
 {
-  return (APP_USART->csr & AVR32_USART_CSR_CTS_MASK);
+	DISENABLE_PEER_SEND_DATA;
+	usart->cr = AVR32_USART_CR_RXDIS_MASK | AVR32_USART_CR_TXEN_MASK;
+}
+
+//! @}
+
+
+
+
+static int usart1_test_cts_ic(volatile avr32_usart_t *usart)
+{
+	return (usart->csr & AVR32_USART_CSR_CTSIC_MASK);
+}
+
+static int usart1_test_cts_status(volatile avr32_usart_t *usart)
+{
+  return (usart->csr & AVR32_USART_CSR_CTS_MASK);
 }
 
 /**
@@ -35,11 +71,11 @@ __interrupt
 #endif
 static void usart1_int_handler(void)
 {
-	static portBASE_TYPE xHigherPriorityTaskWoken;
-	xHigherPriorityTaskWoken = pdFALSE;
+	static portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	static  portBASE_TYPE queue_ret = pdPASS;
 	static int read_ret = USART_RX_EMPTY;
 	static int c =0;
+	static char rx_char =0;
 	//对B设备的发送（A设备接收）来说，如果A设备接收缓冲快满的时发出RTS 信号（意思通知B设备停止发送），
 	//B设备通过CTS 检测到该信号，停止发送；一段时间后A设备接收缓冲有了空余，发出RTS 信号，指示B设备开始发送数据。
 	//A设备发（B设备接收）类似。
@@ -60,13 +96,14 @@ static void usart1_int_handler(void)
 	//usart_write_char(EXAMPLE_USART, c);
 	
 	//CTS中断
-	if(usart1_test_cts_ic())
+	if(usart1_test_cts_ic(APP_USART))
 	{
-		if (usart1_test_cts_status() != 0)//0->1，模块向MCU发送数据完毕标志，则模块处于接收状态，MCU可以先请求发送.
+		if (usart1_test_cts_status(APP_USART) != 0)//0->1，模块向MCU发送数据完毕标志，则模块处于接收状态，MCU可以先请求发送.
 		{
 			peer_rx_status_flag=1;
 			xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
-			DISENABLE_PEER_SEND_DATA;//禁止peer发送数据；
+			usart_enable_transmitter(APP_USART);
+			//禁止peer发送数据；
 		}
 		else//1->0
 		{
@@ -79,13 +116,15 @@ static void usart1_int_handler(void)
 	read_ret = usart_read_char(APP_USART, &c);
 	if(read_ret == USART_SUCCESS)//成功读取一个字节数据
 	{
-		queue_ret = xQueueSendToBackFromISR(usart1_rx_xQueue, &c, 0);//insert data
+		rx_char = c;
+		queue_ret = xQueueSendToBackFromISR(usart1_rx_xQueue, &rx_char, &xHigherPriorityTaskWoken);//insert data
 		int remaining_bytes =0;
 		remaining_bytes = uxQueueMessagesWaitingFromISR(usart1_rx_xQueue);//获取队列有效数据个数
 		if(remaining_bytes>=150)//可能触发了信号量，但是任务不是最高级别，因此可能延迟响应，那么此时若继续中断，那么会再次触发信号，因为个数在不断递增
 		{
 			xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );//触发信号量，通知打包数据并发送到radio
-			DISENABLE_PEER_SEND_DATA;//禁止peer发送数据；理论上，peer每次发送前需要检查RST端口是否拉低
+			usart_enable_transmitter(APP_USART);
+			//禁止peer发送数据；理论上，peer每次发送前需要检查自己的CTS端口是否拉低
 		}
 	}
 	
@@ -97,6 +136,7 @@ volatile  portTickType usart1_task_water_value =0;
 static void usart1_rx_data_task(void * pvParameters)
 {
 	//static  portTickType usart1_task_water_value =0;
+	portBASE_TYPE xTaskWokenByReceive = pdFALSE;
 	static int ret =USART_RX_EMPTY;
 	static  portBASE_TYPE queue_ret = pdPASS;
 	//static  portTickType xLastWakeTime;
@@ -113,7 +153,8 @@ static void usart1_rx_data_task(void * pvParameters)
 	}
 
 	
-	ENABLE_PEER_SEND_DATA;//允许模块向MCU发送usart数据
+	//允许模块向MCU发送usart数据，并拉低RTS信号
+	usart_enable_receiver(APP_USART);
 	static U32 index =0;
 	static int rx_char =0;
 	
@@ -140,7 +181,7 @@ static void usart1_rx_data_task(void * pvParameters)
 			
 			if(index!=0)//有数据则打包发送
 			{	
-				package_usartdata_to_csbkdata(usart_temp_ptr, index);
+				//package_usartdata_to_csbkdata(usart_temp_ptr, index);
 				memset(usart_temp_ptr, 0x00, malloc_size);//清空
 				
 			}
@@ -148,6 +189,9 @@ static void usart1_rx_data_task(void * pvParameters)
 			{
 				mylog("no usart data!!!\n");
 			}
+			
+			//允许模块向MCU发送usart数据，并拉低RTS信号
+			usart_enable_receiver(APP_USART);
 
 		}
 		
@@ -212,6 +256,10 @@ void usart1_init(void)
 	gpio_enable_module(USART_GPIO_MAP,
 	sizeof(USART_GPIO_MAP) / sizeof(USART_GPIO_MAP[0]));
 	
+	
+	//gpio_enable_gpio_pin(APP_USART_RTS_PIN);
+	//DISENABLE_PEER_SEND_DATA;//默认为高，不允许对端发送数据。
+	
 	// Initialize USART in hardware handshaking mode.
 	usart_init_hw_handshaking(APP_USART, &USART_OPTIONS, USART1_TARGET_PBACLK_FREQ_HZ);
 	
@@ -220,17 +268,13 @@ void usart1_init(void)
 	INTC_register_interrupt(&usart1_int_handler, APP_USART_IRQ,
 	AVR32_INTC_INT0);
 	
-	// Enable USART CTS interrupt.
+	// Enable USART CTS interrupt.Enable USART Rx interrupt.
 	APP_USART->ier = AVR32_USART_IER_CTSIC_MASK | AVR32_USART_IER_RXRDY_MASK;
-	// Enable USART Rx interrupt.
-	//APP_USART->ier = AVR32_USART_IER_RXRDY_MASK;
 	
 	Enable_global_interrupt();
 	
-	//gpio_enable_gpio_pin(APP_USART_RTS_PIN);
-	DISENABLE_PEER_SEND_DATA;//默认为高，不允许对端发送数据。
-	
-	
+	usart_enable_transmitter(APP_USART);//失能USART1接收,流控RTS默认为高，指示不允许对端发送数据。
+
 	
 }
 
