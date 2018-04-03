@@ -14,6 +14,7 @@
 #include "gpio.h"
 #include "xcmp.h"
 #include "string.h"
+#include "xgflash.h"
 
 
 #ifndef MYUSART_H_

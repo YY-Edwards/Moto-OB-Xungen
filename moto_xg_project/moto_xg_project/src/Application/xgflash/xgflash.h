@@ -23,7 +23,7 @@
 label:			"PATROL"(6bytes)
 
 voice_numbers:	0x xxxx(2bytes)
-
+						//radio_id	
 index_number(2bytes) + address(4bytes) + length(2bytes);
 index_number(2bytes) + address(4bytes) + length(2bytes);
 index_number(2bytes) + address(4bytes) + length(2bytes);
@@ -46,7 +46,7 @@ index_number(2bytes) + address(4bytes) + length(2bytes);
 #define XG_MESSAGE_LISTINFO_BOUNDARY_ADD	0x020000//128k=2*64k
 
 #define LABEL_ADDRESS						XG_MESSAGE_LISTINFO_START_ADD
-#define LABEL_LENGTH						0x06//6bytes:"PATROL"
+#define LABEL_LENGTH						0x0A//6bytes:"PATROL"
 
 #define MESSAGE_NUMBERS_ADD					(XG_MESSAGE_LISTINFO_START_ADD + LABEL_LENGTH)
 #define MESSAGE_NUMBERS_LENGTH				0x02//2bytes:0x xxxx  
@@ -78,6 +78,14 @@ typedef struct
 	unsigned short	offset;
 
 }MessageList_Info_t;//8bytes
+
+typedef struct
+{
+	unsigned short	serial_index;
+	unsigned char	radio_id_numb[4];//低字节在前，高字节在后
+	unsigned short	unused;
+
+}CSBKList_Info_t;//8bytes
 #pragma pack()
 
 
@@ -105,9 +113,14 @@ typedef enum
 	
 } xgflash_status_t;
 
+#define RADIO_ID_NUMB_SIZE		0x04
 void create_xg_flash_test_task(void);
 void flash_rw_example(const char *caption, nvram_data_t *nvram_data);
 void xg_flashc_init(void);
+
+U16 csbk_flash_get_radio_id_total(void);
+xgflash_status_t csbk_flash_get_radio_detailed_numb(U16 index, void *numb_ptr);
+xgflash_status_t csbk_flash_save_radio_detailed_numb(void *numb_ptr, U32 data_len);
 
 //static xgflash_status_t xgflash_list_info_init(void);
 U16 xgflash_get_message_count(void);

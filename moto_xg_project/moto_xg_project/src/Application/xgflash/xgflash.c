@@ -16,6 +16,7 @@ volatile xQueueHandle xg_resend_queue = NULL;
 
 volatile const char XGFlashLabel[] = {"CSBK"};
 static unsigned short current_message_index = 0;
+static unsigned short current_radio_id_index = 0;
 static unsigned int	  current_save_message_offset = XG_MESSAGE_DATA_START_ADD;
 static U8 list_init_success_flag = 0;
 //U8 TEMP_BUF[4096];
@@ -56,6 +57,198 @@ void flash_rw_example(const char *caption, nvram_data_t *nvram_data)
 }
 
 */
+
+
+static xgflash_status_t csbk_flash_list_init(void)
+{
+		df_status_t return_code = DF_OK;
+		unsigned int i = 0;
+		unsigned int address =0x00000000;
+		static char str[80];
+		memset(str, 0x00, sizeof(str));
+		
+		start:
+		
+		//bytes remained less than one page
+		return_code = data_flash_read_block(LABEL_ADDRESS, LABEL_LENGTH, (U8*)str);
+		{
+			if(memcmp((U8*)XGFlashLabel, str, sizeof(XGFlashLabel)-1) != 0)//compare label
+			{
+				ERASE:
+				//erase list
+				for(i; i < (XG_MESSAGE_LISTINFO_BOUNDARY_ADD/(64*1024)); i++)//2*64k
+				{
+					return_code = data_flash_erase_block(address, DF_BLOCK_64KB);
+					if(return_code != DF_ERASE_COMPLETED)
+					{
+						return FALSE;
+					}
+					address+=65536;//64k*1024=65536bytes
+				}
+				//set label
+				return_code = data_flash_write((U8*)XGFlashLabel, LABEL_ADDRESS, LABEL_LENGTH);
+				
+				//set current_radio_id_index
+				memset(str, 0x00, sizeof(str));
+				return_code = data_flash_write((U8*)str, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
+				if(return_code != DF_WRITE_COMPLETED)
+				{
+					return FALSE;
+				}
+				current_radio_id_index = 0;
+				mylog("\r\n----create csbk message info okay!----\r\n");
+			}
+			else//success
+			{
+				mylog("\nLABEL: %s\n", str);
+				//Get the current radio_id index
+				return_code = data_flash_read_block(MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH, &current_radio_id_index);
+				if(return_code == DF_OK)
+				{
+					//Calculates the offset address of the current stored message
+					if(current_radio_id_index != 0){
+						
+						mylog("current_radio_id_index: %d\n", current_radio_id_index);
+					}
+					mylog("\r\n----xoxo read message info okay!----\r\n");
+				}
+				else
+				return FALSE;
+				
+			}
+			
+			list_init_success_flag = 1;
+			return XG_OK;
+			
+		}
+		return XG_ERROR;
+
+}
+U16 csbk_flash_get_radio_id_total(void)
+{
+	if(!list_init_success_flag)return 0xFFFF;
+	
+	xSemaphoreTake(xgflash_mutex, portMAX_DELAY);
+	U16 return_value = current_radio_id_index;
+	xSemaphoreGive(xgflash_mutex );
+
+	return return_value;
+	
+}
+xgflash_status_t csbk_flash_get_radio_detailed_numb(U16 index, void *numb_ptr)
+{
+	xgflash_status_t status = XG_ERROR;
+	
+	if(!list_init_success_flag)return XG_ERROR;
+	
+	xSemaphoreTake(xgflash_mutex, portMAX_DELAY);//lock
+	/* check input parameter */
+	if ((index > current_radio_id_index) || (index ==0))
+	{
+		xSemaphoreGive(xgflash_mutex);//unlock
+		return XG_INVALID_PARAM;
+	}
+	
+	df_status_t return_code = DF_OK;
+	U32 offset_address =0x00000000;
+	char str[XG_MESSAGE_INFO_HEADER_LENGTH];
+	memset(str, 0x00, sizeof(str));
+	
+	offset_address = XG_MESSAGE_INFO_HEADER_START_ADD + ((index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
+	return_code = data_flash_read_block(offset_address, XG_MESSAGE_INFO_HEADER_LENGTH, (U8 *)str);
+	if (return_code == DF_OK)
+	{
+		CSBKList_Info_t *ptr = (CSBKList_Info_t *)str;
+		if(ptr->serial_index == index)
+		{
+			memcpy(numb_ptr, ptr->radio_id_numb, RADIO_ID_NUMB_SIZE);
+			status = XG_OK;
+		}
+		else
+		{
+			mylog("Err flash data\n");
+			status = 8;
+		
+		}
+		
+		xSemaphoreGive(xgflash_mutex);//unlock
+		return status;
+		
+	}
+	xSemaphoreGive(xgflash_mutex);//unlock
+	return XG_FLASH_READ_FAIL;
+}
+xgflash_status_t csbk_flash_save_radio_detailed_numb(void *numb_ptr, U32 data_len)
+{
+	
+	xgflash_status_t status = XG_ERROR;
+	static df_status_t return_code = DF_WRITE_COMPLETED;
+	U32 address = 0;
+	static U16 index =0;//注意此变量类型
+	U32 offset= 0;
+	U32 q= data_len/RADIO_ID_NUMB_SIZE;
+	U32 r= 0;
+		
+	if(!list_init_success_flag)return XG_ERROR;
+		
+	xSemaphoreTake(xgflash_mutex, portMAX_DELAY);//lock
+	/* check input parameter */
+	if (q ==0)
+	{
+		xSemaphoreGive(xgflash_mutex);//unlock
+		return XG_INVALID_PARAM;
+	}
+	
+	CSBKList_Info_t ptr;
+		
+	//if(data_end_flag == TRUE)//save a message-info into list at the end of the resend-event
+	for (; q>0; q--)
+	{
+		index++;
+		ptr.serial_index		= index;
+		ptr.unused				= 0x000;
+		memcpy(ptr.radio_id_numb, (numb_ptr+offset), RADIO_ID_NUMB_SIZE);
+		offset+=RADIO_ID_NUMB_SIZE;
+			
+		address = XG_MESSAGE_INFO_HEADER_START_ADD + ((index -1)*XG_MESSAGE_INFO_HEADER_LENGTH);
+		if(address > XG_MESSAGE_LISTINFO_BOUNDARY_ADD)//The number of messages is out of bounds
+		{
+			mylog("\r\n----info list is Out of bounds!!!\r\n----");
+			xSemaphoreGive(xgflash_mutex );//unlock
+			return XG_OUT_BOUNDARY;
+		}
+					
+		//set a message info by index
+		return_code = data_flash_write((U8 *)&ptr, address, XG_MESSAGE_INFO_HEADER_LENGTH);
+		if(return_code != DF_WRITE_COMPLETED)
+		{
+			xSemaphoreGive(xgflash_mutex );//unlock
+			return XG_FLASH_WRITE_FAIL;
+		}
+	}
+	
+	//set radio_id numbers
+	return_code = data_flash_write((U8*)&index, MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH);
+	if(return_code != DF_WRITE_COMPLETED)
+	{
+		xSemaphoreGive(xgflash_mutex );//unlock
+		return XG_FLASH_WRITE_FAIL;
+	}
+	static char temp[2]={0};
+	return_code = data_flash_read_block(MESSAGE_NUMBERS_ADD, MESSAGE_NUMBERS_LENGTH, temp);
+	if(return_code != DF_OK)
+	{
+		xSemaphoreGive(xgflash_mutex);//unlock
+		return XG_FLASH_READ_FAIL;
+	}	
+	
+	current_radio_id_index = index;
+	xSemaphoreGive(xgflash_mutex );//unlock
+	return XG_OK; 
+
+	
+}
+
 
 static xgflash_status_t xgflash_list_info_init(void)
 {
@@ -493,6 +686,7 @@ void create_xg_flash_test_task(void)
 }
 
 
+volatile char radio_numb_array[1200] = {0};
 //U16	Current_total_message_count=0;
 void xg_flashc_init(void)
 {
@@ -563,7 +757,53 @@ void xg_flashc_init(void)
 	//mylog("flag : %d", flag);
 	//flashc_lock_all_regions(false);
 	
-	xgflash_list_info_init();
+	//xgflash_list_info_init();
+	
+	csbk_flash_list_init();
+	
+	int radio_total_counts= 0;
+	radio_total_counts = csbk_flash_get_radio_id_total();
+	if(radio_total_counts>300)
+	{
+		mylog("radio count is overflow!!!\n");
+	}
+	else
+	{
+		if(radio_total_counts == 0)
+		{	
+			mylog("radio count is zero!\n");
+			//return;
+		}
+		else
+		{
+			U32 index =1;
+			U32 offset =0;
+			for (;index<=radio_total_counts; index++)
+			{
+			
+				if(csbk_flash_get_radio_detailed_numb(index, &radio_numb_array[offset])!=XG_OK)
+				{
+					mylog("read radio detailed numb err\n");
+					break;
+				}
+				offset+=RADIO_ID_NUMB_SIZE;
+			}
+		}
+	}
+	
+	char obj_id[20]={
+					0x02,0x10,0x00,0x00,
+					0x03,0xa0,0x00,0x00,
+					0x04,0xb0,0x00,0x00,
+					0x06,0xc0,0x00,0x00,
+					0x09,0xd0,0x00,0x00,
+						};
+	csbk_flash_save_radio_detailed_numb(obj_id, 20);
+	static char numb[4]={0};
+	csbk_flash_get_radio_detailed_numb(1, numb);
+	csbk_flash_get_radio_detailed_numb(3, numb);
+	
+	//csbk_flash_list_init();
 	
 	
 	//create_xg_flash_test_task();

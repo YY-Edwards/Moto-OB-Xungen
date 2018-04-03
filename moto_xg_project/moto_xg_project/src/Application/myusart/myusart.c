@@ -300,7 +300,7 @@ void usart1_init(void)
 	
 }
 
-
+extern volatile char radio_numb_array[1200];
 void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 {
 	
@@ -385,7 +385,22 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	mylog("send csbk_ptr data len:%d\n", sizeof(CSBK_Pro_t)*(idx+1));
 	
 	//注意作为主机，此处需要实现一对多的功能。
-	xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);//最多一次只能发送22个csbk数据包
+	U32 dest_id =0;
+	U32 index =csbk_flash_get_radio_id_total();
+	while(index>0)
+	{	
+		dest_id = 
+		(radio_numb_array[index+3]<<24)
+		|(radio_numb_array[index+2]<<16)
+		|(radio_numb_array[index+1]<<8)
+		|(radio_numb_array[index]);
+		
+		xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), dest_id);//最多一次只能发送22个csbk数据包
+		
+		index-=RADIO_ID_NUMB_SIZE;
+	} 
+	
+	//xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);//最多一次只能发送22个csbk数据包
 
 	vPortFree(csbk_t_array_ptr);
 	csbk_t_array_ptr=NULL;
