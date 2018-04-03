@@ -47,9 +47,13 @@ static void usart_enable_transmitter(volatile avr32_usart_t *usart)
 
 
 
-static int usart1_test_cts_ic(volatile avr32_usart_t *usart)
+static int usart1_test_cts_ic(volatile avr32_usart_t *usart, volatile U32 *cst_status)
 {
-	return (usart->csr & AVR32_USART_CSR_CTSIC_MASK);
+	static int temp =0x00000000;
+	temp = (usart->csr & (AVR32_USART_CSR_CTSIC_MASK | AVR32_USART_CSR_CTS_MASK));//读取一次csr寄存器，则会自动清除cstic的标志，所以要一起读回cst端口值
+	*cst_status = temp & AVR32_USART_CSR_CTS_MASK;//获取cts端口的输入电平
+	return (temp & AVR32_USART_CSR_CTSIC_MASK);/*返回cts中断标志状态，判断是否发生中断事件*/
+	
 }
 
 static int usart1_test_cts_status(volatile avr32_usart_t *usart)
@@ -76,6 +80,7 @@ static void usart1_int_handler(void)
 	static int read_ret = USART_RX_EMPTY;
 	static int c =0;
 	static char rx_char =0;
+	static int cts_status =0;
 	//对B设备的发送（A设备接收）来说，如果A设备接收缓冲快满的时发出RTS 信号（意思通知B设备停止发送），
 	//B设备通过CTS 检测到该信号，停止发送；一段时间后A设备接收缓冲有了空余，发出RTS 信号，指示B设备开始发送数据。
 	//A设备发（B设备接收）类似。
@@ -96,9 +101,10 @@ static void usart1_int_handler(void)
 	//usart_write_char(EXAMPLE_USART, c);
 	
 	//CTS中断
-	if(usart1_test_cts_ic(APP_USART))
+	if(usart1_test_cts_ic(APP_USART, &cts_status))
 	{
-		if (usart1_test_cts_status(APP_USART) != 0)//0->1，模块向MCU发送数据完毕标志，则模块处于接收状态，MCU可以先请求发送.
+		//cts_status = usart1_test_cts_status(APP_USART);
+		if (cts_status)//0->1，模块向MCU发送数据完毕标志，则模块处于接收状态，MCU可以先请求发送.
 		{
 			peer_rx_status_flag=1;
 			xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
