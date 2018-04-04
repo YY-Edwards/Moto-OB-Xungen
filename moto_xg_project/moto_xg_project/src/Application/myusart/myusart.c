@@ -246,7 +246,7 @@ void third_party_interface_init(void)
 	portBASE_TYPE res = xTaskCreate(
 	usart1_rx_data_task
 	,  (const signed portCHAR *)"usart_rx"
-	,  1024
+	,  1100
 	,  NULL
 	,  tskUSART_PRIORITY
 	,  NULL );
@@ -386,18 +386,25 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	
 	//注意作为主机，此处需要实现一对多的功能。
 	U32 dest_id =0;
-	U32 index =csbk_flash_get_radio_id_total();
-	while(index>0)
+	U32 radio_counts = csbk_flash_get_radio_id_total();
+	U32 offset =0;
+	static  portTickType xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	while(radio_counts>0)
 	{	
 		dest_id = 
-		(radio_numb_array[index+3]<<24)
-		|(radio_numb_array[index+2]<<16)
-		|(radio_numb_array[index+1]<<8)
-		|(radio_numb_array[index]);
+		(((radio_numb_array[offset+3]<<24) & 0xff000000)
+		|((radio_numb_array[offset+2]<<16) & 0x00ff0000)
+		|((radio_numb_array[offset+1]<<8) & 0x0000ff00)
+		|(radio_numb_array[offset] & 0x000000ff));
 		
 		xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), dest_id);//最多一次只能发送22个csbk数据包
 		
-		index-=RADIO_ID_NUMB_SIZE;
+		offset +=RADIO_ID_NUMB_SIZE;
+		radio_counts--;
+		//增加延时发送，以缓冲大量发送导致的缓冲队列长时间为空的情况
+		vTaskDelayUntil( &xLastWakeTime, (200*2) / portTICK_RATE_MS );//精确的以1000ms为周期执行。
+	
 	} 
 	
 	//xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);//最多一次只能发送22个csbk数据包

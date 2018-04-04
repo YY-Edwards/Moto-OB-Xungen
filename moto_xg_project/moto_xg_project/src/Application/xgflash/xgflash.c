@@ -110,7 +110,7 @@ static xgflash_status_t csbk_flash_list_init(void)
 						
 						mylog("current_radio_id_index: %d\n", current_radio_id_index);
 					}
-					mylog("\r\n----xoxo read message info okay!----\r\n");
+					mylog("----xoxo read message info okay!----\r\n");
 				}
 				else
 				return FALSE;
@@ -790,22 +790,20 @@ void xg_flashc_init(void)
 			}
 		}
 	}
+	//ÅäÖÃÄ¿±êID
+	//char obj_id[20]={
+					//0x02,0x00,0x00,0x00,
+					//0x08,0x00,0x00,0x00,
+					//0x04,0x00,0x00,0x00,
+					//0x06,0x00,0x00,0x00,
+					//0x09,0x00,0x00,0x00,
+						//};
+	//csbk_flash_save_radio_detailed_numb(obj_id, 20);
+	//static char numb[4]={0};
+	//csbk_flash_get_radio_detailed_numb(1, numb);
+	//csbk_flash_get_radio_detailed_numb(3, numb);
 	
-	char obj_id[20]={
-					0x02,0x10,0x00,0x00,
-					0x03,0xa0,0x00,0x00,
-					0x04,0xb0,0x00,0x00,
-					0x06,0xc0,0x00,0x00,
-					0x09,0xd0,0x00,0x00,
-						};
-	csbk_flash_save_radio_detailed_numb(obj_id, 20);
-	static char numb[4]={0};
-	csbk_flash_get_radio_detailed_numb(1, numb);
-	csbk_flash_get_radio_detailed_numb(3, numb);
-	
-	//csbk_flash_list_init();
-	
-	
+
 	//create_xg_flash_test_task();
 }
 

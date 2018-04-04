@@ -615,7 +615,7 @@ void xnl_tx(xnl_fragment_t * xnl)
 		
 		//mylog("ptr -%8x", ptr);
 		
-		xQueueSend(xnl_frame_tx, &ptr, 0);
+		xQueueSend(xnl_frame_tx, &ptr, 0);//如果队列已满，则立即返回
 		//mylog("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 		
 		//vPortFree(ptr);
@@ -794,7 +794,7 @@ void xnl_init(void)
 	/*initialize the semaphore and queue*/
 	vSemaphoreCreateBinary(xnl_timeout_semphr);		
 	
-	xnl_frame_tx = xQueueCreate(60, sizeof(xnl_fragment_t *)); //扩大xnl_frame_tx的队列深度
+	xnl_frame_tx = xQueueCreate(100, sizeof(xnl_fragment_t *)); //扩大xnl_frame_tx的队列深度
 		
 	xnl_store_idle = xQueueCreate(MAX_XNL_STORE, sizeof(phy_fragment_t *));
 	for(int i= 0; i < MAX_XNL_STORE; i++ )

@@ -462,7 +462,7 @@ void xcmp_init(void)
 	xnl_register_xcmp_func( xcmp_rx );
 	
 	/*initialize the queue*/
-	xcmp_frame_rx = xQueueCreate(20, sizeof(xcmp_fragment_t *));
+	xcmp_frame_rx = xQueueCreate(100, sizeof(xcmp_fragment_t *));
 	/*create task*/	
 	/*this task is used to execute xcmp message*/
 	xTaskCreate(
