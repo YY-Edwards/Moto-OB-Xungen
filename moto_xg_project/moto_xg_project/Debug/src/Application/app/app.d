@@ -87,7 +87,8 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/Application/flash/data_flash.h ../src/Application/radio/xcmp.h \
  ../src/Application/radio/xnl.h ../src/config/../Log/log.h \
  ../src/Application/myrtc/xgrtc.h ../src/ASF/avr32/drivers/rtc/rtc.h \
- ../src/Application/xgflash/xgflash.h ../src/Application/radio/xnl.h \
+ ../src/Application/xgflash/xgflash.h \
+ ../src/Application/myusart/myusart.h ../src/Application/radio/xnl.h \
  ../src/Application/radio/payload.h ../src/ASF/avr32/drivers/rtc/rtc.h \
  ../src/Application/radio/physical.h ../src/Application/radio/payload.h
 
@@ -282,6 +283,8 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/avr32/drivers/rtc/rtc.h:
 
 ../src/Application/xgflash/xgflash.h:
+
+../src/Application/myusart/myusart.h:
 
 ../src/Application/radio/xnl.h:
 

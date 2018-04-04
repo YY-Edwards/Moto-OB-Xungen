@@ -35,6 +35,7 @@
 
 #  define USART1_TARGET_PBACLK_FREQ_HZ 24000000  // PBA clock target frequency, in Hz
 #  define MAX_USART_RX_QUEUE_DEEP      300//bytes
+#  define MAX_USART_TX_QUEUE_DEEP      200//bytes
 #  define MAX_CSBK_PACKAGE_DEEP        150//bytes
 
 #define ENABLE_PEER_SEND_DATA		gpio_clr_gpio_pin(APP_USART_RTS_PIN)
@@ -43,6 +44,7 @@
 void third_party_interface_init(void);
 void usart1_init(void);
 void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len);
+void usart1_send_char(U8 c);
 
 
 #endif /* MYUSART_H_ */

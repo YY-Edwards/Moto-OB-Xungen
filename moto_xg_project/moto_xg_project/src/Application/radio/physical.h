@@ -19,7 +19,7 @@ History:
 #define TRUE 1
 #define FALSE 0
 
-#define MAX_XNL_STORE	 200//5k
+#define MAX_XNL_STORE	 100//5k
 
 /*the queue depth is used to create xnl queue*/
 #define TX_XNL_QUEUE_DEEP	50

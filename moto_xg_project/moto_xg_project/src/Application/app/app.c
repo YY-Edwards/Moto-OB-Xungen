@@ -54,6 +54,9 @@ volatile U32 global_count =0;
 volatile xSemaphoreHandle count_mutex = NULL;
 volatile xnl_information_t xnl_information;
 volatile char XCMP_Version[4] ={0};
+	
+extern volatile xSemaphoreHandle xcsbk_rx_finished_Sem;
+extern volatile xQueueHandle usart1_tx_xQueue;
 
 
 //app func--list
@@ -551,10 +554,16 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 
 }
 
+
 void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 Session_number = 0;
 	U16 data_length = 0;
+	static  portBASE_TYPE queue_ret = pdPASS;
+	static U16 payload_len = 0;
+	static U8 payload_count =0;
+	U8 remaining_bytes=0;
+	U16 offset=0;
 //	U32 card_id =0;
 	U8 i = 0;
 //	xgflash_status_t return_value = XG_ERROR;
@@ -572,11 +581,60 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 
 		mylog("\n\r Session_ID: %x \n\r",Session_number );
 		mylog("\n\r paylaod_length: %d \n\r",data_length );
+		
+		if(data_length == sizeof(CSBK_Pro_t))
+		{		
+			CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
+			if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Opcode))
+			{
+		
+				if (csbk_ptr->csbk_header.csbk_PF == CSBK_PF_TRUE)//第一包数据
+				{
+					payload_len = ((csbk_ptr->csbk_data[0]) | ((csbk_ptr->csbk_data[1]<<8) & 0xff00));//获取数据包长度
+				} 
+				else if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据
+				{
+					remaining_bytes = payload_len - payload_count;
+					if(remaining_bytes)//非0 
+					{
+						offset =0;
+						do
+						{
+							queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+							offset++;
+								
+						} while (offset<remaining_bytes);//拷贝剩余数据
+						
+					}
+					//触发事件，发送数据到usart1
+					xSemaphoreGive(xcsbk_rx_finished_Sem);
+				}
+				else//中间数据包
+				{
+					//sendqueue		
+					do
+					{
+						queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+						offset++;
+						
+					} while (offset<sizeof(csbk_ptr->csbk_data));//拷贝8个数据
+					
+					payload_count+=sizeof(csbk_ptr->csbk_data);
+				}
+		
+			}
+			else
+			{
+				mylog("no my csbk type\n\r");
+			}
+		
+		}
 		for(i=0; i<data_length; i++)
 		{
 			
 			//mylog("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
 			mylog("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
+			
 			
 		}
 		
@@ -1088,6 +1146,7 @@ static __app_Thread_(app_cfg)
 //	static int coun=0;
 	static int run_counter=0;
 	static  portTickType xLastWakeTime;
+	static  portBASE_TYPE queue_ret = pdPASS;
 //	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 //	U8 Burst_ID = 0;
 //	char card_id[4]={0};
@@ -1150,32 +1209,43 @@ static __app_Thread_(app_cfg)
 			case OB_WAITINGAPPTASK:
 			
 					//if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
-					if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, 0))
+					//if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, 0))
+					//{
+						//if(data_ptr!=NULL){//save message
+							//
+							//mylog("receive okay!\n");
+							//xSemaphoreTake(count_mutex, portMAX_DELAY);
+							//global_count--;
+							//xSemaphoreGive(count_mutex);
+							//mylog("global_count:%d\n", global_count);
+							////Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
+							//status = xgflash_message_save((U8 *)data_ptr, sizeof(Message_Protocol_t), TRUE);
+							////mylog("receive data : %d", ptr->data.XG_Time.Second);
+							////xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
+							//if(status == XG_OK)
+							//{
+								//mylog("save message okay\n");
+							//}
+							//else
+							//{
+								//mylog("!!! save message err : %d\n", status);
+									//
+							//}
+							//set_message_store(data_ptr);
+							//
+						//}
+						//
+					//}
+					if(xSemaphoreTake(xcsbk_rx_finished_Sem, (20*2) / portTICK_RATE_MS) == pdTRUE)
 					{
-						if(data_ptr!=NULL){//save message
-							
-							mylog("receive okay!\n");
-							xSemaphoreTake(count_mutex, portMAX_DELAY);
-							global_count--;
-							xSemaphoreGive(count_mutex);
-							mylog("global_count:%d\n", global_count);
-							//Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-							status = xgflash_message_save((U8 *)data_ptr, sizeof(Message_Protocol_t), TRUE);
-							//mylog("receive data : %d", ptr->data.XG_Time.Second);
-							//xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
-							if(status == XG_OK)
-							{
-								mylog("save message okay\n");
-							}
-							else
-							{
-								mylog("!!! save message err : %d\n", status);
-									
-							}
-							set_message_store(data_ptr);
-							
+						mylog("xSemaphoreTake xcsbk_rx_finished_Sem  okay!\n");
+						U8 rx_char =0;
+						//有数据就发
+						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (10*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
+						{
+							usart1_send_char(rx_char);			
 						}
-						
+						mylog("usart1 send data okay...\n");
 					}
 					else
 					{						
@@ -1209,7 +1279,7 @@ static __app_Thread_(app_cfg)
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (3000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	mylog("app exit:err\n");
 }

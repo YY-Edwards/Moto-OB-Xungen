@@ -8,7 +8,9 @@
 #include "myusart.h"
 
 volatile xSemaphoreHandle xCountingSem=NULL;
+volatile xSemaphoreHandle xcsbk_rx_finished_Sem=NULL;
 volatile xQueueHandle usart1_rx_xQueue=NULL;
+volatile xQueueHandle usart1_tx_xQueue=NULL;
 volatile U8 peer_rx_status_flag = 0;//默认情况下，peer是处于发送状态，mcu是处于接收状态。
 
 
@@ -225,6 +227,22 @@ static void usart1_rx_data_task(void * pvParameters)
 }
 
 
+void usart1_send_char(U8 c)
+{
+	while(gpio_pin_is_high(APP_USART_CTS_PIN));//peer is sending
+	
+	//if(peer_rx_status_flag)
+	if(1)
+	{
+		usart_putchar(APP_USART, c);
+	}
+	else
+	{
+		mylog("peer busy!!!\n");
+	}
+	
+}
+
 void third_party_interface_init(void)
 {
 	//创建一个计算信号量，以记录第三方接口发送数据完成的中断事件。
@@ -234,12 +252,25 @@ void third_party_interface_init(void)
 		mylog("create xCountingSem failure!!!\n");
 	}
 	
+	xcsbk_rx_finished_Sem = xSemaphoreCreateCounting( 20, 0 );
+	if(xcsbk_rx_finished_Sem==NULL)
+	{
+		mylog("create xcsbk_rx_finished_Sem failure!!!\n");
+	}
+	
 	/*initialize the queue*/
 	usart1_rx_xQueue = xQueueCreate((MAX_USART_RX_QUEUE_DEEP+200), sizeof(char));//最大缓冲500
 	if(usart1_rx_xQueue==NULL)
 	{
 		mylog("create usart1_rx_xQueue failure!!!\n");
 	}
+	
+	usart1_tx_xQueue = xQueueCreate((MAX_USART_TX_QUEUE_DEEP), sizeof(char));//最大缓冲200
+	if(usart1_tx_xQueue==NULL)
+	{
+		mylog("create usart1_tx_xQueue failure!!!\n");
+	}
+	
 	
 	usart1_init();
 	
@@ -267,7 +298,7 @@ void usart1_init(void)
 	// USART options.
 	static const usart_options_t USART_OPTIONS =
 	{
-		.baudrate     = 19200,//115200,
+		.baudrate     = 115200,//115200,
 		.charlength   = 8,
 		.paritytype   = USART_NO_PARITY,
 		.stopbits     = USART_1_STOPBIT,
@@ -343,10 +374,10 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 
 	//打包CSBK数据
 	//第一包数据放置协议信息,具有保护块标志
-	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_TRUE;//fixed value
-	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value
-	csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value
-	csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;
+	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_TRUE;//fixed value-0x1
+	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value-0x3f
+	csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value-0x20
+	csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;//-0x0
 	//考虑放入校验等数据，未填充字段默认设置为0；
 	csbk_t_array_ptr[idx].csbk_data[0] = payload_len & 0xff;//数据长度低字节
 	csbk_t_array_ptr[idx].csbk_data[1] = ((payload_len >> 8) &0x00ff);////数据长度高字节，且默认数据长度双字节最大65535
@@ -355,13 +386,13 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	do//将负载数据打包到CSBK数据的中间包数据和最后一包数据
 	{
 		idx++;
-		csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value
+		csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value-0x0
 		csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value
 		csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value
 		
 		if(remaining_len < CSBK_Payload_Length)//不超过8个字节
 		{
-			csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_TRUE;//负载数据的最后一包
+			csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_TRUE;//负载数据的最后一包-0x1
 			memcpy(csbk_t_array_ptr[idx].csbk_data, (usart_payload+data_ptr_index), remaining_len);//拷贝CSBK数据
 			remaining_len =0;//清零剩余数据长度，并退出循环
 		}

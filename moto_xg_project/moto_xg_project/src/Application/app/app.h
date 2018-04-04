@@ -18,6 +18,7 @@
 #include "RFID.h"
 #include "xgrtc.h"
 #include "xgflash.h"
+#include "myusart.h"
 //#include "voice.h"
 
 #include <xnl.h>
