@@ -41,7 +41,7 @@ int main (void)
 	
 	xg_flashc_init();
 	
-	rfid_init();
+	//rfid_init();
 		
 	app_init();
 		

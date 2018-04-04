@@ -1103,6 +1103,9 @@ static __app_Thread_(app_cfg)
 						log("OB disconnecting!!!\n");
 					}
 					
+					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
+					
+					
 					//Disable_interrupt_level(1);
 					//flashc_memcpy((void *)0x80061234, (void *)test_data, 7,  true);
 					//Enable_interrupt_level(1);
@@ -1128,8 +1131,8 @@ static __app_Thread_(app_cfg)
 							//memset(str, 0x00, 80);
 						//}
 					//}
-					
-											
+					nop();
+					nop();						
 					nop();
 					log("app task run!\n");
 					
@@ -1140,7 +1143,7 @@ static __app_Thread_(app_cfg)
 			break;
 				
 		} //End of switch on OB_State.
-		vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 }
 
