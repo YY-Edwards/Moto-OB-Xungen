@@ -342,9 +342,9 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	U32 data_ptr_index=0;
 
 	//打包CSBK数据
-	//第一包数据放置协议信息
-	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value
-	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcade;//fixed value
+	//第一包数据放置协议信息,具有保护块标志
+	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_TRUE;//fixed value
+	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value
 	csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value
 	csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;
 	//考虑放入校验等数据，未填充字段默认设置为0；
@@ -356,7 +356,7 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	{
 		idx++;
 		csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value
-		csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcade;//fixed value
+		csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value
 		csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value
 		
 		if(remaining_len < CSBK_Payload_Length)//不超过8个字节

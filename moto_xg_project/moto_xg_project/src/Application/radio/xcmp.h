@@ -1103,7 +1103,7 @@ An XCMP device can initiate multiple data sessions at one time.
 #define CSBK_PF_FALSE		0x0
 #define CSBK_LB_TRUE		0x1
 #define CSBK_LB_FALSE		0x0
-#define CSBK_Opcade			0x3f
+#define CSBK_Opcode			0x3f
 #define CSBK_Third_PARTY	0x20
 #define CSBK_Payload_Length	0x8
 
