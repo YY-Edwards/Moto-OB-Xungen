@@ -246,7 +246,7 @@ void third_party_interface_init(void)
 	portBASE_TYPE res = xTaskCreate(
 	usart1_rx_data_task
 	,  (const signed portCHAR *)"usart_rx"
-	,  1100
+	,  1200
 	,  NULL
 	,  tskUSART_PRIORITY
 	,  NULL );

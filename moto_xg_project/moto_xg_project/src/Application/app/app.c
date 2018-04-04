@@ -988,7 +988,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  1500//1024//800//384
+	,  800//1024//800//384
 	,  NULL
 	,  2
 	,  NULL );
@@ -1205,7 +1205,7 @@ static __app_Thread_(app_cfg)
 			mylog("usart1_task water_value: %d\n", usart1_task_water_value);
 			//mylog("xnl rx water_value: %d\n", xnl_rx_water_value);
 			//mylog("xnl tx water_value: %d\n", xnl_tx_water_value);
-			//mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
+			mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//ясЁы300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);

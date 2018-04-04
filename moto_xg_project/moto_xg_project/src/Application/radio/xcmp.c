@@ -361,7 +361,7 @@ Calls: xQueueReceive -- freerots
 	xcmp_exec_func
 Called By: task
 */
-//portTickType xcmp_rx_water_value = 0;
+portTickType xcmp_rx_water_value = 0;
 static void xcmp_rx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
@@ -432,6 +432,7 @@ static void xcmp_rx_process(void * pvParameters)
 			}
 			//vPortFree(ptr);
 			set_xnl_idle(ptr);
+			xcmp_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
 		}
 
 	}
@@ -465,10 +466,10 @@ void xcmp_init(void)
 	xcmp_frame_rx = xQueueCreate(100, sizeof(xcmp_fragment_t *));
 	/*create task*/	
 	/*this task is used to execute xcmp message*/
-	xTaskCreate(
+	xTaskCreate(//此处增加栈空间，以防止接收CSBK数据时，增加了空间的开销
 	xcmp_rx_process
 	,  (const signed portCHAR *)"XCMP_RX"
-	, 750//750//1024//800//384
+	, 1024//750//1024//800//384
 	,  NULL
 	,  tskXCMP_PRIORITY
 	,  NULL
