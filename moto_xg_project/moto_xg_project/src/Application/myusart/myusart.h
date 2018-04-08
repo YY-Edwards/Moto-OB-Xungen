@@ -46,5 +46,26 @@ void usart1_init(void);
 void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len);
 void usart1_send_char(U8 c);
 
+#define FIXED_HEADER	0xABCD5A5A
+
+//OB分布模式：一主多从
+typedef struct
+{				
+	U32 header;//0xABCD5A5A
+	U8 data_len[2];
+	U8 unused[2];
+	//U8 data_crc[2];没有实际作用，只需要保证空中数据流的传输
+	
+}my_custom_pro_t;
+
+typedef enum {
+	
+	WAITING_FOR_HEADER,
+	READING_MIDDLE_FRAGEMENT,
+	WAITING_LAST_TERM
+	
+} csbk_rx_state_t;
+
+
 
 #endif /* MYUSART_H_ */

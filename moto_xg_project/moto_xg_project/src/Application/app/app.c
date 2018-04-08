@@ -554,7 +554,7 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 
 }
 
-
+extern volatile unsigned char host_flag;
 void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 Session_number = 0;
@@ -562,8 +562,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	static  portBASE_TYPE queue_ret = pdPASS;
 	static U16 payload_len = 0;
 	static U8 payload_count =0;
-	U8 remaining_bytes=0;
+	static U8 remaining_bytes=0;
 	U16 offset=0;
+	static csbk_rx_state_t rx_status = WAITING_FOR_HEADER;
 //	U32 card_id =0;
 	U8 i = 0;
 //	xgflash_status_t return_value = XG_ERROR;
@@ -584,10 +585,88 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		
 		if(data_length == sizeof(CSBK_Pro_t))
 		{		
-			//CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
+			CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
+			#if host_flag//主机
+			
+				if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode))//接收从机的CSBK数据			
+			#else//从机
+			
+				if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode))//接收主机的CSBK数据		
+			#endif
+			
+			{
+				switch(rx_status)
+				{
+					case WAITING_FOR_HEADER:
+					
+							my_custom_pro_t *custom_pro =  (my_custom_pro_t *)(csbk_ptr->csbk_data);
+							if(custom_pro->header == FIXED_HEADER)
+							{
+								payload_len = ((csbk_ptr->csbk_data[0]) | ((csbk_ptr->csbk_data[1]<<8) & 0xff00));//获取数据包长度
+								rx_status = READING_MIDDLE_FRAGEMENT;
+							}				
+					
+							break;
+					
+					case READING_MIDDLE_FRAGEMENT:				
+							//sendqueue
+							offset =0;
+							do
+							{
+								queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+								offset++;
+								
+							} while (offset<sizeof(csbk_ptr->csbk_data));//拷贝8个数据
+							
+							payload_count+=sizeof(csbk_ptr->csbk_data);
+							
+							remaining_bytes = payload_len - payload_count;
+							if(remaining_bytes<=8)//判断是否应该等待最后一包数据
+							{
+								rx_status = WAITING_LAST_TERM;
+							}
+										
+							break;
+					
+					case WAITING_LAST_TERM:
+							
+								if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据)
+								{
+									offset =0;
+									do
+									{
+										queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+										offset++;
+									
+									} while (offset<remaining_bytes);//拷贝剩余数据
+	
+									//触发事件，发送数据到usart1
+									xSemaphoreGive(xcsbk_rx_finished_Sem);
+								}
+								else//clear 队列
+								{
+									U8 rx_char =0;
+									while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
+								}
+								
+								rx_status = WAITING_FOR_HEADER;
+							
+							break;
+					
+					default:
+							break;
+					
+				}
+						
+			}
+			else
+			{
+				mylog("no my csbk type\n\r");
+			}
+
 			//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Opcode))
 			//{
-		//
+				//
 				//if (csbk_ptr->csbk_header.csbk_PF == CSBK_PF_TRUE)//第一包数据
 				//{
 					//payload_len = ((csbk_ptr->csbk_data[0]) | ((csbk_ptr->csbk_data[1]<<8) & 0xff00));//获取数据包长度
@@ -1243,7 +1322,8 @@ static __app_Thread_(app_cfg)
 						//有数据就发
 						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (10*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
 						{
-							usart1_send_char(rx_char);			
+							mylog("rx_char:%x\n");
+							//usart1_send_char(rx_char);			
 						}
 						mylog("usart1 send data okay...\n");
 					}

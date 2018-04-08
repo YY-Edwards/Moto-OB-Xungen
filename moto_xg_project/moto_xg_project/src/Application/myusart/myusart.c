@@ -337,6 +337,7 @@ void usart1_init(void)
 }
 
 extern volatile char radio_numb_array[1200];
+extern volatile unsigned char host_flag;
 void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 {
 	
@@ -376,23 +377,38 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	U32 remaining_len =payload_len;
 	U32 idx =0;
 	U32 data_ptr_index=0;
-
+	U8 custom_csbk_opcode =0;
+	if(host_flag)//compare label
+	{
+		custom_csbk_opcode = CSBK_Host_Opcode;//host->slave
+	}
+	else
+	{
+		custom_csbk_opcode = CSBK_Slave_Opcode;//slave->host
+	}
+	my_custom_pro_t custom_pro;
+	memset(custom_pro, 0x00, sizeof(custom_pro));//clear buff
+	custom_pro.header = FIXED_HEADER;
+	custom_pro.data_len[0] = payload_len & 0xff;//数据长度低字节
+	custom_pro.data_len[1] = ((payload_len >> 8) &0x00ff);////数据长度高字节，且默认数据长度双字节最大65535
+	
 	//打包CSBK数据
 	//第一包数据放置协议信息,具有保护块标志
-	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value-0x0
-	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value-0x3f
+	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value-0x0，如果开启保护模式，则对端接收的数据中没有此保护块
+	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =custom_csbk_opcode;//
 	csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value-0x20
 	csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;//-0x0
+	memcpy(csbk_t_array_ptr[idx].csbk_data, custom_pro, sizeof(custom_pro));
 	//考虑放入校验等数据，未填充字段默认设置为0；
-	csbk_t_array_ptr[idx].csbk_data[0] = payload_len & 0xff;//数据长度低字节
-	csbk_t_array_ptr[idx].csbk_data[1] = ((payload_len >> 8) &0x00ff);////数据长度高字节，且默认数据长度双字节最大65535
+	//csbk_t_array_ptr[idx].csbk_data[0] = payload_len & 0xff;//数据长度低字节
+	//csbk_t_array_ptr[idx].csbk_data[1] = ((payload_len >> 8) &0x00ff);////数据长度高字节，且默认数据长度双字节最大65535
 	
 	
 	do//将负载数据打包到CSBK数据的中间包数据和最后一包数据
 	{
 		idx++;
 		csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value-0x0
-		csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value
+		csbk_t_array_ptr[idx].csbk_header.csbk_opcode =custom_csbk_opcode;//
 		csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value
 		
 		if(remaining_len < CSBK_Payload_Length)//不超过8个字节
