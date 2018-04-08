@@ -564,7 +564,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	static U8 payload_count =0;
 	static U8 remaining_bytes=0;
 	U16 offset=0;
-	static csbk_rx_state_t rx_status = WAITING_FOR_HEADER;
+	static csbk_rx_state_t rx_status = WAITING_CSBK_P_HEADER;
 //	U32 card_id =0;
 	U8 i = 0;
 //	xgflash_status_t return_value = XG_ERROR;
@@ -598,14 +598,14 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			{
 				switch(rx_status)
 				{
-					case WAITING_FIRST_FRAGEMENT:
+					case WAITING_CSBK_P_HEADER:
 					
 							if(custom_pro->header == FIXED_HEADER)
 							{
 								payload_len = ((custom_pro->data_len[0]) | ((custom_pro->data_len[1]<<8) & 0xff00));//获取数据包长度
 								rx_status = READING_MIDDLE_FRAGEMENT;
 							}				
-					
+							mylog("WAITING_CSBK_P_HEADER \n\r");
 							break;
 					
 					case READING_MIDDLE_FRAGEMENT:				
@@ -613,7 +613,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 							offset =0;
 							do
 							{
-								queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+								queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), portMAX_DELAY);//insert data
 								offset++;
 								
 							} while (offset<sizeof(csbk_ptr->csbk_data));//拷贝8个数据
@@ -623,9 +623,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 							remaining_bytes = payload_len - payload_count;
 							if(remaining_bytes<=8)//判断是否应该等待最后一包数据
 							{
-								rx_status = WAITING_LAST_TERM;
+								rx_status = WAITING_LAST_FRAGEMENT;
 							}
-										
+							mylog("READING_MIDDLE_FRAGEMENT \n\r");			
 							break;
 					
 					case WAITING_LAST_FRAGEMENT:
@@ -635,7 +635,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 									offset =0;
 									do
 									{
-										queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+										queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), portMAX_DELAY);//insert data
 										offset++;
 									
 									} while (offset<remaining_bytes);//拷贝剩余数据
@@ -647,9 +647,14 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 								{
 									U8 rx_char =0;
 									while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
+									mylog("csbk err!!! \n\r");	
 								}
 								
-								rx_status = WAITING_FOR_HEADER;
+								rx_status = WAITING_CSBK_P_HEADER;
+								payload_len = 0;
+								payload_count =0;
+								remaining_bytes=0;
+								mylog("WAITING_LAST_FRAGEMENT \n\r");	
 							
 							break;
 					
@@ -1322,7 +1327,7 @@ static __app_Thread_(app_cfg)
 						//有数据就发
 						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (10*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
 						{
-							mylog("rx_char:%x\n");
+							mylog("rx_char:%x\n", rx_char);
 							//usart1_send_char(rx_char);			
 						}
 						mylog("usart1 send data okay...\n");
