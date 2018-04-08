@@ -108,14 +108,18 @@ static void usart1_int_handler(void)
 		//cts_status = usart1_test_cts_status(APP_USART);
 		if (cts_status)//0->1，模块向MCU发送数据完毕标志，则模块处于接收状态，MCU可以先请求发送.
 		{
-			peer_rx_status_flag=1;
-			xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
-			usart_enable_transmitter(APP_USART);
-			//禁止peer发送数据；
+			if(!peer_rx_status_flag)
+			{
+				peer_rx_status_flag=1;
+				xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
+				usart_enable_transmitter(APP_USART);
+				//禁止peer发送数据；			
+			}
 		}
 		else//1->0
 		{
-			peer_rx_status_flag=0;
+			if(peer_rx_status_flag)
+				peer_rx_status_flag=0;
 		}
 	
 	}
