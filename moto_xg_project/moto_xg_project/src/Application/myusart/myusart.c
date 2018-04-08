@@ -25,7 +25,7 @@ volatile U8 peer_rx_status_flag = 0;//Ä¬ÈÏÇé¿öÏÂ£¬peerÊÇ´¦ÓÚ·¢ËÍ×´Ì¬£¬mcuÊÇ´¦ÓÚ½
  *
  * \param usart   Base address of the USART instance.
  */
-static void usart_enable_receiver(volatile avr32_usart_t *usart)
+void usart_enable_receiver(volatile avr32_usart_t *usart)
 {
   usart->cr = AVR32_USART_CR_TXDIS_MASK | AVR32_USART_CR_RXEN_MASK;
   ENABLE_PEER_SEND_DATA;
@@ -38,7 +38,7 @@ static void usart_enable_receiver(volatile avr32_usart_t *usart)
  *
  * \param usart   Base address of the USART instance.
  */
-static void usart_enable_transmitter(volatile avr32_usart_t *usart)
+void usart_enable_transmitter(volatile avr32_usart_t *usart)
 {
 	DISENABLE_PEER_SEND_DATA;
 	usart->cr = AVR32_USART_CR_RXDIS_MASK | AVR32_USART_CR_TXEN_MASK;

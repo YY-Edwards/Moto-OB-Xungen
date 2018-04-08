@@ -1325,11 +1325,13 @@ static __app_Thread_(app_cfg)
 						mylog("xSemaphoreTake xcsbk_rx_finished_Sem  okay!\n");
 						U8 rx_char =0;
 						//有数据就发
+						usart_enable_transmitter(APP_USART);
 						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (10*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
 						{
 							mylog("rx_char:%x\n", rx_char);
-							//usart1_send_char(rx_char);			
+							usart1_send_char(rx_char);			
 						}
+						usart_enable_receiver(APP_USART);
 						mylog("usart1 send data okay...\n");
 					}
 					else
