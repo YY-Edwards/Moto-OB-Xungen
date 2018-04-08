@@ -387,7 +387,8 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 		custom_csbk_opcode = CSBK_Slave_Opcode;//slave->host
 	}
 	my_custom_pro_t custom_pro;
-	memset(custom_pro, 0x00, sizeof(custom_pro));//clear buff
+	memset(&custom_pro, 0x00, sizeof(custom_pro));//clear buff
+	//memcpy(custom_pro.header, FIXED_HEADER, sizeof(FIXED_HEADER));
 	custom_pro.header = FIXED_HEADER;
 	custom_pro.data_len[0] = payload_len & 0xff;//数据长度低字节
 	custom_pro.data_len[1] = ((payload_len >> 8) &0x00ff);////数据长度高字节，且默认数据长度双字节最大65535
@@ -398,7 +399,7 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =custom_csbk_opcode;//
 	csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value-0x20
 	csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;//-0x0
-	memcpy(csbk_t_array_ptr[idx].csbk_data, custom_pro, sizeof(custom_pro));
+	memcpy(csbk_t_array_ptr[idx].csbk_data, &custom_pro, sizeof(custom_pro));
 	//考虑放入校验等数据，未填充字段默认设置为0；
 	//csbk_t_array_ptr[idx].csbk_data[0] = payload_len & 0xff;//数据长度低字节
 	//csbk_t_array_ptr[idx].csbk_data[1] = ((payload_len >> 8) &0x00ff);////数据长度高字节，且默认数据长度双字节最大65535

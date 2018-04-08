@@ -586,6 +586,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		if(data_length == sizeof(CSBK_Pro_t))
 		{		
 			CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
+			my_custom_pro_t *custom_pro =  (my_custom_pro_t *)(csbk_ptr->csbk_data);
 			#if host_flag//主机
 			
 				if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode))//接收从机的CSBK数据			
@@ -597,12 +598,11 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			{
 				switch(rx_status)
 				{
-					case WAITING_FOR_HEADER:
+					case WAITING_FIRST_FRAGEMENT:
 					
-							my_custom_pro_t *custom_pro =  (my_custom_pro_t *)(csbk_ptr->csbk_data);
 							if(custom_pro->header == FIXED_HEADER)
 							{
-								payload_len = ((csbk_ptr->csbk_data[0]) | ((csbk_ptr->csbk_data[1]<<8) & 0xff00));//获取数据包长度
+								payload_len = ((custom_pro->data_len[0]) | ((custom_pro->data_len[1]<<8) & 0xff00));//获取数据包长度
 								rx_status = READING_MIDDLE_FRAGEMENT;
 							}				
 					
@@ -628,7 +628,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 										
 							break;
 					
-					case WAITING_LAST_TERM:
+					case WAITING_LAST_FRAGEMENT:
 							
 								if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据)
 								{

@@ -48,21 +48,25 @@ void usart1_send_char(U8 c);
 
 #define FIXED_HEADER	0xABCD5A5A
 
+#pragma pack(1)
 //OB分布模式：一主多从
 typedef struct
-{				
-	U32 header;//0xABCD5A5A
+{			
+	U32 header;
+	//U8 header[4];//0xABCD5A5A
 	U8 data_len[2];
 	U8 unused[2];
 	//U8 data_crc[2];没有实际作用，只需要保证空中数据流的传输
 	
 }my_custom_pro_t;
+#pragma pack(0)
+
 
 typedef enum {
 	
-	WAITING_FOR_HEADER,
+	WAITING_FIRST_FRAGEMENT,
 	READING_MIDDLE_FRAGEMENT,
-	WAITING_LAST_TERM
+	WAITING_LAST_FRAGEMENT
 	
 } csbk_rx_state_t;
 
