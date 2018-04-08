@@ -1757,6 +1757,6 @@ void xcmp_exit_enhanced_OB_mode(void);
 void xcmp_audio_route_encoder_AMBE(void);
 void xcmp_audio_route_decoder_AMBE(void);
 void xcmp_audio_route_AMBE(void);
-void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest);
+void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength);
 
 #endif /* XCMP_H_ */

@@ -689,7 +689,7 @@ extern U8  MAX_ADDRESS_SIZE;
 
 
 
-void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
+void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
 {
 	//mylog("send xcmp_data_session_csbk_raw_req\n");
 	//xcmp_fragment_t xcmp_fragment;
@@ -718,15 +718,18 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength, U32 dest)
 
 	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;//0x04
 
-	unsigned int addr = 0x0C000000 | (dest & 0x00FFFFFF);
+	//unsigned int addr = 0x0C000000 | (dest & 0x00FFFFFF);
+	unsigned int addr = 0x00000000; 
 	memcpy(ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address, &addr, Remote_IPV4_Address_Size);
 	//ptr->DataDefinition.Dest_Address.Remote_Address[0] = 0x0C;//12
 	//ptr->DataDefinition.Dest_Address.Remote_Address[1] = 0x00;//0
 	//ptr->DataDefinition.Dest_Address.Remote_Address[2] = 0x00;//0
 	//ptr->DataDefinition.Dest_Address.Remote_Address[3] = 0x02;//2
 
-	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
-	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
+	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = 0;//4007
+	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = 1;//
+	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
+	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
 
 
 	ptr.DataSession_req.DataPayload.Session_ID_Number = Session_ID;//0x00

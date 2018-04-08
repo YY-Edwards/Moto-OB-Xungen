@@ -379,7 +379,7 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 
 	//打包CSBK数据
 	//第一包数据放置协议信息,具有保护块标志
-	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_TRUE;//fixed value-0x1
+	csbk_t_array_ptr[idx].csbk_header.csbk_PF = CSBK_PF_FALSE;//fixed value-0x0
 	csbk_t_array_ptr[idx].csbk_header.csbk_opcode =CSBK_Opcode;//fixed value-0x3f
 	csbk_t_array_ptr[idx].csbk_manufacturing_id = CSBK_Third_PARTY;//fixed value-0x20
 	csbk_t_array_ptr[idx].csbk_header.csbk_LB = CSBK_LB_FALSE;//-0x0
@@ -422,28 +422,38 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 	
 	//注意作为主机，此处需要实现一对多的功能。
 	U32 dest_id =0;
-	U32 radio_counts = csbk_flash_get_radio_id_total();
-	U32 offset =0;
+	//U32 radio_counts = csbk_flash_get_radio_id_total();
+	//U32 offset =0;
 	static  portTickType xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	while(radio_counts>0)
+	//xLastWakeTime = xTaskGetTickCount();
+	//while(radio_counts>0)
 	{	
-		dest_id = 
-		(((radio_numb_array[offset+3]<<24) & 0xff000000)
-		|((radio_numb_array[offset+2]<<16) & 0x00ff0000)
-		|((radio_numb_array[offset+1]<<8) & 0x0000ff00)
-		|(radio_numb_array[offset] & 0x000000ff));
+		//dest_id = 
+		//(((radio_numb_array[offset+3]<<24) & 0xff000000)
+		//|((radio_numb_array[offset+2]<<16) & 0x00ff0000)
+		//|((radio_numb_array[offset+1]<<8) & 0x0000ff00)
+		//|(radio_numb_array[offset] & 0x000000ff));
 		
-		xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), dest_id);//最多一次只能发送22个csbk数据包
 		
-		offset +=RADIO_ID_NUMB_SIZE;
-		radio_counts--;
+		//On the receiving side, all the XCMP device (both OB and Non-IP peripheral) can
+		//receive the CSBK broadcast /*so that no need for target IP address specified in the
+		//sending side XCMP request.*/ After receiving each CSBK, MOTOTRBO Radio checks
+		//the CRC error, removes the CRC field and then broadcasts to XCMP devices the
+		//remaining bytes (CSBK without CRC) as the payload of Data Session XCMP command.
+	
+		//dest_id = 0x01;
+		//mylog("send to: %d\n", dest_id);
+		//csbk_raw相当于broadcast,不需要指定目标ID
+		xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1));//最多一次只能发送22个csbk数据包
+		
+		//offset +=RADIO_ID_NUMB_SIZE;
+		//radio_counts--;
 		//增加延时发送，以缓冲大量发送导致的缓冲队列长时间为空的情况
-		vTaskDelayUntil( &xLastWakeTime, (200*2) / portTICK_RATE_MS );//精确的以1000ms为周期执行。
+		//vTaskDelayUntil( &xLastWakeTime, (200*2) / portTICK_RATE_MS );//精确的以1000ms为周期执行。
 	
 	} 
 	
-	//xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);//最多一次只能发送22个csbk数据包
+	//xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1));//最多一次只能发送22个csbk数据包
 
 	vPortFree(csbk_t_array_ptr);
 	csbk_t_array_ptr=NULL;
@@ -500,7 +510,7 @@ void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len)
 
 	mylog("send csbk_t data len:%d\n", sizeof(CSBK_Pro_t)*(idx+1));
 	
-	xcmp_data_session_csbk_raw_req(csbk_t_array, sizeof(CSBK_Pro_t)*(idx+1), 3);
+	xcmp_data_session_csbk_raw_req(csbk_t_array, sizeof(CSBK_Pro_t)*(idx+1));
 	
 	#endif
 }

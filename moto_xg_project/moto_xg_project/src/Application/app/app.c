@@ -584,49 +584,49 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		
 		if(data_length == sizeof(CSBK_Pro_t))
 		{		
-			CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
-			if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Opcode))
-			{
-		
-				if (csbk_ptr->csbk_header.csbk_PF == CSBK_PF_TRUE)//第一包数据
-				{
-					payload_len = ((csbk_ptr->csbk_data[0]) | ((csbk_ptr->csbk_data[1]<<8) & 0xff00));//获取数据包长度
-				} 
-				else if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据
-				{
-					remaining_bytes = payload_len - payload_count;
-					if(remaining_bytes)//非0 
-					{
-						offset =0;
-						do
-						{
-							queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
-							offset++;
-								
-						} while (offset<remaining_bytes);//拷贝剩余数据
-						
-					}
-					//触发事件，发送数据到usart1
-					xSemaphoreGive(xcsbk_rx_finished_Sem);
-				}
-				else//中间数据包
-				{
-					//sendqueue		
-					do
-					{
-						queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
-						offset++;
-						
-					} while (offset<sizeof(csbk_ptr->csbk_data));//拷贝8个数据
-					
-					payload_count+=sizeof(csbk_ptr->csbk_data);
-				}
-		
-			}
-			else
-			{
-				mylog("no my csbk type\n\r");
-			}
+			//CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
+			//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Opcode))
+			//{
+		//
+				//if (csbk_ptr->csbk_header.csbk_PF == CSBK_PF_TRUE)//第一包数据
+				//{
+					//payload_len = ((csbk_ptr->csbk_data[0]) | ((csbk_ptr->csbk_data[1]<<8) & 0xff00));//获取数据包长度
+				//} 
+				//else if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据
+				//{
+					//remaining_bytes = payload_len - payload_count;
+					//if(remaining_bytes)//非0 
+					//{
+						//offset =0;
+						//do
+						//{
+							//queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+							//offset++;
+								//
+						//} while (offset<remaining_bytes);//拷贝剩余数据
+						//
+					//}
+					////触发事件，发送数据到usart1
+					//xSemaphoreGive(xcsbk_rx_finished_Sem);
+				//}
+				//else//中间数据包
+				//{
+					////sendqueue		
+					//do
+					//{
+						//queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[2+offset]), portMAX_DELAY);//insert data
+						//offset++;
+						//
+					//} while (offset<sizeof(csbk_ptr->csbk_data));//拷贝8个数据
+					//
+					//payload_count+=sizeof(csbk_ptr->csbk_data);
+				//}
+		//
+			//}
+			//else
+			//{
+				//mylog("no my csbk type\n\r");
+			//}
 		
 		}
 		for(i=0; i<data_length; i++)
@@ -1046,7 +1046,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  800//1024//800//384
+	,  900//1024//800//384
 	,  NULL
 	,  2
 	,  NULL );
@@ -1422,7 +1422,7 @@ void vApplicationIdleHook( void )
 	//
 	//mylog("send csbk_ptr data len:%d\n", sizeof(CSBK_Pro_t)*(idx+1));
 	//
-	//xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1), 3);//最多一次只能发送22个csbk数据包
+	//xcmp_data_session_csbk_raw_req(csbk_t_array_ptr, sizeof(CSBK_Pro_t)*(idx+1));//最多一次只能发送22个csbk数据包
 //
 	//vPortFree(csbk_t_array_ptr);
 	//csbk_t_array_ptr=NULL;
@@ -1479,7 +1479,7 @@ void vApplicationIdleHook( void )
 //
 	 //mylog("send csbk_t data len:%d\n", sizeof(CSBK_Pro_t)*(idx+1));
 	 //
-	 //xcmp_data_session_csbk_raw_req(csbk_t_array, sizeof(CSBK_Pro_t)*(idx+1), 3);
+	 //xcmp_data_session_csbk_raw_req(csbk_t_array, sizeof(CSBK_Pro_t)*(idx+1));
 	//
 //#endif	
 //}
