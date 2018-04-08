@@ -116,7 +116,8 @@ static void usart1_int_handler(void)
 				//½ûÖ¹peer·¢ËÍÊı¾İ£»			
 			}
 		}
-		else//1->0
+		else
+		//1->0
 		{
 			if(peer_rx_status_flag)
 				peer_rx_status_flag=0;
