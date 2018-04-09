@@ -45,7 +45,7 @@ void third_party_interface_init(void);
 void usart1_init(void);
 void package_usartdata_to_csbkdata(U8 *usart_payload, U32 payload_len);
 void usart1_send_char(U8 c);
-void usart_enable_transmitter(volatile avr32_usart_t *usart);
+void usart_disable_receiver(volatile avr32_usart_t *usart);
 void usart_enable_receiver(volatile avr32_usart_t *usart);
 
 #define FIXED_HEADER	0xABCD5A5A

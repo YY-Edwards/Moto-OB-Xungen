@@ -21,27 +21,25 @@ volatile U8 peer_rx_status_flag = 0;//Ä¬ÈÏÇé¿öÏÂ£¬peerÊÇ´¦ÓÚ·¢ËÍ×´Ì¬£¬mcuÊÇ´¦ÓÚ½
 
 /*! \brief Enables the ISO7816 receiver.
  *
- * The ISO7816 transmitter is disabled.
- *
  * \param usart   Base address of the USART instance.
  */
 void usart_enable_receiver(volatile avr32_usart_t *usart)
 {
-  usart->cr = AVR32_USART_CR_TXDIS_MASK | AVR32_USART_CR_RXEN_MASK;
+  usart->cr = AVR32_USART_CR_RXEN_MASK;
   ENABLE_PEER_SEND_DATA;
   
 }
 
-/*! \brief Enables the ISO7816 transmitter.
+/*! \
  *
  * The ISO7816 receiver is disabled.
  *
  * \param usart   Base address of the USART instance.
  */
-void usart_enable_transmitter(volatile avr32_usart_t *usart)
+void usart_disable_receiver(volatile avr32_usart_t *usart)
 {
 	DISENABLE_PEER_SEND_DATA;
-	usart->cr = AVR32_USART_CR_RXDIS_MASK | AVR32_USART_CR_TXEN_MASK;
+	usart->cr = AVR32_USART_CR_RXDIS_MASK;
 }
 
 //! @}
@@ -83,6 +81,7 @@ static void usart1_int_handler(void)
 	static int c =0;
 	static char rx_char =0;
 	static int cts_status =0;
+	int remaining_bytes =0;
 	//¶ÔBÉè±¸µÄ·¢ËÍ£¨AÉè±¸½ÓÊÕ£©À´Ëµ£¬Èç¹ûAÉè±¸½ÓÊÕ»º³å¿ìÂúµÄÊ±·¢³öRTS ĞÅºÅ£¨ÒâË¼Í¨ÖªBÉè±¸Í£Ö¹·¢ËÍ£©£¬
 	//BÉè±¸Í¨¹ıCTS ¼ì²âµ½¸ÃĞÅºÅ£¬Í£Ö¹·¢ËÍ£»Ò»¶ÎÊ±¼äºóAÉè±¸½ÓÊÕ»º³åÓĞÁË¿ÕÓà£¬·¢³öRTS ĞÅºÅ£¬Ö¸Ê¾BÉè±¸¿ªÊ¼·¢ËÍÊı¾İ¡£
 	//AÉè±¸·¢£¨BÉè±¸½ÓÊÕ£©ÀàËÆ¡£
@@ -106,21 +105,30 @@ static void usart1_int_handler(void)
 	if(usart1_test_cts_ic(APP_USART, &cts_status))
 	{
 		//cts_status = usart1_test_cts_status(APP_USART);
-		if (cts_status)//0->1£¬Ä£¿éÏòMCU·¢ËÍÊı¾İÍê±Ï±êÖ¾£¬ÔòÄ£¿é´¦ÓÚ½ÓÊÕ×´Ì¬£¬MCU¿ÉÒÔÏÈÇëÇó·¢ËÍ.
+		if (cts_status)//0->1£¬Ä£¿é´¦ÓÚ·¢ËÍ×´Ì¬£¬µÈ´ı¿ÕÏĞ±êÊ¶
+		{
+			if(peer_rx_status_flag)
+			{
+				peer_rx_status_flag=0;
+				ENABLE_PEER_SEND_DATA;//Ê¹ÄÜRTS¶Ë¿Ú
+			}
+			
+		}
+		else
+		//1->0£¬Ä£¿éÏòMCU·¢ËÍÊı¾İÍê±Ï±êÖ¾£¬ÔòÄ£¿é´¦ÓÚ¿ÕÏĞ½ÓÊÕ×´Ì¬£¬MCU¿ÉÒÔÏÈÇëÇó·¢ËÍ.
 		{
 			if(!peer_rx_status_flag)
 			{
 				peer_rx_status_flag=1;
-				xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
-				usart_enable_transmitter(APP_USART);
-				//½ûÖ¹peer·¢ËÍÊı¾İ£»			
+				remaining_bytes = uxQueueMessagesWaitingFromISR(usart1_rx_xQueue);//»ñÈ¡¶ÓÁĞÓĞĞ§Êı¾İ¸öÊı
+				if(remaining_bytes)//Èç¹û¶ÓÁĞ²»Îª¿Õ£¬Ôò´¥·¢ĞÅºÅ
+				{
+					xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );
+					usart_disable_receiver(APP_USART);
+					//½ûÖ¹peer·¢ËÍÊı¾İ£»
+				}
 			}
-		}
-		else
-		//1->0
-		{
-			if(peer_rx_status_flag)
-				peer_rx_status_flag=0;
+			
 		}
 	
 	}
@@ -131,12 +139,11 @@ static void usart1_int_handler(void)
 	{
 		rx_char = c;
 		queue_ret = xQueueSendToBackFromISR(usart1_rx_xQueue, &rx_char, &xHigherPriorityTaskWoken);//insert data
-		int remaining_bytes =0;
 		remaining_bytes = uxQueueMessagesWaitingFromISR(usart1_rx_xQueue);//»ñÈ¡¶ÓÁĞÓĞĞ§Êı¾İ¸öÊı
 		if(remaining_bytes>=MAX_USART_RX_QUEUE_DEEP)//¿ÉÄÜ´¥·¢ÁËĞÅºÅÁ¿£¬µ«ÊÇÈÎÎñ²»ÊÇ×î¸ß¼¶±ğ£¬Òò´Ë¿ÉÄÜÑÓ³ÙÏìÓ¦£¬ÄÇÃ´´ËÊ±Èô¼ÌĞøÖĞ¶Ï£¬ÄÇÃ´»áÔÙ´Î´¥·¢ĞÅºÅ£¬ÒòÎª¸öÊıÔÚ²»¶ÏµİÔö
 		{
 			xSemaphoreGiveFromISR( xCountingSem, &xHigherPriorityTaskWoken );//´¥·¢ĞÅºÅÁ¿£¬Í¨Öª´ò°üÊı¾İ²¢·¢ËÍµ½radio
-			usart_enable_transmitter(APP_USART);
+			usart_disable_receiver(APP_USART);
 			//½ûÖ¹peer·¢ËÍÊı¾İ£»ÀíÂÛÉÏ£¬peerÃ¿´Î·¢ËÍÇ°ĞèÒª¼ì²é×Ô¼ºµÄCTS¶Ë¿ÚÊÇ·ñÀ­µÍ
 		}
 	}
@@ -161,7 +168,7 @@ static void usart1_rx_data_task(void * pvParameters)
 		memset(usart_temp_ptr, 0x00, malloc_size);//Çå¿Õ
 	}
 	
-	//ÔÊĞíÄ£¿éÏòMCU·¢ËÍusartÊı¾İ£¬²¢À­µÍRTSĞÅºÅ
+	//ÔÊĞíÄ£¿éÏòMCU·¢ËÍÊı¾İ£¬²¢À­µÍRTSĞÅºÅ
 	usart_enable_receiver(APP_USART);
 	static U32 index =0;
 	static int rx_char =0;
@@ -186,6 +193,9 @@ static void usart1_rx_data_task(void * pvParameters)
 				}
 				
 			} while (queue_ret == pdPASS);
+			
+			//ÔÊĞíÄ£¿éÏòMCU·¢ËÍÊı¾İ£¬²¢À­µÍRTSĞÅºÅ
+			usart_enable_receiver(APP_USART);
 			
 			if(index!=0)//ÓĞÊı¾İÔò´ò°ü·¢ËÍ
 			{	
@@ -218,9 +228,6 @@ static void usart1_rx_data_task(void * pvParameters)
 			{
 				mylog("no usart data!!!\n");
 			}
-			
-			//ÔÊĞíÄ£¿éÏòMCU·¢ËÍusartÊı¾İ£¬²¢À­µÍRTSĞÅºÅ
-			usart_enable_receiver(APP_USART);
 
 		}
 		
@@ -331,9 +338,8 @@ void usart1_init(void)
 	
 	Enable_global_interrupt();
 	
-	usart_enable_transmitter(APP_USART);//Ê§ÄÜUSART1½ÓÊÕ,Á÷¿ØRTSÄ¬ÈÏÎª¸ß£¬Ö¸Ê¾²»ÔÊĞí¶Ô¶Ë·¢ËÍÊı¾İ¡£
+	usart_disable_receiver(APP_USART);//Ê§ÄÜUSART1½ÓÊÕ,Á÷¿ØRTSÄ¬ÈÏÎª¸ß£¬Ö¸Ê¾²»ÔÊĞí¶Ô¶Ë·¢ËÍÊı¾İ¡£
 
-	
 }
 
 extern volatile char radio_numb_array[1200];

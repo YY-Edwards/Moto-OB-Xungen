@@ -590,7 +590,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			#if host_flag//主机
 			
 				if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode))//接收从机的CSBK数据			
-			#else//从机
+			#else //从机
 			
 				if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode))//接收主机的CSBK数据		
 			#endif
@@ -1323,15 +1323,35 @@ static __app_Thread_(app_cfg)
 					if(xSemaphoreTake(xcsbk_rx_finished_Sem, (20*2) / portTICK_RATE_MS) == pdTRUE)
 					{
 						mylog("xSemaphoreTake xcsbk_rx_finished_Sem  okay!\n");
-						U8 rx_char =0;
+						U8 rx_char =0;					
+						/*
+						Connection with a Remote Device for Hardware Handshaking:
+						RTS/CTS都是低电平有效，默认启动时：
+												OB处于接收状态，即A上电后RTS默认为低电平；
+												device处于发送状态，即B上电后RTS默认为高电平；
+						硬件连接(交叉)说明：
+						A.RXD <-- B.TXD
+						A.TXD --> B.RXD
+						A.CTS <-- B.RTS
+						A.RTS --> B.CTS
+						
+						A要发送数据，先设置自己的RTS无效；
+						B通过监测自己的CTS(即A端口RTS管脚输出)，并根据具体情况决定，如果自己要做准备工作，就设置B的RTS为无效，
+						如果本身准备好了，就设置B的RTS有效，Request To Send，表示对于你的Send发送（数据）来说，我已经Clear（忙清了）。
+						所以A监测自己的CTS有效就可以发送数据了。然后接下来的每一个从A发送到B的字节数据都是这么个过程。
+						中间有可能遇到说，B的buffer full 缓存满了，所以B要设置自己的RTS无效；A发现后，就停止发送数据，继续检测CTS直到有效，才继续发送数据。
+						正常数据发送完成后，A就把最开始设置为无效的RTS这个标识清除掉，即设置RTS有效，表示数据传完了。 
+						由此，整个A发送数据到B的过程就完成了。		
+						*/
+						
+						DISENABLE_PEER_SEND_DATA;//将RTS设置为无效，即不允许peer发送数据
 						//有数据就发
-						usart_enable_transmitter(APP_USART);
 						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (10*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
 						{
 							mylog("rx_char:%x\n", rx_char);
 							usart1_send_char(rx_char);			
 						}
-						usart_enable_receiver(APP_USART);
+						ENABLE_PEER_SEND_DATA;//拉低RTS，mcu发送完毕，准备接收数据，即允许peer发送数据
 						mylog("usart1 send data okay...\n");
 					}
 					else
