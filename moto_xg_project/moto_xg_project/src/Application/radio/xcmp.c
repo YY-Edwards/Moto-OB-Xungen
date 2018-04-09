@@ -700,6 +700,7 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
 	/*point to xcmp payload*/
 	//DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
 	xcmp_datasession_req_t ptr;//新增结构体，以支持分包发送数据
+	memset(&ptr, 0x00, sizeof(ptr));
 	
 	ptr.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
 	
@@ -738,7 +739,11 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
 	ptr.DataSession_req.DataPayload.DataPayload_Length[1] =data_ength & 0xFF  ;//可能会变化
 
 	memcpy(&(ptr.DataSession_req.DataPayload.DataPayload[0]), data, data_ength);//不会出现越界现象，DataPayload：1024bytes
-
+	int k=0;
+	for (; k<data_ength; k++)
+	{
+		mylog("csbk_t_array_ptr[%d]:%x\n", k, ptr.DataSession_req.DataPayload.DataPayload[k]);
+	}
 	//xcmp_multi_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
 	
 	//目前不支持多包发送，因而需要设定长度限制。

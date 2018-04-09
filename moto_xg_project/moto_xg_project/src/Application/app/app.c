@@ -563,6 +563,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	static U16 payload_len = 0;
 	static U8 payload_count =0;
 	static U8 remaining_bytes=0;
+	static U8 last_temp[10]={0};
 	U16 offset=0;
 	static csbk_rx_state_t rx_status = WAITING_CSBK_P_HEADER;
 //	U32 card_id =0;
@@ -603,12 +604,27 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 							if(custom_pro->header == FIXED_HEADER)
 							{
 								payload_len = ((custom_pro->data_len[0]) | ((custom_pro->data_len[1]<<8) & 0xff00));//获取数据包长度
-								rx_status = READING_MIDDLE_FRAGEMENT;
+								if(payload_len<=8)//判断是否有中间包
+								{
+									rx_status = WAITING_LAST_FRAGEMENT;
+								}
+								else
+								{
+									rx_status = READING_MIDDLE_FRAGEMENT;
+								}
+								remaining_bytes = payload_len;
 							}				
 							mylog("WAITING_CSBK_P_HEADER \n\r");
 							break;
 					
-					case READING_MIDDLE_FRAGEMENT:				
+					case READING_MIDDLE_FRAGEMENT://注意考虑一种情况：中间包出现重复的情况，考虑出现重复中间包则丢弃。(判断重复中间包的逻辑是否正确？)				
+							
+							if(memcmp(last_temp,  csbk_ptr->csbk_data, 8)==0)
+							{
+								mylog("\n\r repeated middle fragement!!!\n\r");
+								break;
+							}
+							memcpy(last_temp, csbk_ptr->csbk_data, 8);					
 							//sendqueue
 							offset =0;
 							do
@@ -616,9 +632,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 								queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), portMAX_DELAY);//insert data
 								offset++;
 								
-							} while (offset<sizeof(csbk_ptr->csbk_data));//拷贝8个数据
+							} while (offset<8);//拷贝8个数据
 							
-							payload_count+=sizeof(csbk_ptr->csbk_data);
+							payload_count+=8;
 							
 							remaining_bytes = payload_len - payload_count;
 							if(remaining_bytes<=8)//判断是否应该等待最后一包数据
@@ -642,6 +658,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	
 									//触发事件，发送数据到usart1
 									xSemaphoreGive(xcsbk_rx_finished_Sem);
+									xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);
 								}
 								else//clear 队列
 								{
@@ -668,7 +685,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			{
 				mylog("no my csbk type\n\r");
 			}
-
+			
+			mylog("remaining_bytes:%d \n\r", remaining_bytes);	
 			//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Opcode))
 			//{
 				//
@@ -1240,6 +1258,7 @@ static __app_Thread_(app_cfg)
 	xLastWakeTime = xTaskGetTickCount();
 	static  portTickType water_value;
 	int i =0;
+	int k= 0;
 		
 	for(;;)
 	{
@@ -1346,9 +1365,11 @@ static __app_Thread_(app_cfg)
 						
 						DISENABLE_PEER_SEND_DATA;//将RTS设置为无效，即不允许peer发送数据
 						//有数据就发
+						k=0;
 						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (10*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
 						{
-							mylog("rx_char:%x\n", rx_char);
+							//mylog("rx_char[%d]:%x\n", k, rx_char);
+							k++;
 							usart1_send_char(rx_char);			
 						}
 						ENABLE_PEER_SEND_DATA;//拉低RTS，mcu发送完毕，准备接收数据，即允许peer发送数据
@@ -1378,15 +1399,15 @@ static __app_Thread_(app_cfg)
 				
 		} //End of switch on OB_State.
 		
-			mylog("app-thread water_value: %d\n", water_value);
-			mylog("usart1_task water_value: %d\n", usart1_task_water_value);
+			//mylog("app-thread water_value: %d\n", water_value);
+			//mylog("usart1_task water_value: %d\n", usart1_task_water_value);
 			//mylog("xnl rx water_value: %d\n", xnl_rx_water_value);
 			//mylog("xnl tx water_value: %d\n", xnl_tx_water_value);
-			mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
+			//mylog("xcmp rx water_value: %d\n", xcmp_rx_water_value);
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (2000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	mylog("app exit:err\n");
 }
