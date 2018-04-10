@@ -632,7 +632,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 							offset =0;
 							do
 							{
-								queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), portMAX_DELAY);//insert data
+								//若队列满，则丢弃
+								queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), 0);//insert data
 								offset++;
 								
 							} while (offset<8);//拷贝8个数据
@@ -654,7 +655,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 									offset =0;
 									do
 									{
-										queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), portMAX_DELAY);//insert data
+										queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), 0);//insert data
 										offset++;
 									
 									} while (offset<remaining_bytes);//拷贝剩余数据
