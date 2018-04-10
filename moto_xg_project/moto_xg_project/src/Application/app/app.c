@@ -630,7 +630,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 								payload_len = 0;
 								payload_count =0;
 								remaining_bytes=0;
-								mylog("csbk err!!! \n\r");
+								mylog("csbk-middle lost!!! \n\r");
 								break;
 							}
 							
