@@ -588,14 +588,17 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		{		
 			CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
 			my_custom_pro_t *custom_pro =  (my_custom_pro_t *)(csbk_ptr->csbk_data);
-			#if host_flag//主机
 			
-				if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode))//接收从机的CSBK数据			
-			#else //从机
-			
-				if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode))//接收主机的CSBK数据		
-			#endif
-			
+			if(
+			(csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY)
+			&&(((host_flag == 1) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode)) 
+				||((host_flag == 0) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode)))
+				)	
+			//if (host_flag == 1)//主机
+				//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode))//接收从机的CSBK数据			
+			//else //从机	
+				//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode))//接收主机的CSBK数据		
+							//
 			{
 				switch(rx_status)
 				{
@@ -621,7 +624,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 							
 							if(memcmp(last_temp,  csbk_ptr->csbk_data, 8)==0)
 							{
-								mylog("\n\r repeated middle fragement!!!\n\r");
+								mylog("repeated middle fragement!!!\n\r");
 								break;
 							}
 							memcpy(last_temp, csbk_ptr->csbk_data, 8);					
