@@ -735,14 +735,14 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//}
 		
 		}
-		for(i=0; i<data_length; i++)
-		{
-			
-			//mylog("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
-			//mylog("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
-			
-			
-		}
+		//for(i=0; i<data_length; i++)
+		//{
+			//
+			////mylog("\n\r payload[%d]: %X \n\r", i, xcmp->u8[4+i]);
+			////mylog("\n\r payload[%d]: %X \n\r", i, ptr->DataPayload.DataPayload[i]);
+			//
+			//
+		//}
 		
 	}
 	else
