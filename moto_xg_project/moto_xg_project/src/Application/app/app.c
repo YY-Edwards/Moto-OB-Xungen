@@ -589,7 +589,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
 			my_custom_pro_t *custom_pro =  (my_custom_pro_t *)(csbk_ptr->csbk_data);
 			
-			if(
+			if(//拼接CSBK包
 			(csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY)
 			&&(((host_flag == 1) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode)) 
 				||((host_flag == 0) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode)))
@@ -609,22 +609,34 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 								payload_len = ((custom_pro->data_len[0]) | ((custom_pro->data_len[1]<<8) & 0xff00));//获取数据包长度
 								if(payload_len<=8)//判断是否有中间包
 								{
-									rx_status = WAITING_LAST_FRAGEMENT;
+									rx_status = WAITING_LAST_FRAGMENT;
 								}
 								else
 								{
-									rx_status = READING_MIDDLE_FRAGEMENT;
+									rx_status = READING_MIDDLE_FRAGMENT;
 								}
 								remaining_bytes = payload_len;
 							}				
 							mylog("WAITING_CSBK_P_HEADER \n\r");
 							break;
 					
-					case READING_MIDDLE_FRAGEMENT://注意考虑一种情况：中间包出现重复的情况，考虑出现重复中间包则丢弃。(判断重复中间包的逻辑是否正确？)				
+					case READING_MIDDLE_FRAGMENT://注意考虑一种情况：中间包出现重复的情况，考虑出现重复中间包则丢弃。(判断重复中间包的逻辑是否正确？)				
+							
+							if(csbk_ptr->csbk_header.csbk_LB != CSBK_LB_FALSE)//如果中间包丢失，则丢弃
+							{
+								U8 rx_char =0;
+								while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
+								rx_status = WAITING_CSBK_P_HEADER;
+								payload_len = 0;
+								payload_count =0;
+								remaining_bytes=0;
+								mylog("csbk err!!! \n\r");
+								break;
+							}
 							
 							if(memcmp(last_temp,  csbk_ptr->csbk_data, 8)==0)
 							{
-								mylog("repeated middle fragement!!!\n\r");
+								mylog("repeated middle fragment!!!\n\r");
 								break;
 							}
 							memcpy(last_temp, csbk_ptr->csbk_data, 8);					
@@ -643,12 +655,12 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 							remaining_bytes = payload_len - payload_count;
 							if(remaining_bytes<=8)//判断是否应该等待最后一包数据
 							{
-								rx_status = WAITING_LAST_FRAGEMENT;
+								rx_status = WAITING_LAST_FRAGMENT;
 							}
-							mylog("READING_MIDDLE_FRAGEMENT \n\r");			
+							mylog("READING_MIDDLE_FRAGMENT \n\r");			
 							break;
 					
-					case WAITING_LAST_FRAGEMENT:
+					case WAITING_LAST_FRAGMENT:
 							
 								if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据)
 								{
@@ -664,7 +676,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 									xSemaphoreGive(xcsbk_rx_finished_Sem);
 									xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);
 								}
-								else//clear 队列
+								else//clear 队列，最后一包丢失时则清零队列（有两种情况：中间包有重复包，则数据长度异常；或者最后一包数据丢失）
 								{
 									U8 rx_char =0;
 									while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
@@ -675,7 +687,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 								payload_len = 0;
 								payload_count =0;
 								remaining_bytes=0;
-								mylog("WAITING_LAST_FRAGEMENT \n\r");	
+								mylog("WAITING_LAST_FRAGMENT \n\r");	
 							
 							break;
 					

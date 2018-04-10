@@ -73,7 +73,7 @@ extern volatile U8 connect_flag;
 	//*/
 	//U32 q= 0;
 	//U32 r = 0;
-	//U16 fragement_type =0x0000;//default SINGLE_FRAGMENT
+	//U16 fragment_type =0x0000;//default SINGLE_FRAGMENT
 	//
 	//q = data_len/MAX_XCMP_DATA_LENGTH;
 	//r = data_len%MAX_XCMP_DATA_LENGTH;
@@ -110,9 +110,9 @@ extern volatile U8 connect_flag;
 		//*/
 		//if(q != 0)
 		//{
-			//fragement_type = 0x300;//last fragment
+			//fragment_type = 0x300;//last fragment
 		//}
-		//xnl_frame.phy_header.phy_control  = ((0x4000 | fragement_type) + (sizeof(xnl_frame.phy_header.check_sum) + sizeof(xnl_header_t) + r));
+		//xnl_frame.phy_header.phy_control  = ((0x4000 | fragment_type) + (sizeof(xnl_frame.phy_header.check_sum) + sizeof(xnl_header_t) + r));
 		//
 		//memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, r);
 		//xnl_frame.xnl_header.payload_length = r;
@@ -137,7 +137,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 	*/
 	U32 q= 0;
 	U32 r = 0;
-	U16 fragement_type =0x0000;//default SINGLE_FRAGMENT
+	U16 fragment_type =0x0000;//default SINGLE_FRAGMENT
 	
 	q = data_len/MAX_XCMP_DATA_LENGTH;
 	r = data_len%MAX_XCMP_DATA_LENGTH;
@@ -164,10 +164,10 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		//mylog("need to send data in a sub package\n");
 		if (r!=0)//整包发送，判断是单包还是分包
 		{
-			fragement_type = 0x100;//first fragment
+			fragment_type = 0x100;//first fragment
 		}
 	
-		xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+		xnl_frame.phy_header.phy_control = (0x4000 | fragment_type | MAX_TRANSFER_UNIT);
 		/*insert xcmp frame data*/
 		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
 		xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
@@ -193,8 +193,8 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		int idx=1;
 		for (; idx<q; idx++)//发送中间包
 		{
-			fragement_type = 0x200;//middle fragment
-			xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+			fragment_type = 0x200;//middle fragment
+			xnl_frame.phy_header.phy_control = (0x4000 | fragment_type | MAX_TRANSFER_UNIT);
 			/*insert xcmp frame data*/
 			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
 			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;	
@@ -220,12 +220,12 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 	
 		}
 		
-		if(r==0 && fragement_type !=0)//判断是单包还是多包，如果是多包且以整包的方式发送
+		if(r==0 && fragment_type !=0)//判断是单包还是多包，如果是多包且以整包的方式发送
 		{	
 			//clear
 			//memset(&(xnl_frame.xnl_payload.xnl_content_data_msg.u8) , 0x00, sizeof(xnl_frame.xnl_payload.xnl_content_data_msg.u8));
-			fragement_type = 0x300;//last fragment
-			xnl_frame.phy_header.phy_control = (0x4000 | fragement_type | MAX_TRANSFER_UNIT);
+			fragment_type = 0x300;//last fragment
+			xnl_frame.phy_header.phy_control = (0x4000 | fragment_type | MAX_TRANSFER_UNIT);
 			/*insert xcmp frame data*/
 			memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, MAX_XCMP_DATA_LENGTH);
 			xnl_frame.xnl_header.payload_length = MAX_XCMP_DATA_LENGTH;
@@ -257,9 +257,9 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		*/
 		if(q != 0)
 		{
-			fragement_type = 0x300;//last fragment
+			fragment_type = 0x300;//last fragment
 		}
-		xnl_frame.phy_header.phy_control  = ((0x4000 | fragement_type) + (sizeof(xnl_frame.phy_header.check_sum) + sizeof(xnl_header_t) + r));
+		xnl_frame.phy_header.phy_control  = ((0x4000 | fragment_type) + (sizeof(xnl_frame.phy_header.check_sum) + sizeof(xnl_header_t) + r));
 		
 		memcpy(&(xnl_frame.xnl_payload.xnl_content_data_msg), data_ptr, r);
 		xnl_frame.xnl_header.payload_length = r;
