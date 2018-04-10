@@ -241,7 +241,12 @@ static void usart1_rx_data_task(void * pvParameters)
 
 void usart1_send_char(U8 c)
 {
-	while(gpio_pin_is_high(APP_USART_CTS_PIN));//peer is sending
+	static  portTickType xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	while(gpio_pin_is_high(APP_USART_CTS_PIN))//peer is sending
+	{
+		vTaskDelayUntil( &xLastWakeTime, (250*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+	}
 	
 	//if(peer_rx_status_flag)
 	if(1)
