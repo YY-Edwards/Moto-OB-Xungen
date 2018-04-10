@@ -194,30 +194,28 @@ static void usart1_rx_data_task(void * pvParameters)
 				
 			} while (queue_ret == pdPASS);
 			
-			//允许模块向MCU发送数据，并拉低RTS信号
-			usart_enable_receiver(APP_USART);
-			
 			if(index!=0)//有数据则打包发送
 			{	
 			
 				int remaining_send_bytes =index;//需要发送的数据长度
 				int offset =0;
-					
-				do 
-				{
-					if (remaining_send_bytes<=MAX_CSBK_PACKAGE_DEEP)
-					{
-						package_usartdata_to_csbkdata((usart_temp_ptr+offset), remaining_send_bytes);
-						remaining_send_bytes = 0;
-					}
-					else//整包150bytes发送
-					{
-						package_usartdata_to_csbkdata((usart_temp_ptr+offset), MAX_CSBK_PACKAGE_DEEP);
-						remaining_send_bytes -= MAX_CSBK_PACKAGE_DEEP;	
-						offset +=MAX_CSBK_PACKAGE_DEEP;
-					}
-						
-				} while (remaining_send_bytes>0);
+				//不分包，单包发送，每包最长不超过150bytes
+				package_usartdata_to_csbkdata((usart_temp_ptr), remaining_send_bytes);	
+				//do 
+				//{
+					//if (remaining_send_bytes<=MAX_CSBK_PACKAGE_DEEP)
+					//{
+						//package_usartdata_to_csbkdata((usart_temp_ptr+offset), remaining_send_bytes);
+						//remaining_send_bytes = 0;
+					//}
+					//else//整包150bytes发送
+					//{
+						//package_usartdata_to_csbkdata((usart_temp_ptr+offset), MAX_CSBK_PACKAGE_DEEP);
+						//remaining_send_bytes -= MAX_CSBK_PACKAGE_DEEP;	
+						//offset +=MAX_CSBK_PACKAGE_DEEP;
+					//}
+						//
+				//} while (remaining_send_bytes>0);
 			
 				memset(usart_temp_ptr, 0x00, malloc_size);//清空
 				
@@ -228,6 +226,10 @@ static void usart1_rx_data_task(void * pvParameters)
 			{
 				mylog("no usart data!!!\n");
 			}
+			
+			////允许模块向MCU发送数据，并拉低RTS信号
+			//usart_enable_receiver(APP_USART);
+			
 
 		}
 		
@@ -276,13 +278,13 @@ void third_party_interface_init(void)
 	}
 	
 	/*initialize the queue*/
-	usart1_rx_xQueue = xQueueCreate((MAX_USART_RX_QUEUE_DEEP+200), sizeof(char));//最大缓冲500
+	usart1_rx_xQueue = xQueueCreate((MAX_USART_RX_QUEUE_DEEP+200), sizeof(char));//最大缓冲350
 	if(usart1_rx_xQueue==NULL)
 	{
 		mylog("create usart1_rx_xQueue failure!!!\n");
 	}
 	
-	usart1_tx_xQueue = xQueueCreate((MAX_USART_TX_QUEUE_DEEP), sizeof(char));//最大缓冲200
+	usart1_tx_xQueue = xQueueCreate((MAX_USART_TX_QUEUE_DEEP), sizeof(char));//最大缓冲500
 	if(usart1_tx_xQueue==NULL)
 	{
 		mylog("create usart1_tx_xQueue failure!!!\n");

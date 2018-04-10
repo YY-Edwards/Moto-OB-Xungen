@@ -765,10 +765,11 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		mylog("State: %X \n", ptr->State);
 		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
+			//允许模块向MCU发送数据，并拉低RTS信号
+			usart_enable_receiver(APP_USART);
 			mylog("data transmit success\n");
-			vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
+			//vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
 			xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
-
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
 		{
@@ -801,6 +802,9 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//}
 			xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
 			
+			//resend-csbk
+			xcmp_data_session_csbk_raw_req(ptr->DataPayload.DataPayload, data_length);//最多一次只能发送22个csbk数据包
+				
 		}
 		
 		//if((ptr->State == DATA_SESSION_TX_Fail) || (ptr->State == DATA_SESSION_TX_Suc))
