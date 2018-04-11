@@ -72,7 +72,7 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		if (ptr->DeviceInitType == Device_Init_Complete)
 		{
 			bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
-			mylog("device init complete...\n");
+			//mylog("device init complete...\n");
 		}
 		else if(ptr->DeviceInitType  == Device_Init_Status)
 		{
@@ -82,7 +82,7 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 			XCMP_Version[2]= ptr->XCMPVersion[2];
 			XCMP_Version[3]= ptr->XCMPVersion[3];
 			xcmp_DeviceInitializationStatus_request();
-			mylog("device init request..\n");
+			//mylog("device init request..\n");
 		}
 		else//Device_Status_Update
 		{
@@ -1427,7 +1427,7 @@ static __app_Thread_(app_cfg)
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (1000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (800*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	mylog("app exit:err\n");
 }

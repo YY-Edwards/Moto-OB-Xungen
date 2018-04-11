@@ -14,8 +14,8 @@ volatile xQueueHandle message_storage_queue = NULL;
 /*the queue is used to receive failure-send message*/
 volatile xQueueHandle xg_resend_queue = NULL;
 
-volatile const char XGFlashLabel[] = {"S_CSBK"};
-volatile unsigned char host_flag=0;
+volatile const char XGFlashLabel[] = {"H_CSBK"};
+volatile unsigned char host_flag=1;
 static unsigned short current_message_index = 0;
 static unsigned short current_radio_id_index = 0;
 static unsigned int	  current_save_message_offset = XG_MESSAGE_DATA_START_ADD;
@@ -764,33 +764,33 @@ void xg_flashc_init(void)
 	
 	int radio_total_counts= 0;
 	radio_total_counts = csbk_flash_get_radio_id_total();
-	if(radio_total_counts>300)
-	{
-		mylog("radio count is overflow!!!\n");
-	}
-	else
-	{
-		if(radio_total_counts == 0)
-		{	
-			mylog("radio count is zero!\n");
-			//return;
-		}
-		else
-		{
-			U32 index =1;
-			U32 offset =0;
-			for (;index<=radio_total_counts; index++)
-			{
-			
-				if(csbk_flash_get_radio_detailed_numb(index, &radio_numb_array[offset])!=XG_OK)
-				{
-					mylog("read radio detailed numb err\n");
-					break;
-				}
-				offset+=RADIO_ID_NUMB_SIZE;
-			}
-		}
-	}
+	//if(radio_total_counts>300)
+	//{
+		//mylog("radio count is overflow!!!\n");
+	//}
+	//else
+	//{
+		//if(radio_total_counts == 0)
+		//{	
+			//mylog("radio count is zero!\n");
+			////return;
+		//}
+		//else
+		//{
+			//U32 index =1;
+			//U32 offset =0;
+			//for (;index<=radio_total_counts; index++)
+			//{
+			//
+				//if(csbk_flash_get_radio_detailed_numb(index, &radio_numb_array[offset])!=XG_OK)
+				//{
+					//mylog("read radio detailed numb err\n");
+					//break;
+				//}
+				//offset+=RADIO_ID_NUMB_SIZE;
+			//}
+		//}
+	//}
 	//ÅäÖÃÄ¿±êID
 	//char obj_id[20]={
 					//0x12,0x00,0x00,0x00,
