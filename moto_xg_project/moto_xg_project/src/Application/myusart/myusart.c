@@ -284,7 +284,7 @@ void third_party_interface_init(void)
 		mylog("create usart1_rx_xQueue failure!!!\n");
 	}
 	
-	usart1_tx_xQueue = xQueueCreate((MAX_USART_TX_QUEUE_DEEP), sizeof(char));//最大缓冲500
+	usart1_tx_xQueue = xQueueCreate((MAX_USART_TX_QUEUE_DEEP), sizeof(char));//最大缓冲2048
 	if(usart1_tx_xQueue==NULL)
 	{
 		mylog("create usart1_tx_xQueue failure!!!\n");

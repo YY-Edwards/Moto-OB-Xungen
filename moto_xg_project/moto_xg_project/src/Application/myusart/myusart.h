@@ -35,7 +35,7 @@
 
 #  define USART1_TARGET_PBACLK_FREQ_HZ 24000000  // PBA clock target frequency, in Hz
 #  define MAX_USART_RX_QUEUE_DEEP      150//bytes
-#  define MAX_USART_TX_QUEUE_DEEP      500//bytes
+#  define MAX_USART_TX_QUEUE_DEEP      2048//bytes，扩大csbk接收队列深度
 #  define MAX_CSBK_PACKAGE_DEEP        150//bytes
 
 #define ENABLE_PEER_SEND_DATA		gpio_clr_gpio_pin(APP_USART_RTS_PIN)
