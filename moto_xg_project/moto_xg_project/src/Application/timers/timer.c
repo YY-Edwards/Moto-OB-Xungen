@@ -276,8 +276,19 @@ void tc_init()
 	// configure the timer interrupt
 	tc_configure_interrupts(tc, EXAMPLE_TC_CHANNEL, &tc_interrupt);
 	// Start the timer/counter.
-	tc_start(tc, EXAMPLE_TC_CHANNEL);
+	//tc_start(tc, EXAMPLE_TC_CHANNEL);
 }
+
+void start_my_timer(void)
+{
+	tc_start(EXAMPLE_TC, EXAMPLE_TC_CHANNEL);
+	
+}
+void stop_my_timer(void)
+{
+	tc_stop(EXAMPLE_TC, EXAMPLE_TC_CHANNEL);
+}
+
 
 void delay_ns(U32 ns)
 {

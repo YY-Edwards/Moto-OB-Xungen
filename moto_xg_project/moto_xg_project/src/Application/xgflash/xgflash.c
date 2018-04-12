@@ -14,8 +14,8 @@ volatile xQueueHandle message_storage_queue = NULL;
 /*the queue is used to receive failure-send message*/
 volatile xQueueHandle xg_resend_queue = NULL;
 
-volatile const char XGFlashLabel[] = {"S_CSBK"};
-volatile unsigned char host_flag=0;
+volatile const char XGFlashLabel[] = {"H_CSBK"};
+volatile unsigned char host_flag=1;
 static unsigned short current_message_index = 0;
 static unsigned short current_radio_id_index = 0;
 static unsigned int	  current_save_message_offset = XG_MESSAGE_DATA_START_ADD;

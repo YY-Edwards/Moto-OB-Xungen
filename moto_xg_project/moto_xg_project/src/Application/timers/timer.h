@@ -24,11 +24,14 @@
 #define TIMER_EN_CLK_FUNCTION       AVR32_TC_A0_0_0_FUNCTION
 
 void tc_init(void);
+void start_my_timer(void);
+void stop_my_timer(void);
 void local_start_pll0(void);
 void local_start_timer(void);
 void delay_ns(U32 ns);
 void delay_us(U32 us);
 void delay_ms(U32 ms);
+
 
 
 

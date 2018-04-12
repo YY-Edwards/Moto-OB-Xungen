@@ -581,8 +581,8 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		
 		data_length = (ptr->DataPayload.DataPayload_Length[0]<<8) | (ptr->DataPayload.DataPayload_Length[1]);//( xcmp->u8[2]<<8) | (xcmp->u8[3]);
 
-		mylog("\n\r Session_ID: %x \n\r",Session_number );
-		mylog("\n\r paylaod_length: %d \n\r",data_length );
+		//mylog("\n\r Session_ID: %x \n\r",Session_number );
+		//mylog("\n\r paylaod_length: %d \n\r",data_length );
 		
 		if(data_length == sizeof(CSBK_Pro_t))
 		{		
@@ -617,7 +617,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 								}
 								remaining_bytes = payload_len;
 							}				
-							mylog("WAITING_CSBK_P_HEADER \n\r");
+							//mylog("WAITING_CSBK_P_HEADER \n\r");
 							break;
 					
 					case READING_MIDDLE_FRAGMENT://注意考虑一种情况：中间包出现重复的情况，考虑出现重复中间包则丢弃。(判断重复中间包的逻辑是否正确？)				
@@ -657,7 +657,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 							{
 								rx_status = WAITING_LAST_FRAGMENT;
 							}
-							mylog("READING_MIDDLE_FRAGMENT \n\r");			
+							//mylog("READING_MIDDLE_FRAGMENT \n\r");			
 							break;
 					
 					case WAITING_LAST_FRAGMENT:
@@ -687,7 +687,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 								payload_len = 0;
 								payload_count =0;
 								remaining_bytes=0;
-								mylog("WAITING_LAST_FRAGMENT \n\r");	
+								//mylog("WAITING_LAST_FRAGMENT \n\r");	
 							
 							break;
 					
@@ -702,7 +702,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 				mylog("no my csbk type\n\r");
 			}
 			
-			mylog("remaining_bytes:%d \n\r", remaining_bytes);	
+			//mylog("remaining_bytes:%d \n\r", remaining_bytes);	
 			//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Opcode))
 			//{
 				//
@@ -1267,6 +1267,7 @@ static __app_Thread_(app_cfg)
 {
 //	static int coun=0;
 	static int run_counter=0;
+	static int rx_csbk_count=0;
 	static  portTickType xLastWakeTime;
 	static  portBASE_TYPE queue_ret = pdPASS;
 //	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
@@ -1359,8 +1360,9 @@ static __app_Thread_(app_cfg)
 						//}
 						//
 					//}
-					if(xSemaphoreTake(xcsbk_rx_finished_Sem, (20*2) / portTICK_RATE_MS) == pdTRUE)
+					if(xSemaphoreTake(xcsbk_rx_finished_Sem, (200*2) / portTICK_RATE_MS) == pdTRUE)
 					{
+						rx_csbk_count++;
 						mylog("xSemaphoreTake xcsbk_rx_finished_Sem  okay!\n");
 						U8 rx_char =0;					
 						/*
@@ -1386,7 +1388,15 @@ static __app_Thread_(app_cfg)
 						DISENABLE_PEER_SEND_DATA;//将RTS设置为无效，即不允许peer发送数据
 						//有数据就发
 						k=0;
-						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (10*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
+						if(rx_csbk_count==2)
+						{
+							stop_my_timer();
+							mylog("my timer:%d\n", tc_tick);
+							tc_tick =0;
+							rx_csbk_count = 0;
+						}
+	
+						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (20*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
 						{
 							//mylog("rx_char[%d]:%x\n", k, rx_char);
 							k++;
@@ -1427,7 +1437,7 @@ static __app_Thread_(app_cfg)
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (800*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (500*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	mylog("app exit:err\n");
 }

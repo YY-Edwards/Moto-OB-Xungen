@@ -15,6 +15,7 @@
 #include "xcmp.h"
 #include "string.h"
 #include "xgflash.h"
+#include "timer.h"
 
 
 #ifndef MYUSART_H_
