@@ -34,7 +34,7 @@
 #  define APP_USART_CLOCK_MASK      AVR32_USART1_CLK_PBA
 
 #  define USART1_TARGET_PBACLK_FREQ_HZ 24000000  // PBA clock target frequency, in Hz
-#  define MAX_USART_RX_QUEUE_DEEP      150//bytes
+#  define MAX_USART_RX_QUEUE_DEEP      100//bytes
 #  define MAX_USART_TX_QUEUE_DEEP      2048//bytes，扩大csbk接收队列深度
 #  define MAX_CSBK_PACKAGE_DEEP        150//bytes
 
