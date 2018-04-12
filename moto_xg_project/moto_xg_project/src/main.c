@@ -47,7 +47,7 @@ int main (void)
 
 	//tc_init();
 	
-	//rfid_init();csbk-ob：无此硬件接口
+	//rfid_init();csbk-ob：无此硬件接口,注意如果没有先开启flash模块，则需要单独初始化spi引脚接口
 		
 	app_init();
 	
