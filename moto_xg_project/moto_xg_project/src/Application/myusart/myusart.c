@@ -201,7 +201,7 @@ static void usart1_rx_data_task(void * pvParameters)
 				int offset =0;
 				//不分包，单包发送，每包最长不超过150bytes
 				package_usartdata_to_csbkdata((usart_temp_ptr), remaining_send_bytes);
-				start_my_timer();	
+				//start_my_timer();	
 				//do 
 				//{
 					//if (remaining_send_bytes<=MAX_CSBK_PACKAGE_DEEP)

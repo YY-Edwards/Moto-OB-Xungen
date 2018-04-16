@@ -1388,13 +1388,13 @@ static __app_Thread_(app_cfg)
 						DISENABLE_PEER_SEND_DATA;//将RTS设置为无效，即不允许peer发送数据
 						//有数据就发
 						k=0;
-						if(rx_csbk_count==2)
-						{
-							stop_my_timer();
-							mylog("my timer:%d\n", tc_tick);
-							tc_tick =0;
-							rx_csbk_count = 0;
-						}
+						//if(rx_csbk_count==2)
+						//{
+							//stop_my_timer();
+							//mylog("my timer:%d\n", tc_tick);
+							//tc_tick =0;
+							//rx_csbk_count = 0;
+						//}
 	
 						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (20*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
 						{
