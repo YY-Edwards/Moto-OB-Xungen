@@ -1493,6 +1493,7 @@ void vApplicationIdleHook( void )
 {
 	/* This hook function does nothing but increment a counter. */
 	ulIdleCycleCount++;
+	//SLEEP(AVR32_PM_SMODE_IDLE);
 	
 }
 

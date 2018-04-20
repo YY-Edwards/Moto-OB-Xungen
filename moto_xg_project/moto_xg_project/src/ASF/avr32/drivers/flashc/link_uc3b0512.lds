@@ -150,7 +150,14 @@ SECTIONS
   .lalign	: { . = ALIGN(8); PROVIDE(_data_lma = .); } >FLASH AT>FLASH :FLASH
   . = ORIGIN(INTRAM);
   .dalign	: { . = ALIGN(8); PROVIDE(_data = .); } >INTRAM AT>INTRAM :INTRAM_ALIGN
+
+   PROVIDE (_data = ORIGIN(INTRAM));
+  . = ORIGIN(INTRAM);
   /* Exception handling  */
+  .ram_flashcmds  : { *(.ram_flashcmds) }  >INTRAM AT>FLASH
+  .fastrun        : { *(.fastrun) }  >INTRAM AT>FLASH
+
+
   .eh_frame       : ONLY_IF_RW { KEEP (*(.eh_frame)) } >INTRAM AT>FLASH :INTRAM_AT_FLASH
   .gcc_except_table   : ONLY_IF_RW { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) } >INTRAM AT>FLASH :INTRAM_AT_FLASH
   /* Thread Local Storage sections  */
