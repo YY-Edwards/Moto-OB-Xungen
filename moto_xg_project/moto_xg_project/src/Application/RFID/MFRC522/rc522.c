@@ -130,9 +130,9 @@ void static spi_init(void)
 
 	static const gpio_map_t RC522_SPI_GPIO_MAP =
 	{
-		//{AVR32_SPI_SCK_0_1_PIN,        AVR32_SPI_SCK_0_1_FUNCTION   },  // SPI Clock. PA17 as SCK (func C)
-		//{AVR32_SPI_MISO_0_2_PIN,       AVR32_SPI_MISO_0_2_FUNCTION  },  // MISO. PA28 as MISO (func C)
-		//{AVR32_SPI_MOSI_0_2_PIN,       AVR32_SPI_MOSI_0_2_FUNCTION  },  // MOSI. PA29 as MOSI (func C)
+		{AVR32_SPI_SCK_0_1_PIN,        AVR32_SPI_SCK_0_1_FUNCTION   },  // SPI Clock. PA17 as SCK (func C)
+		{AVR32_SPI_MISO_0_2_PIN,       AVR32_SPI_MISO_0_2_FUNCTION  },  // MISO. PA28 as MISO (func C)
+		{AVR32_SPI_MOSI_0_2_PIN,       AVR32_SPI_MOSI_0_2_FUNCTION  },  // MOSI. PA29 as MOSI (func C)
 		{AVR32_SPI_NPCS_0_1_PIN,       AVR32_SPI_NPCS_0_1_FUNCTION  },  // Chip Select NPCS. PA24 as NPCS[0] (func B)
 	};
 

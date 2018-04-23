@@ -727,7 +727,7 @@ void xg_flashc_init(void)
 	}
 	
 	
-	data_flash_init();//interface
+	//data_flash_init();//interface
 	
 	//static df_status_t status = DF_ERROR;
 	//char ptr_buff[80];
@@ -760,10 +760,10 @@ void xg_flashc_init(void)
 	
 	//xgflash_list_info_init();
 	
-	csbk_flash_list_init();
-	
-	int radio_total_counts= 0;
-	radio_total_counts = csbk_flash_get_radio_id_total();
+	//csbk_flash_list_init();
+	//
+	//int radio_total_counts= 0;
+	//radio_total_counts = csbk_flash_get_radio_id_total();
 	//if(radio_total_counts>300)
 	//{
 		//mylog("radio count is overflow!!!\n");
@@ -809,6 +809,16 @@ void xg_flashc_init(void)
 }
 
 
+
+
+void write_flash_in_multitask(volatile void *dst, const void *src, size_t nbytes)
+{
+	Disable_interrupt_level(1);
+	vTaskSuspendAll();
+	flashc_memcpy(dst, src, nbytes, TRUE);
+	xTaskResumeAll();
+	Enable_interrupt_level(1);
+}
 
 
 

@@ -1263,6 +1263,18 @@ static void send_message(void * pvParameters)
 	}
 }
 
+
+
+//! NVRAM data structure located in the flash array.
+#if defined (__GNUC__)
+__attribute__((__section__(".flash_nvram")))
+#endif
+static nvram_data_t flash_nvram_data
+#if defined (__ICCAVR32__)
+@ "FLASH_NVRAM"
+#endif
+;
+
 static __app_Thread_(app_cfg)
 {
 //	static int coun=0;
@@ -1280,6 +1292,10 @@ static __app_Thread_(app_cfg)
 	static  portTickType water_value;
 	int i =0;
 	int k= 0;
+	static const uint8_t write_data_first[8] = {0x11, 0x23, 0x33, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+	static const uint8_t write_data_second[8] = {0xab, 0xcd, 0xef, 0x09, 0x08, 0x07, 0xCD, 0xEF};
+	
+	
 		
 	for(;;)
 	{
@@ -1409,6 +1425,24 @@ static __app_Thread_(app_cfg)
 					{						
 						run_counter++;			
 						nop();
+						
+						mylog("var8:%x\n", flash_nvram_data.var8);
+						if(run_counter%2==0)
+						{
+							write_flash_in_multitask((void *)&(flash_nvram_data.var8),  &write_data_first, sizeof(flash_nvram_data.var8));
+						}
+						else
+						{
+							write_flash_in_multitask((void *)&(flash_nvram_data.var8),  &write_data_second, sizeof(flash_nvram_data.var8));						
+						}
+						if (flashc_is_lock_error() || flashc_is_programming_error())
+						{
+							mylog("XG flashc_memcpy err...\n");
+						}
+						mylog("var8:%x\n", flash_nvram_data.var8);
+
+						
+						
 						//if(run_counter == 2)新增代码，可能需要增大栈空间分配值
 						//{
 							////mylog("send test csbk data...\n");

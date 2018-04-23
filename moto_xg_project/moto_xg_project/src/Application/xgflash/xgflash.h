@@ -13,7 +13,7 @@
 #include "task.h"
 #include "compiler.h"
 #include "data_flash.h"
-//#include "flashc.h"
+#include "flashc.h"
 #include "string.h"
 #include "log.h"
 #include "RFID.h"
@@ -127,6 +127,9 @@ U16 xgflash_get_message_count(void);
 xgflash_status_t xgflash_message_save(U8 *data_ptr, U16 data_len, U8 data_end_flag);
 xgflash_status_t xgflash_get_message_data(U32 message_index, void *buff_ptr, bool erase);//read+erase
 xgflash_status_t xgflash_erase_info_region(void);
+
+void write_flash_in_multitask(volatile void *dst, const void *src, size_t nbytes);
+
 
 
 #endif /* XGFLASH_H_ */
