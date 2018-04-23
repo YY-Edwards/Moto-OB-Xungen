@@ -151,8 +151,6 @@ SECTIONS
   . = ORIGIN(INTRAM);
   .dalign	: { . = ALIGN(8); PROVIDE(_data = .); } >INTRAM AT>INTRAM :INTRAM_ALIGN
 
-   PROVIDE (_data = ORIGIN(INTRAM));
-  . = ORIGIN(INTRAM);
   /* Exception handling  */
   .ram_flashcmds  : { *(.ram_flashcmds) }  >INTRAM AT>FLASH
   .fastrun        : { *(.fastrun) }  >INTRAM AT>FLASH

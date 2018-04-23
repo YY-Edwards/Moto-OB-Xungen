@@ -220,13 +220,14 @@ void flashc_enable_prog_error_int(bool enable)
  */
 //! @{
 
-
+// Set this function to execute from RAM.
+__attribute__((section(".ram_flashcmds")))
 bool flashc_is_ready(void)
 {
 	return ((AVR32_FLASHC.fsr & AVR32_FLASHC_FSR_FRDY_MASK) != 0);
 }
 
-
+__attribute__((section(".ram_flashcmds")))
 void flashc_default_wait_until_ready(void)
 {
 	while (!flashc_is_ready());
@@ -246,6 +247,7 @@ void (*volatile flashc_wait_until_ready)(void) = flashc_default_wait_until_ready
  *          the driver's API which instead presents \ref flashc_is_lock_error
  *          and \ref flashc_is_programming_error.
  */
+__attribute__((section(".ram_flashcmds")))
 static unsigned int flashc_get_error_status(void)
 {
 	return AVR32_FLASHC.fsr & (AVR32_FLASHC_FSR_LOCKE_MASK |
@@ -291,7 +293,12 @@ unsigned int flashc_get_page_number(void)
 	return (AVR32_FLASHC.fcmd & AVR32_FLASHC_FCMD_PAGEN_MASK) >> AVR32_FLASHC_FCMD_PAGEN_OFFSET;
 }
 
-
+#if __GNUC__
+// Set this function to execute from RAM.
+__attribute__((section(".ram_flashcmds"), __noinline__))
+#elif __ICCAVR32__
+#pragma optimize = no_inline
+#endif
 void flashc_issue_command(unsigned int command, int page_number)
 {
 	u_avr32_flashc_fcmd_t u_avr32_flashc_fcmd;
