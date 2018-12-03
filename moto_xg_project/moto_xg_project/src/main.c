@@ -18,9 +18,10 @@ History:
 #include "timer.h"
 #include "xcmp.h"
 #include "xgrtc.h"
-#include "xgflash.h"
+//#include "xgflash.h"
+#include "RFID.h"
 #include "app.h"
-#include "myusart.h"
+//#include "myusart.h"
 
 
 int main (void)
@@ -36,18 +37,18 @@ int main (void)
 		
 	INTC_init_interrupts();
 		
-	log_init();//usart2
+	log_init();
 	mylog("----start debug----");
 	
-	third_party_interface_init();//usart1
+	//third_party_interface_init();//usart1
 	
-	xg_flashc_init();
+	//xg_flashc_init();
 		
 	//voc_init();
 
 	//tc_init();
 	
-	//rfid_init();csbk-ob：无此硬件接口,注意如果没有先开启flash模块，则需要单独初始化spi引脚接口
+	rfid_init();//csbk-ob：无此硬件接口,注意如果没有先开启flash模块，则需要单独初始化spi引脚接口
 		
 	app_init();
 	

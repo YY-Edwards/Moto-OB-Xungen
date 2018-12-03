@@ -794,12 +794,13 @@ void xnl_init(void)
 	/*initialize the semaphore and queue*/
 	vSemaphoreCreateBinary(xnl_timeout_semphr);		
 	
-	xnl_frame_tx = xQueueCreate(100, sizeof(xnl_fragment_t *)); //扩大xnl_frame_tx的队列深度
+	//作为一个中间变量，为什么分配那么大的空间？
+	xnl_frame_tx = xQueueCreate(TX_XNL_QUEUE_DEEP, sizeof(xnl_fragment_t *)); //扩大xnl_frame_tx的队列深度
 		
 	xnl_store_idle = xQueueCreate(MAX_XNL_STORE, sizeof(phy_fragment_t *));
 	for(int i= 0; i < MAX_XNL_STORE; i++ )
 	{
-		set_xnl_idle(&xnl_store[i]);
+		set_xnl_idle(&xnl_store[i]);//xnl_frame_tx，phy_xnl_frame_tx，phy_xnl_frame_rx这三个实际上都是依赖xnl_store_idle实体：二维数组
 	}
 	
 	/*initialize the queue to send/receive xnl packet */

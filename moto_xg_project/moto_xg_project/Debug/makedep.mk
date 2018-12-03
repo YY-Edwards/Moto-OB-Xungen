@@ -4,17 +4,9 @@
 
 src\Application\app\app.c
 
-src\Application\flash\data_flash.c
-
 src\Application\myrtc\xgrtc.c
 
-src\Application\myusart\myusart.c
-
 src\Application\radio\ambe.c
-
-src\Application\radio\AMBE_audio.c
-
-src\Application\radio\AMBE_audio_2.c
 
 src\Application\radio\audio.c
 
@@ -33,10 +25,6 @@ src\Application\RFID\MFRC522\rc522.c
 src\Application\RFID\RFID.c
 
 src\Application\timers\timer.c
-
-src\Application\voice\voice.c
-
-src\Application\xgflash\xgflash.c
 
 src\ASF\avr32\drivers\flashc\flashc.c
 

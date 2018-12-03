@@ -130,9 +130,9 @@ void static spi_init(void)
 
 	static const gpio_map_t RC522_SPI_GPIO_MAP =
 	{
-		//{AVR32_SPI_SCK_0_1_PIN,        AVR32_SPI_SCK_0_1_FUNCTION   },  // SPI Clock. PA17 as SCK (func C)
-		//{AVR32_SPI_MISO_0_2_PIN,       AVR32_SPI_MISO_0_2_FUNCTION  },  // MISO. PA28 as MISO (func C)
-		//{AVR32_SPI_MOSI_0_2_PIN,       AVR32_SPI_MOSI_0_2_FUNCTION  },  // MOSI. PA29 as MOSI (func C)
+		{AVR32_SPI_SCK_0_1_PIN,        AVR32_SPI_SCK_0_1_FUNCTION   },  // SPI Clock. PA17 as SCK (func C)
+		{AVR32_SPI_MISO_0_2_PIN,       AVR32_SPI_MISO_0_2_FUNCTION  },  // MISO. PA28 as MISO (func C)
+		{AVR32_SPI_MOSI_0_2_PIN,       AVR32_SPI_MOSI_0_2_FUNCTION  },  // MOSI. PA29 as MOSI (func C)
 		{AVR32_SPI_NPCS_0_1_PIN,       AVR32_SPI_NPCS_0_1_FUNCTION  },  // Chip Select NPCS. PA24 as NPCS[0] (func B)
 	};
 
@@ -161,13 +161,13 @@ void static spi_init(void)
 	spi = &AVR32_SPI;
 
 	// Initialize as master.
-	//spi_initMaster(spi, &spiOptions);
+	spi_initMaster(spi, &spiOptions);
 
 	// Set selection mode: variable_ps, pcs_decode, delay.
-	//spi_selectionMode(spi, 0, 0, 0);
+	spi_selectionMode(spi, 0, 0, 0);
 
 	// Enable SPI.
-	//spi_enable(spi);
+	spi_enable(spi);
 
 	// Initialize RC522 with SPI clock PBA.
 	if (spi_setupChipReg(spi, &spiOptions, 2*12000000) != SPI_OK)

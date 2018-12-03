@@ -565,7 +565,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	static U8 remaining_bytes=0;
 	static U8 last_temp[10]={0};
 	U16 offset=0;
-	static csbk_rx_state_t rx_status = WAITING_CSBK_P_HEADER;
+	//static csbk_rx_state_t rx_status = WAITING_CSBK_P_HEADER;
 //	U32 card_id =0;
 	U8 i = 0;
 //	xgflash_status_t return_value = XG_ERROR;
@@ -587,114 +587,114 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		if(data_length == sizeof(CSBK_Pro_t))
 		{		
 			CSBK_Pro_t *csbk_ptr = (CSBK_Pro_t *)(ptr->DataPayload.DataPayload);//将csbk_ptr指向负载数据
-			my_custom_pro_t *custom_pro =  (my_custom_pro_t *)(csbk_ptr->csbk_data);
-			
-			if(//拼接CSBK包
-			(csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY)
-			&&(((host_flag == 1) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode)) 
-				||((host_flag == 0) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode)))
-				)	
-			//if (host_flag == 1)//主机
-				//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode))//接收从机的CSBK数据			
-			//else //从机	
-				//if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode))//接收主机的CSBK数据		
-							//
-			{
-				switch(rx_status)
-				{
-					case WAITING_CSBK_P_HEADER:
-					
-							if(custom_pro->header == FIXED_HEADER)
-							{
-								payload_len = ((custom_pro->data_len[0]) | ((custom_pro->data_len[1]<<8) & 0xff00));//获取数据包长度
-								if(payload_len<=8)//判断是否有中间包
-								{
-									rx_status = WAITING_LAST_FRAGMENT;
-								}
-								else
-								{
-									rx_status = READING_MIDDLE_FRAGMENT;
-								}
-								remaining_bytes = payload_len;
-							}				
-							//mylog("WAITING_CSBK_P_HEADER \n\r");
-							break;
-					
-					case READING_MIDDLE_FRAGMENT://注意考虑一种情况：中间包出现重复的情况，考虑出现重复中间包则丢弃。(判断重复中间包的逻辑是否正确？)				
-							
-							if(csbk_ptr->csbk_header.csbk_LB != CSBK_LB_FALSE)//如果中间包丢失，则丢弃
-							{
-								U8 rx_char =0;
-								while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
-								rx_status = WAITING_CSBK_P_HEADER;
-								payload_len = 0;
-								payload_count =0;
-								remaining_bytes=0;
-								mylog("csbk-middle lost!!! \n\r");
-								break;
-							}
-							
-							if(memcmp(last_temp,  csbk_ptr->csbk_data, 8)==0)
-							{
-								mylog("repeated middle fragment!!!\n\r");
-								break;
-							}
-							memcpy(last_temp, csbk_ptr->csbk_data, 8);					
-							//sendqueue
-							offset =0;
-							do
-							{
-								//若队列满，则丢弃
-								queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), 0);//insert data
-								offset++;
-								
-							} while (offset<8);//拷贝8个数据
-							
-							payload_count+=8;
-							
-							remaining_bytes = payload_len - payload_count;
-							if(remaining_bytes<=8)//判断是否应该等待最后一包数据
-							{
-								rx_status = WAITING_LAST_FRAGMENT;
-							}
-							//mylog("READING_MIDDLE_FRAGMENT \n\r");			
-							break;
-					
-					case WAITING_LAST_FRAGMENT:
-							
-								if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据)
-								{
-									offset =0;
-									do
-									{
-										queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), 0);//insert data
-										offset++;
-									
-									} while (offset<remaining_bytes);//拷贝剩余数据
-	
-									//触发事件，发送数据到usart1
-									xSemaphoreGive(xcsbk_rx_finished_Sem);
-									xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);
-								}
-								else//clear 队列，最后一包丢失时则清零队列（有两种情况：中间包有重复包，则数据长度异常；或者最后一包数据丢失）
-								{
-									U8 rx_char =0;
-									while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
-									mylog("csbk err!!! \n\r");	
-								}
-								
-								rx_status = WAITING_CSBK_P_HEADER;
-								payload_len = 0;
-								payload_count =0;
-								remaining_bytes=0;
-								//mylog("WAITING_LAST_FRAGMENT \n\r");	
-							
-							break;
-					
-					default:
-							break;
-					
-				}
+			////my_custom_pro_t *custom_pro =  (my_custom_pro_t *)(csbk_ptr->csbk_data);
+			////
+			////if(//拼接CSBK包
+			////(csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY)
+			////&&(((host_flag == 1) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode)) 
+				////||((host_flag == 0) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode)))
+				////)	
+			//////if (host_flag == 1)//主机
+				//////if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Slave_Opcode))//接收从机的CSBK数据			
+			//////else //从机	
+				//////if((csbk_ptr->csbk_manufacturing_id == CSBK_Third_PARTY) && (csbk_ptr->csbk_header.csbk_opcode == CSBK_Host_Opcode))//接收主机的CSBK数据		
+							//////
+			////{
+				////switch(rx_status)
+				////{
+					////case WAITING_CSBK_P_HEADER:
+					////
+							////if(custom_pro->header == FIXED_HEADER)
+							////{
+								////payload_len = ((custom_pro->data_len[0]) | ((custom_pro->data_len[1]<<8) & 0xff00));//获取数据包长度
+								////if(payload_len<=8)//判断是否有中间包
+								////{
+									////rx_status = WAITING_LAST_FRAGMENT;
+								////}
+								////else
+								////{
+									////rx_status = READING_MIDDLE_FRAGMENT;
+								////}
+								////remaining_bytes = payload_len;
+							////}				
+							//////mylog("WAITING_CSBK_P_HEADER \n\r");
+							////break;
+					////
+					////case READING_MIDDLE_FRAGMENT://注意考虑一种情况：中间包出现重复的情况，考虑出现重复中间包则丢弃。(判断重复中间包的逻辑是否正确？)				
+							////
+							////if(csbk_ptr->csbk_header.csbk_LB != CSBK_LB_FALSE)//如果中间包丢失，则丢弃
+							////{
+								////U8 rx_char =0;
+								////while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
+								////rx_status = WAITING_CSBK_P_HEADER;
+								////payload_len = 0;
+								////payload_count =0;
+								////remaining_bytes=0;
+								////mylog("csbk-middle lost!!! \n\r");
+								////break;
+							////}
+							////
+							////if(memcmp(last_temp,  csbk_ptr->csbk_data, 8)==0)
+							////{
+								////mylog("repeated middle fragment!!!\n\r");
+								////break;
+							////}
+							////memcpy(last_temp, csbk_ptr->csbk_data, 8);					
+							//////sendqueue
+							////offset =0;
+							////do
+							////{
+								//////若队列满，则丢弃
+								////queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), 0);//insert data
+								////offset++;
+								////
+							////} while (offset<8);//拷贝8个数据
+							////
+							////payload_count+=8;
+							////
+							////remaining_bytes = payload_len - payload_count;
+							////if(remaining_bytes<=8)//判断是否应该等待最后一包数据
+							////{
+								////rx_status = WAITING_LAST_FRAGMENT;
+							////}
+							//////mylog("READING_MIDDLE_FRAGMENT \n\r");			
+							////break;
+					////
+					////case WAITING_LAST_FRAGMENT:
+							////
+								////if(csbk_ptr->csbk_header.csbk_LB == CSBK_LB_TRUE)//最后一包数据)
+								////{
+									////offset =0;
+									////do
+									////{
+										////queue_ret = xQueueSendToBack(usart1_tx_xQueue, &(csbk_ptr->csbk_data[offset]), 0);//insert data
+										////offset++;
+									////
+									////} while (offset<remaining_bytes);//拷贝剩余数据
+	////
+									//////触发事件，发送数据到usart1
+									////xSemaphoreGive(xcsbk_rx_finished_Sem);
+									////xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);
+								////}
+								////else//clear 队列，最后一包丢失时则清零队列（有两种情况：中间包有重复包，则数据长度异常；或者最后一包数据丢失）
+								////{
+									////U8 rx_char =0;
+									////while((xQueueReceive(usart1_tx_xQueue, &rx_char, 0)) == pdPASS);
+									////mylog("csbk err!!! \n\r");	
+								////}
+								////
+								////rx_status = WAITING_CSBK_P_HEADER;
+								////payload_len = 0;
+								////payload_count =0;
+								////remaining_bytes=0;
+								//////mylog("WAITING_LAST_FRAGMENT \n\r");	
+							////
+							////break;
+					////
+					////default:
+							////break;
+					////
+				////}
 						
 			}
 			else
@@ -746,7 +746,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 				//mylog("no my csbk type\n\r");
 			//}
 		
-		}
+		//}
 		//for(i=0; i<data_length; i++)
 		//{
 			//
@@ -766,7 +766,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		if (ptr->State == DATA_SESSION_TX_Suc)
 		{
 			//允许模块向MCU发送数据，并拉低RTS信号
-			usart_enable_receiver(APP_USART);
+			//usart_enable_receiver(APP_USART);
 			mylog("data transmit success\n");
 			//vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
 			xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
@@ -803,7 +803,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			xcmp_IdleTestTone(Tone_Start, MANDOWN_DISABLE_TONE);//set tone to indicate send-failure!!!
 			
 			//resend-csbk
-			xcmp_data_session_csbk_raw_req(ptr->DataPayload.DataPayload, data_length);//最多一次只能发送22个csbk数据包
+			//xcmp_data_session_csbk_raw_req(ptr->DataPayload.DataPayload, data_length);//最多一次只能发送22个csbk数据包
 				
 		}
 		
@@ -876,8 +876,8 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 			
 		vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
 		//delay_ms(200);
-		//rfid_sendID_message();//send message		
-		scan_rfid_save_message();
+		rfid_sendID_message();//send message		
+		//scan_rfid_save_message();
 	}
 	//mylog("\n\r PUI_Source: %X \n\r" , PUI_Source);
 	//mylog("\n\r PUI_Type: %X \n\r" , PUI_Type);
@@ -1331,96 +1331,19 @@ static __app_Thread_(app_cfg)
 						}
 			break;
 			case OB_WAITINGAPPTASK:
-			
-					//if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, (2000*2) / portTICK_RATE_MS))
-					//if(pdPASS == xQueueReceive(xg_resend_queue, &data_ptr, 0))
+														
+					run_counter++;			
+					nop();
+					//if(run_counter == 2)新增代码，可能需要增大栈空间分配值
 					//{
-						//if(data_ptr!=NULL){//save message
-							//
-							//mylog("receive okay!\n");
-							//xSemaphoreTake(count_mutex, portMAX_DELAY);
-							//global_count--;
-							//xSemaphoreGive(count_mutex);
-							//mylog("global_count:%d\n", global_count);
-							////Message_Protocol_t *ptr = (Message_Protocol_t* )data_ptr;
-							//status = xgflash_message_save((U8 *)data_ptr, sizeof(Message_Protocol_t), TRUE);
-							////mylog("receive data : %d", ptr->data.XG_Time.Second);
-							////xcmp_data_session_req(data_ptr, sizeof(Message_Protocol_t), DEST);								
-							//if(status == XG_OK)
-							//{
-								//mylog("save message okay\n");
-							//}
-							//else
-							//{
-								//mylog("!!! save message err : %d\n", status);
-									//
-							//}
-							//set_message_store(data_ptr);
-							//
-						//}
-						//
+						////mylog("send test csbk data...\n");
+						////package_usartdata_to_csbkdata(test, sizeof(test));
 					//}
-					if(xSemaphoreTake(xcsbk_rx_finished_Sem, (200*2) / portTICK_RATE_MS) == pdTRUE)
+					mylog("app task run:%d\n", run_counter);
+					if(0x00000003 != (bunchofrandomstatusflags & 0x00000003))//可能断开
 					{
-						rx_csbk_count++;
-						mylog("xSemaphoreTake xcsbk_rx_finished_Sem  okay!\n");
-						U8 rx_char =0;					
-						/*
-						Connection with a Remote Device for Hardware Handshaking:
-						RTS/CTS都是低电平有效，默认启动时：
-												OB处于接收状态，即A上电后RTS默认为低电平；
-												device处于发送状态，即B上电后RTS默认为高电平；
-						硬件连接(交叉)说明：
-						A.RXD <-- B.TXD
-						A.TXD --> B.RXD
-						A.CTS <-- B.RTS
-						A.RTS --> B.CTS
-						
-						A要发送数据，先设置自己的RTS无效；
-						B通过监测自己的CTS(即A端口RTS管脚输出)，并根据具体情况决定，如果自己要做准备工作，就设置B的RTS为无效，
-						如果本身准备好了，就设置B的RTS有效，Request To Send，表示对于你的Send发送（数据）来说，我已经Clear（忙清了）。
-						所以A监测自己的CTS有效就可以发送数据了。然后接下来的每一个从A发送到B的字节数据都是这么个过程。
-						中间有可能遇到说，B的buffer full 缓存满了，所以B要设置自己的RTS无效；A发现后，就停止发送数据，继续检测CTS直到有效，才继续发送数据。
-						正常数据发送完成后，A就把最开始设置为无效的RTS这个标识清除掉，即设置RTS有效，表示数据传完了。 
-						由此，整个A发送数据到B的过程就完成了。		
-						*/
-						
-						DISENABLE_PEER_SEND_DATA;//将RTS设置为无效，即不允许peer发送数据
-						//有数据就发
-						k=0;
-						//if(rx_csbk_count==2)
-						//{
-							//stop_my_timer();
-							//mylog("my timer:%d\n", tc_tick);
-							//tc_tick =0;
-							//rx_csbk_count = 0;
-						//}
-	
-						while((queue_ret = xQueueReceive(usart1_tx_xQueue, &rx_char, (20*2) / portTICK_RATE_MS)) == pdPASS)//注意：先进先出
-						{
-							//mylog("rx_char[%d]:%x\n", k, rx_char);
-							k++;
-							usart1_send_char(rx_char);			
-						}
-						ENABLE_PEER_SEND_DATA;//拉低RTS，mcu发送完毕，准备接收数据，即允许peer发送数据
-						mylog("usart1 send data okay...\n");
-					}
-					else
-					{						
-						run_counter++;			
-						nop();
-						//if(run_counter == 2)新增代码，可能需要增大栈空间分配值
-						//{
-							////mylog("send test csbk data...\n");
-							////package_usartdata_to_csbkdata(test, sizeof(test));
-						//}
-						mylog("app task run:%d\n", run_counter);
-						if(0x00000003 != (bunchofrandomstatusflags & 0x00000003))//可能断开
-						{
-							connect_flag =0;
-							OB_State = OB_UNCONNECTEDWAITINGSTATUS;
-						}
-					
+						connect_flag =0;
+						OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 					}
 				
 			break;

@@ -556,7 +556,7 @@ static void phy_xnl_rx(xnl_channel_t * xnl_rx_channel)
 	}/*End of phy_rx_state switch.*/
 }
 
-extern char AMBE_AudioData[];
+//extern char AMBE_AudioData[];
 extern char AudioData[];
 extern U16 Public_AMBEkey[];
 extern U8 Speaker_is_unmute;

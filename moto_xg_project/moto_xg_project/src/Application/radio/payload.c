@@ -35,7 +35,9 @@ static void payload_tx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
 	U16  * payload_ptr;
-	
+
+#if ENABLE == PAYLOAD_ENABLE	
+
 	if(NULL == phy_payload_frame_tx)
 	{
 		phy_payload_frame_tx = xQueueCreate(TX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t *));
@@ -49,6 +51,7 @@ static void payload_tx_process(void * pvParameters)
 		}
 
 	}
+#endif
 }
 
 
@@ -64,7 +67,7 @@ static void payload_rx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
 	U16  * payload_ptr;
-		
+#if ENABLE == PAYLOAD_ENABLE			
 	if(NULL ==   phy_payload_frame_rx)
 	{
 		phy_payload_frame_rx = xQueueCreate(RX_PAYLOAD_QUEUE_DEEP, sizeof(phy_fragment_t *));
@@ -78,6 +81,8 @@ static void payload_rx_process(void * pvParameters)
 		}
 	
 	}
+#endif	
+	
 }
 
 /**
