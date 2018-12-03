@@ -141,11 +141,11 @@ void xg_rtc_init(void)
 	// Enable the RTC
 	rtc_enable(&AVR32_RTC);
 
-	Current_time.Year		= 16;
-	Current_time.Month		= 2;
-	Current_time.Day		= 29;
-	Current_time.Hour		= 23;
-	Current_time.Minute		= 59;
+	Current_time.Year		= 18;
+	Current_time.Month		= 12;
+	Current_time.Day		= 03;
+	Current_time.Hour		= 16;
+	Current_time.Minute		= 25;
 	Current_time.Second		= 40;
 	
 	// Enable global interrupts
