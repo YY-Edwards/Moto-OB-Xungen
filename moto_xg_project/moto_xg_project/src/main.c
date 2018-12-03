@@ -24,6 +24,7 @@ History:
 //#include "myusart.h"
 
 
+
 int main (void)
 {
 	
@@ -39,6 +40,8 @@ int main (void)
 		
 	log_init();
 	mylog("----start debug----");
+	
+	//avr_flash_test();
 	
 	//third_party_interface_init();//usart1
 	

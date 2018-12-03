@@ -11,6 +11,7 @@
 #include <rtc.h>
 #include <physical.h>
 #include "string.h"
+#include "avrflash.h"
 
 static __app_Thread_(app_cfg);
 static void send_message(void * pvParameters);
@@ -1345,6 +1346,12 @@ static __app_Thread_(app_cfg)
 						connect_flag =0;
 						OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 					}
+					else
+					{
+						mylog("avr flash test begin:\n");
+						avr_flash_test();
+						mylog("avr flash test end:\n");
+					}
 				
 			break;
 			default:
@@ -1360,7 +1367,7 @@ static __app_Thread_(app_cfg)
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//mylog("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (500*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (500*3) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	mylog("app exit:err\n");
 }

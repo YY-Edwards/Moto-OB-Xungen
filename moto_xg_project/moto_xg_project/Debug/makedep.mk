@@ -4,6 +4,8 @@
 
 src\Application\app\app.c
 
+src\Application\avrflash\avrflash.c
+
 src\Application\myrtc\xgrtc.c
 
 src\Application\radio\ambe.c
