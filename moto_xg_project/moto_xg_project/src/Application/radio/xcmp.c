@@ -97,7 +97,7 @@ extern volatile U8 connect_flag;
 //
 	//if(q != 0)//商
 	//{//need to send data in a sub package 
-		//mylog("need to send data in a sub package\n");
+		//log_debug("need to send data in a sub package\n");
 	//}
 	//if(r!=0)//余数
 	//{
@@ -120,7 +120,7 @@ extern volatile U8 connect_flag;
 		///* send xnl frame*/
 		//xnl_tx(&xnl_frame);
 		////if(connect_flag)
-		////mylog("no need sub xcmp\n");
+		////log_debug("no need sub xcmp\n");
 //
 	//}
 	//
@@ -161,7 +161,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 	//xSemaphoreTake(xcmp_mutex, portMAX_DELAY);
 	if(q != 0)//商
 	{//need to send data in a sub package 
-		//mylog("need to send data in a sub package\n");
+		//log_debug("need to send data in a sub package\n");
 		if (r!=0)//整包发送，判断是单包还是分包
 		{
 			fragment_type = 0x100;//first fragment
@@ -278,7 +278,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		/* send xnl frame*/
 		xnl_tx(&xnl_frame);
 		//if(connect_flag)
-			//mylog("n sub\n");
+			//log_debug("n sub\n");
 
 	}
 	
@@ -378,10 +378,10 @@ static void xcmp_rx_process(void * pvParameters)
 				continue;
 			}
 			
-			//mylog("\n\r R_xcmp : %4x \n\r",ptr->xcmp_opcode);//log:R_xcmp指令	
+			//log_debug("\n\r R_xcmp : %4x \n\r",ptr->xcmp_opcode);//log:R_xcmp指令	
 			//static  portTickType water_value;
 			//xcmp_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
-			//mylog("xcmp_rx_water_value: %d\n", water_value);			
+			//log_debug("xcmp_rx_water_value: %d\n", water_value);			
 			switch(ptr->xcmp_opcode & 0x0FFF)
 			{
 				case RADIO_STATUS:				
@@ -456,7 +456,7 @@ void xcmp_init(void)
 	//xcmp_mutex = xSemaphoreCreateMutex();
 	//if (xcmp_mutex == NULL)
 	//{
-		//mylog("Create the xcmp_mutex failure\n");
+		//log_debug("Create the xcmp_mutex failure\n");
 	//}
 	
 	/*register the xcmp function(callback function)*/
@@ -469,7 +469,7 @@ void xcmp_init(void)
 	xTaskCreate(//此处增加栈空间，以防止接收CSBK数据时，增加了空间的开销
 	xcmp_rx_process
 	,  (const signed portCHAR *)"XCMP_RX"
-	, 1024//750//1024//800//384
+	, 750//750//1024//800//384,1024*4=4096bytes
 	,  NULL
 	,  tskXCMP_PRIORITY
 	,  NULL
@@ -691,7 +691,7 @@ extern U8  MAX_ADDRESS_SIZE;
 
 void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
 {
-	//mylog("send xcmp_data_session_csbk_raw_req\n");
+	//log_debug("send xcmp_data_session_csbk_raw_req\n");
 	//xcmp_fragment_t xcmp_fragment;
 
 	/*insert XCMP opcode*/
@@ -707,7 +707,7 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
 
 	if (data_ength > (MAX_XCMP_DATA_LENGTH- (sizeof(xcmp_datasession_req_t) - 1024)))
 	{
-		mylog("csbk data is to long!!!\n");
+		log_debug("csbk data is to long!!!\n");
 		return ;
 	}
 
@@ -742,16 +742,16 @@ void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
 	//int k=0;
 	//for (; k<data_ength; k++)
 	//{
-		//mylog("csbk_t_array_ptr[%d]:%x\n", k, ptr.DataSession_req.DataPayload.DataPayload[k]);
+		//log_debug("csbk_t_array_ptr[%d]:%x\n", k, ptr.DataSession_req.DataPayload.DataPayload[k]);
 	//}
 	//xcmp_multi_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
 	
 	//目前不支持多包发送，因而需要设定长度限制。
 	U32 xcmp_payload_len = sizeof(xcmp_datasession_req_t) - (1024 - data_ength);//1039-(1024-len)
-	mylog("xcmp_payload_len:%d\n", xcmp_payload_len);
+	log_debug("xcmp_payload_len:%d\n", xcmp_payload_len);
 	if(xcmp_payload_len>MAX_XCMP_DATA_LENGTH)
 	{
-		mylog("xcmp_payload_len overflow!!!\n");
+		log_debug("xcmp_payload_len overflow!!!\n");
 	}
 	else
 	{

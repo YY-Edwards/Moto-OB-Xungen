@@ -132,7 +132,7 @@ void xg_rtc_init(void)
 	//if (!rtc_init(&AVR32_RTC, RTC_OSC_RC, RTC_PSEL_RC_1_76HZ))
 	if (!rtc_init(&AVR32_RTC, RTC_OSC_32KHZ, RTC_PSEL_32KHZ_1HZ))
 	{
-		mylog("Error initializing the RTC\r\n");
+		log_debug("Error initializing the RTC\r\n");
 	}
 	// Set top value to 0 to generate an interrupt every seconds */
 	rtc_set_top_value(&AVR32_RTC, 0);

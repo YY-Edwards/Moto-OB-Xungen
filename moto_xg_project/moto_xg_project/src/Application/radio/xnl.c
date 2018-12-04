@@ -180,7 +180,7 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	/*XNL frame will be send*/	
 	xnl_fragment_t xnl_frame;
 	
-	//mylog("T_xnl-opcode:%4x", xnl->xnl_header.opcode);
+	//log_debug("T_xnl-opcode:%4x", xnl->xnl_header.opcode);
 	
 	/*
 	The XNL_MASTER_STATUS_BRDCST message is sent out by the master device to 
@@ -201,7 +201,7 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	/*No timeout*/	
 	xSemaphoreGive(xnl_timeout_semphr);	
 
-	//mylog("xnl-ma:%4x", xnl->xnl_header.source);
+	//log_debug("xnl-ma:%4x", xnl->xnl_header.source);
 	/*get the master adderss from this message*/	
 	xnl_information.master_address = xnl->xnl_header.source;	
 	
@@ -258,7 +258,7 @@ static void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 	the receiving device and will be used to authenticate the connection 
 	request. 5.4.4
 	*/
-	//mylog("R_xnl-opcode:%4x", xnl->xnl_header.opcode);
+	//log_debug("R_xnl-opcode:%4x", xnl->xnl_header.opcode);
 	
 	if(xnl_information.is_connected)
 	{
@@ -421,7 +421,7 @@ static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 		/*connect finish*/
 		xnl_information.is_connected = TRUE;
 		
-		//mylog("connected finish");
+		//log_debug("connected finish");
 	}
 	
 	//xcmp_audio_route_speaker();
@@ -600,10 +600,10 @@ void xnl_tx(xnl_fragment_t * xnl)
 	xnl->phy_header.check_sum = check_sum( xnl );
 	
 	
-	//mylog("op -%8x", xnl->xnl_header.opcode);
+	//log_debug("op -%8x", xnl->xnl_header.opcode);
 	
-	//mylog("\n\r T_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:T_xnl指令
-	//mylog("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
+	//log_debug("\n\r T_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:T_xnl指令
+	//log_debug("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 	
 	xnl_fragment_t * ptr = get_xnl_idle();//pvPortMalloc(sizeof(xnl_fragment_t));
 	//get_xnl_idle(&ptr);
@@ -613,16 +613,16 @@ void xnl_tx(xnl_fragment_t * xnl)
 	
 		/*push to queue and send*/
 		
-		//mylog("ptr -%8x", ptr);
+		//log_debug("ptr -%8x", ptr);
 		
 		xQueueSend(xnl_frame_tx, &ptr, 0);//如果队列已满，则立即返回
-		//mylog("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
+		//log_debug("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 		
 		//vPortFree(ptr);
 	}
 	else
 	{
-		mylog("ptr - failure\n");
+		log_debug("ptr - failure\n");
 	}
 }
 
@@ -635,7 +635,7 @@ Calls: xQueueReceive--freertos
 	phy_tx -- physical.c
 Called By: task
 */
-//portTickType xnl_tx_water_value =0;
+portTickType xnl_tx_water_value =0;
 static void xnl_tx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
@@ -653,7 +653,6 @@ static void xnl_tx_process(void * pvParameters)
 	
 	for(;;)
 	{		
-		//xnl_tx_water_value = uxTaskGetStackHighWaterMark(NULL);
 		switch(xnl_tx_state)
 		{
 			case WAITING_FOR_TX:
@@ -675,11 +674,16 @@ static void xnl_tx_process(void * pvParameters)
 					
 					/*send physical data*/
 					phy_tx((phy_fragment_t *)ptr);
-					//mylog("\n\r T_xcmp:%4x \n\r", ptr->xnl_payload.xnl_content_data_msg.xcmp_opcode);
+					//if( ptr->xnl_header.opcode == XNL_DATA_MSG)
+					//{
+						//占用更多的的内存开销，谨慎调用
+						//log_debug("T_xcmp:0x%x \n\r", ptr->xnl_payload.xnl_content_data_msg.xcmp_opcode);
+					//}
 					xnl_send_times = 1;				
 					/*clear timeout semaphore and wait XNL reply*/
 					xSemaphoreTake( xnl_timeout_semphr, ( portTickType )0);			
 					xnl_tx_state = WAITING_FOR_REPLY;
+					xnl_tx_water_value = uxTaskGetStackHighWaterMark(NULL);
 				}
 				break;
 			
@@ -706,10 +710,12 @@ static void xnl_tx_process(void * pvParameters)
 					{
 						//can not send data, disconnected						
 						//vPortFree(ptr);	
+						//log_debug("note:send xnl timeout! \n\r");
 						set_xnl_idle(ptr);									
-						xnl_tx_state = WAITING_FOR_TX;
+						xnl_tx_state = WAITING_FOR_TX;									
 					}
 				}
+				xnl_tx_water_value = uxTaskGetStackHighWaterMark(NULL);
 				break;
 			default:
 				break;
@@ -733,7 +739,7 @@ static void xnl_rx(xnl_fragment_t * xnl)
 
 	if(NULL != xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec)
 	{
-		//mylog("\n\r R_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:R_xnl指令
+		//log_debug("\n\r R_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:R_xnl指令
 		/*execute the function in list*/
 		xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec(xnl);
 	}
@@ -746,7 +752,7 @@ Description: Receive the XNL
 Calls: 
 Called By:task
 */
-//portTickType xnl_rx_water_value =0;
+portTickType xnl_rx_water_value =0;
 static void xnl_rx_process(void * pvParameters)
 {
 	/*To ptr the elements in the queue*/
@@ -763,7 +769,7 @@ static void xnl_rx_process(void * pvParameters)
 			{
 				xnl_rx(xnl_ptr);
 				set_xnl_idle(xnl_ptr);
-				//xnl_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
+				xnl_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
 				
 			}			
 		}
@@ -829,7 +835,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_rx_process
 	,  (const signed portCHAR *)"XNL_RX"
-	,  220//512
+	,  220//512,220*4=880bytes
 	,  NULL
 	,  tskXNL_PRIORITY //+ 1
 	,  NULL
@@ -839,7 +845,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_tx_process
 	,  (const signed portCHAR *)"XNL_TX"
-	,  130//800
+	,  120//800,130*4=520bytes
 	,  NULL
 	,  tskXNL_PRIORITY//+1
 	,  NULL

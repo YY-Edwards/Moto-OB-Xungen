@@ -118,7 +118,7 @@ to exclude the API function. */
 
 /* configHEAP_INIT is a boolean indicating whether to initialize the heap with
    0xA5 in order to be able to determine the maximal heap consumption. */
-#define configHEAP_INIT               0
+#define configHEAP_INIT               0xA5
 
  #define configUSE_MUTEXES                   1
 // #define configUSE_RECURSIVE_MUTEXES         0

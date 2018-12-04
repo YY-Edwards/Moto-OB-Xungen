@@ -1095,7 +1095,7 @@ void vTaskStartScheduler( void )
 {
 portBASE_TYPE xReturn;
 
-	/* Add the idle task at the lowest priority. */
+	/* Add the idle task at the lowest priority.4*256=1024bytes */
 	xReturn = xTaskCreate( prvIdleTask, ( signed char * ) "IDLE", tskIDLE_STACK_SIZE, ( void * ) NULL, ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), ( xTaskHandle * ) NULL );
 
 	#if ( configUSE_TIMERS == 1 )

@@ -98,7 +98,7 @@
  *        accuracy, use the 32 KHz oscillator (i.e. RTC_OSC_32KHZ).
  * \param psel The preselector value for the corresponding oscillator (4-bits).
  *        To obtain this value, you can use this formula:
- *        psel = mylog(Fosc/Frtc)/mylog(2)-1, where Fosc is the frequency of the
+ *        psel = log_debug(Fosc/Frtc)/log_debug(2)-1, where Fosc is the frequency of the
  *        oscillator you are using (32 KHz or 115 KHz) and Frtc the frequency
  *        desired.
  * \return 1 if the initialization succeeds otherwise it will return 0.

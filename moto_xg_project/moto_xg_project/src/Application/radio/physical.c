@@ -104,8 +104,8 @@ void phy_tx(phy_fragment_t * phy)
 	
 	//phy_fragment_t * phy_ptr = malloc(sizeof(phy_fragment_t));
 	//memcpy(phy_ptr, phy, sizeof(phy_fragment_t));
-	//mylog("\n\r T_xcmp:%4x \n\r", phy->xnl_fragment.xnl_payload.xnl_content_data_msg.xcmp_opcode);
-	//mylog("T_xnl-opcode:%4x", xnl->xnl_header.opcode);//log:R_xnlÖ¸Áî	
+	//log_debug("\n\r T_xcmp:%4x \n\r", phy->xnl_fragment.xnl_payload.xnl_content_data_msg.xcmp_opcode);
+	//log_debug("T_xnl-opcode:%4x", xnl->xnl_header.opcode);//log:R_xnlÖ¸Áî	
 	if(XCMPXNL_DATA == (phy_ctrl & 0xF000))
 	{
 		/*push the xnl packet to queue to send */
@@ -1604,7 +1604,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 			//if (((payload_rx_channel->dword[0]  & 0x0000F000) != 0x00001000) //media data from mic or speaker
 			//&&((payload_rx_channel->dword[0]  & 0x0000F000) != 0x00002000))
 			//break;   //Skip on non-DATA.
-			//mylog("mic data:");
+			//log_debug("mic data:");
 			//PAYLOAD_DATA_ENH (0x0c)
 			//¡ªData routed to Option Board or to radio's main board, the data contents depend on Item field contained in payload bits.
 			//if (((payload_rx_channel->dword[0]  & 0x0000F000) == 0x00005000)

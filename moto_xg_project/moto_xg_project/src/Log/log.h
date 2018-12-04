@@ -34,9 +34,14 @@
 #endif
 
 
-extern xQueueHandle logQueue;
-int mylog(char * content, ...);
-int logFromISR(char * content, ...);
+//extern xQueueHandle logQueue;
+#define log_debug(...)	add_msg_to_queue("DEBUG", __PRETTY_FUNCTION__, __VA_ARGS__)
+#define log_debugFromISR(...) add_msg_to_queue_fromisr("DEBUG", __PRETTY_FUNCTION__, __VA_ARGS__)
+//int mylog(char * content, ...);
+//int logFromISR(char * content, ...);
+
+void add_msg_to_queue(const char* psz_level,const char* psz_funcsig,const char *psz_fmt, ...);
+void add_msg_to_queue_fromisr(const char* psz_level,const char* psz_funcsig,const char *psz_fmt, ...);
 
 #ifdef _PRINT_LOG
 void log_init(void);

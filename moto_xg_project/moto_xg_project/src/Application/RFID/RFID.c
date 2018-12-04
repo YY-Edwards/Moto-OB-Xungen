@@ -28,7 +28,7 @@ void rfid_init(void)
 	rc522_init();
 	
 	//if(rfid_auto_reader(card_id) == 0){
-		//mylog("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
+		//log_debug("card_id : 0x%x, 0x%x, 0x%x, 0x%x\n", &card_id[0], &card_id[1], &card_id[2], &card_id[3]);	
 	//}
 		//
 }
@@ -45,17 +45,17 @@ U8 rfid_auto_reader(void *card_id)
 	//continue;
 	
 	if(CT[0]==0x04&&CT[1]==0x00)
-		mylog("MFOne-S50\n");
+		log_debug("MFOne-S50\n");
 	else if(CT[0]==0x02&&CT[1]==0x00)
-		mylog("MFOne-S70\n");
+		log_debug("MFOne-S70\n");
 	else if(CT[0]==0x44&&CT[1]==0x00)
-		mylog("MF-UltraLight\n");
+		log_debug("MF-UltraLight\n");
 	else if(CT[0]==0x08&&CT[1]==0x00)
-		mylog("MF-Pro\n");
+		log_debug("MF-Pro\n");
 	else if(CT[0]==0x44&&CT[1]==0x03)
-		mylog("MF Desire\n");
+		log_debug("MF Desire\n");
 	else
-		mylog("Unknown\n");
+		log_debug("Unknown\n");
 		
 	status=PcdAnticoll(SN);//防冲撞，返回卡的序列号 4字节
 	if(status!=MI_OK)
@@ -72,7 +72,7 @@ U8 rfid_auto_reader(void *card_id)
 	else{//选卡成功
 			
 		memcpy(card_id, SN, 4);
-		mylog("select okay\n");
+		log_debug("select okay\n");
 		//continue;
 		return status;	
 	}
@@ -104,7 +104,7 @@ extern volatile DateTime_t Current_time;
 	//
 	//if(return_err == 0){
 		//
-		//mylog("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
+		//log_debug("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
 		//xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_8);//set tone to indicate scan rfid success!!!
 		//for(int i = 0; i<4; i++){//将Unicode码转换为大端模式
 			//
@@ -146,7 +146,7 @@ extern volatile DateTime_t Current_time;
 			////xQueueSend(xg_resend_queue, &myptr, 0);
 			//if (xQueueSend(xg_resend_queue, &myptr, 0) != pdPASS)
 			//{
-				//mylog("xg_resend_queue: full\n" );
+				//log_debug("xg_resend_queue: full\n" );
 				//xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
 				//vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
 				//xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
@@ -160,7 +160,7 @@ extern volatile DateTime_t Current_time;
 		//}
 		//else
 		//{
-			//mylog("myptr: err\n\r" );
+			//log_debug("myptr: err\n\r" );
 		//}
 		//
 		//
@@ -168,7 +168,7 @@ extern volatile DateTime_t Current_time;
 	//else
 	//{
 		//xcmp_IdleTestTone(Tone_Start, Low_Battery_3);//set tone to indicate scan rfid failure!!!
-		//mylog("no card find...\n");
+		//log_debug("no card find...\n");
 	//}
 	//
 	//return return_err;
@@ -200,7 +200,7 @@ U8 rfid_sendID_message(void)
 	
 	if(return_err == 0){
 		
-		mylog("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
+		log_debug("card_id : %X, %X, %X, %X\n", SN[0], SN[1], SN[2], SN[3]);
 		xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate scan rfid success!!!		 
 		for(int i = 0; i<4; i++){//将Unicode码转换为大端模式	
 		
@@ -239,7 +239,7 @@ U8 rfid_sendID_message(void)
 	else
 	{
 		xcmp_IdleTestTone(Tone_Start, BT_Disconnecting_Success_Tone);//set tone to indicate scan rfid failure!!!
-		mylog("no card find...\n");
+		log_debug("no card find...\n");
 	}
 	
 	return return_err;
@@ -255,9 +255,9 @@ U8 scan_patrol(char* SN)
 	return_err = rfid_auto_reader(SN);
 	Powerdown_RC522(ENTER_POWERDOWN);
 	if(return_err == 0)
-		mylog("scan_patrol okay!\n");
+		log_debug("scan_patrol okay!\n");
 	else
-		mylog("scan_patrol err!\n");
+		log_debug("scan_patrol err!\n");
 		
 	return return_err;
 

@@ -39,7 +39,7 @@ int main (void)
 	INTC_init_interrupts();
 		
 	log_init();
-	mylog("----start debug----");
+	log_debug("----start debug----");
 	
 	//avr_flash_test();
 	
