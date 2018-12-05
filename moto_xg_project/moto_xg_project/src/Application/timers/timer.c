@@ -24,8 +24,13 @@ volatile U32 tc_tick = 0;
 __attribute__((__interrupt__))
 static void _tc_interrupt(void)
  {
-	// Increment the 200ms seconds counter
+	// Increment the 10ms  counter
 	tc_tick++;
+	
+	if(tc_tick >= 1000)
+	{		
+		tc_tick = 0;
+	}
 	/*
 	 * TODO: Place a breakpoint here and watch the update of tc_tick variable
 	 * in the Watch Window.
@@ -271,7 +276,7 @@ void tc_init()
 	 * to get an interrupt every 10 ms.
 	 */
 	
-	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2)/8/100));//10ms
+	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2)/8/1000));//10ms
 	
 	// configure the timer interrupt
 	tc_configure_interrupts(tc, EXAMPLE_TC_CHANNEL, &tc_interrupt);

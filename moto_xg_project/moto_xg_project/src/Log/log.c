@@ -155,6 +155,8 @@ void add_msg_to_queue(const char* psz_level,
 						const char* psz_funcsig,
 						const char *psz_fmt, ...)
 {
+	
+	return;
 	  	char msg[120] = { 0 };
 	  	//C语言中解决变参问题的一组宏,所在头文件：#include <stdarg.h>,用于获取不确定个数的参数
 	  	va_list vArgList;

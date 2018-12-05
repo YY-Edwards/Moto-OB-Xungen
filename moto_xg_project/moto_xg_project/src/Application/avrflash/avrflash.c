@@ -69,25 +69,25 @@ void write_flash_in_multitask(volatile void *dst, const void *src, size_t nbytes
 static void flash_rw_example(const char *caption, nvram_data_t *nvram_data)
 {
 	
-	static const uint8_t write_data[8] = {0x77, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+	//static const uint8_t write_data[512] = {0x77, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
 	static char str[80];
 	memset(str, 0x00, sizeof(str));
 	
 	//print_dbg("\r\nClearing NVRAM variables...");
-	flashc_memset((void *)nvram_data, 0x00, 8, sizeof(*nvram_data), true);
+	flashc_memset((void *)nvram_data, 0x3B5A, 16, 4, true);
 	
 	
 	//print_dbg("\r\nNVRAM variables cleared:\r\n");
 	//print_nvram_variables(nvram_data);
 
 	//print_dbg("\r\nWriting new values to NVRAM variables...");
-	flashc_memcpy((void *)&nvram_data->var8,   &write_data, sizeof(nvram_data->var8),   true);
-	flashc_memcpy((void *)&nvram_data->var16,  &write_data, sizeof(nvram_data->var16),  true);
-	flashc_memcpy((void *)&nvram_data->var8_3, &write_data, sizeof(nvram_data->var8_3), true);
-	flashc_memcpy((void *)&nvram_data->var32,  &write_data, sizeof(nvram_data->var32),  true);
+	//flashc_memcpy((void *)&nvram_data->var8,   &write_data, sizeof(nvram_data->var8),   true);
+	//flashc_memcpy((void *)&nvram_data->var16,  &write_data, sizeof(nvram_data->var16),  true);
+	//flashc_memcpy((void *)&nvram_data->var8_3, &write_data, sizeof(nvram_data->var8_3), true);
+	//flashc_memcpy((void *)&nvram_data->var32,  &write_data, sizeof(nvram_data->var32),  true);
 	//print_dbg("\r\nNVRAM variables written:\r\n");
 	//print_nvram_variables(nvram_data);
-	flashc_memcpy((void *)str,  (void *)&nvram_data->var8, sizeof(nvram_data->var8),  false);
+	//flashc_memcpy((void *)str,  (void *)&nvram_data->var8, sizeof(nvram_data->var8),  false);
 	
 		
 }

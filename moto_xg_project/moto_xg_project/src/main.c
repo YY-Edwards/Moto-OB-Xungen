@@ -23,7 +23,8 @@ History:
 #include "app.h"
 //#include "myusart.h"
 
-
+void avr_flash_test();
+extern volatile U32 tc_tick;
 
 int main (void)
 {
@@ -35,9 +36,33 @@ int main (void)
 		
 	Disable_global_interrupt();
 	local_start_pll0();
-		
+	
+#if 1
+
 	INTC_init_interrupts();
-		
+	
+	tc_init();
+	
+	start_my_timer();
+	
+	Enable_global_interrupt();
+	
+	while(1)
+	{
+		U32 count = 0;
+		//if(tc_tick == 500)
+		//{
+			//count = 9;
+		//}
+		//for(U32 i = count; i<100; i++)
+		//{
+			avr_flash_test();
+		//}
+		//stop_my_timer();
+		count = 0;
+	}
+	
+#endif		
 	log_init();
 	log_debug("----start debug----");
 	
@@ -51,7 +76,7 @@ int main (void)
 
 	//tc_init();
 	
-	rfid_init();//csbk-ob：无此硬件接口,注意如果没有先开启flash模块，则需要单独初始化spi引脚接口
+	//rfid_init();//csbk-ob：无此硬件接口,注意如果没有先开启flash模块，则需要单独初始化spi引脚接口
 		
 	app_init();
 	

@@ -1171,7 +1171,7 @@ void app_init(void)
 	,  (const signed portCHAR *)"USER_P"
 	,  900//1024//800//384,900*4=3600bytes
 	,  NULL
-	,  2
+	,  tskIDLE_PRIORITY
 	,  NULL );
 	
 	 //res = xTaskCreate(
@@ -1315,6 +1315,8 @@ static __app_Thread_(app_cfg)
 					Current_time.Hour, Current_time.Minute, Current_time.Second);
 					/*send device_master_query to connect radio*/
 					xnl_send_device_master_query();
+					
+					//avr_flash_test();
 				}
 								
 			break;
@@ -1348,9 +1350,14 @@ static __app_Thread_(app_cfg)
 					}
 					else
 					{
+						Disable_interrupt_level(0);
 						//log_debug("avr flash test begin:\n");
-						//avr_flash_test();
+						//vTaskSuspendAll();
+						avr_flash_test();
+						//xTaskResumeAll();
 						//log_debug("avr flash test end:\n");
+						//Enable_global_interrupt();
+						Enable_interrupt_level(0);
 					}
 				
 			break;
