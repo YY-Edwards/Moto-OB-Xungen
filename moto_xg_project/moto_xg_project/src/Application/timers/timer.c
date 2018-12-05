@@ -276,7 +276,7 @@ void tc_init()
 	 * to get an interrupt every 10 ms.
 	 */
 	
-	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2)/8/1000));//10ms
+	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2)/8/1000));//1ms
 	
 	// configure the timer interrupt
 	tc_configure_interrupts(tc, EXAMPLE_TC_CHANNEL, &tc_interrupt);

@@ -255,7 +255,7 @@ void ssc_init(void)
 	INTC_register_interrupt (
 	&pdca_int_handler
 	, AVR32_PDCA_IRQ_0 //PDCA_CHANNEL_SSCRX_EXAMPLE = 0
-	, AVR32_INTC_INT0 //highest priority.
+	, AVR32_INTC_INT3 //highest priority.
 	);
 	
 	Enable_global_interrupt();

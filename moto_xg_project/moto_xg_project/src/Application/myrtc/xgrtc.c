@@ -126,7 +126,7 @@ void xg_rtc_init(void)
 	Disable_global_interrupt();
 	  //
 	//// Register the RTC interrupt handler to the interrupt controller.
-	//INTC_register_interrupt(&rtc_irq, AVR32_RTC_IRQ, AVR32_INTC_INT0);
+	//INTC_register_interrupt(&rtc_irq, AVR32_RTC_IRQ, AVR32_INTC_INT1);
 //
 	//// Initialize the RTC
 	////if (!rtc_init(&AVR32_RTC, RTC_OSC_RC, RTC_PSEL_RC_1_76HZ))

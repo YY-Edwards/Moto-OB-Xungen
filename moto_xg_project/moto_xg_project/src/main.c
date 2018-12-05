@@ -23,8 +23,8 @@ History:
 #include "app.h"
 //#include "myusart.h"
 
-void avr_flash_test();
-extern volatile U32 tc_tick;
+//void avr_flash_test();
+//extern volatile U32 tc_tick;
 
 int main (void)
 {
@@ -38,32 +38,6 @@ int main (void)
 	local_start_pll0();
 	INTC_init_interrupts();
 	
-#if 0
-
-	
-	
-	tc_init();
-	
-	start_my_timer();
-	
-	Enable_global_interrupt();
-	
-	while(1)
-	{
-		U32 count = 0;
-		//if(tc_tick == 500)
-		//{
-			//count = 9;
-		//}
-		//for(U32 i = count; i<100; i++)
-		//{
-			avr_flash_test();
-		//}
-		//stop_my_timer();
-		count = 0;
-	}
-	
-#endif		
 	log_init();
 	log_debug("----start debug----");
 	
