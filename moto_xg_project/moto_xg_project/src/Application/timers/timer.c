@@ -209,7 +209,7 @@ void tc_init()
 
 	volatile avr32_tc_t * tc = EXAMPLE_TC;
 	
-	INTC_register_interrupt(&_tc_interrupt, AVR32_TC_IRQ1, AVR32_INTC_INT2);
+	INTC_register_interrupt(&_tc_interrupt, AVR32_TC_IRQ1, AVR32_INTC_INT1);
 
 	// Options for waveform generation.
 	static const tc_waveform_opt_t waveform_opt = {

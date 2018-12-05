@@ -505,6 +505,16 @@ void CallControl_brdcst_func(xcmp_fragment_t * xcmp)
 	
 }
 
+extern void xcmp_data_session_reply(void);
+
+void DataSession_request_func(xcmp_fragment_t * xcmp)
+{
+	DataSession_req_t * req = (DataSession_req_t *)xcmp->u8;
+
+	log_debug("DATAreq :%s \n", req->DataPayload.DataPayload);
+	xcmp_data_session_reply();
+	
+}
 void DataSession_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
@@ -877,7 +887,7 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 			
 		vTaskDelay(1000*2 / portTICK_RATE_MS);//ясЁы1000ms
 		//delay_ms(200);
-		rfid_sendID_message();//send message		
+		//rfid_sendID_message();//send message		
 		//scan_rfid_save_message();
 	}
 	//log_debug("\n\r PUI_Source: %X \n\r" , PUI_Source);
@@ -1056,7 +1066,7 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
     {NULL, NULL, NULL},// 0x41A --
     {NULL, NULL, (void *)SingleDetection_brdcst_func},// 0x41B -- Signal Detection Broadcast
     {NULL, NULL, NULL},// 0x41C -- Remote Radio Control
-    {NULL, (void *)DataSession_reply_func, (void *)DataSession_brdcst_func},// 0x41D -- Data Session
+    {(void *)DataSession_request_func, (void *)DataSession_reply_func, (void *)DataSession_brdcst_func},// 0x41D -- Data Session
     {NULL, NULL, (void *)CallControl_brdcst_func},// 0x41E -- Call Control
     {NULL, NULL, NULL},// 0x41F -- Menu or List Navigation
     {NULL, NULL, NULL},// 0x420 -- Menu Control
@@ -1350,14 +1360,15 @@ static __app_Thread_(app_cfg)
 					}
 					else
 					{
-						Disable_interrupt_level(0);
+						//break;
+						Disable_interrupt_level(1);
 						//log_debug("avr flash test begin:\n");
-						//vTaskSuspendAll();
+						vTaskSuspendAll();
 						avr_flash_test();
-						//xTaskResumeAll();
+						xTaskResumeAll();
 						//log_debug("avr flash test end:\n");
 						//Enable_global_interrupt();
-						Enable_interrupt_level(0);
+						Enable_interrupt_level(1);
 					}
 				
 			break;

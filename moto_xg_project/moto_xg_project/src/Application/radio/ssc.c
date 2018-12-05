@@ -9,7 +9,7 @@ Date: 2016/3/15 14:20:43
 Description: 
 History:
 */
-
+#include "string.h"
 #include "conf_board.h"
 #include "ssc.h"
 #include "ambe.h"
@@ -21,9 +21,16 @@ volatile U32 intDuration;
 
 volatile U8 BufferIndex; // Index is used to toggle send/receive buffer
 
+
+U16 TxIdle[] = {
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000
+};
+
 /*Set the PDCA data channel address to rend/receive SSC data*/
-volatile ssc_fragment_t RxBuffer[2];
-volatile ssc_fragment_t TxBuffer[2];
+volatile unsigned char RxBuffer[2][480];
+volatile unsigned char TxBuffer[2][480];
 
 /*
 Defines the interface function (callback function) is used to send/receive SSC 
@@ -53,30 +60,40 @@ static void pdca_int_handler(void)
 	
 	count++;
 	/*Toggle Index*/
-    BufferIndex ^= 0x01;
+	//U8 temp = BufferIndex;
+	BufferIndex ^= 0x01;
 	
 	/*Software reset PDCA */
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->marr 
-                              = (U32)(&TxBuffer[BufferIndex].xnl_channel.dword);
+                              = (U32)(TxBuffer[BufferIndex]);
 
     /*Three words xfered each DMA.*/
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 3;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 120;
 
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr 
-                              = (U32)(&RxBuffer[BufferIndex].xnl_channel.dword);
+                              = (U32)(RxBuffer[BufferIndex]);
 
     /*Three words xfered each DMA.*/
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 3;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 120;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr;
 	
 	/*receive SSC data*/
-    if(phy_rx_exec != NULL)phy_rx_exec((void *)&RxBuffer[BufferIndex]);
+	
+	if(phy_rx_exec != NULL)for(int i=0; i < 40;++i)
+	{
+		void  * p = RxBuffer[BufferIndex] + i * 12;
+		phy_rx_exec(p);
+	}
+    
 
     /*transmit SSC data*/
+	if(phy_tx_exec != NULL)for(int i =0; i< 40; ++i)
+	{
+		void  * p = TxBuffer[BufferIndex] + i * 12;
+		phy_tx_exec(p);
+	}
 
-	if(phy_tx_exec != NULL)phy_tx_exec((void *)&TxBuffer[BufferIndex]);//phy_tx_func, phy_rx_func
-
-	if(count%20000 == 0)
+	//if(count%20000 == 0)
 	{
 		/* 'Give' the semaphore to unblock the task. */
 		//xSemaphoreGiveFromISR(xBinarySemaphore, &xHigherPriorityTaskWoken );
@@ -176,36 +193,45 @@ static void local_start_PDC(void)
     /*Toggle Index*/	
     BufferIndex = 1;
 	
+	memset(RxBuffer, 0, 960);
+	for(int i = 0; i < 80; ++i)
+	{
+		memcpy(TxBuffer[0] + i * 12 , TxIdle, 12);
+	}
+	
+	//TxBuffer[0].xnl_channel.dword = XNL_IDLE;
+	//TxBuffer[0].payload_channel.dword[0] = PAYLOADIDLE0;
+	//TxBuffer[0].payload_channel.dword[1] = PAYLOADIDLE1;
+	//TxBuffer[1].xnl_channel.dword = XNL_IDLE;
+	//TxBuffer[1].payload_channel.dword[0] = PAYLOADIDLE0;
+	//TxBuffer[1].payload_channel.dword[1] = PAYLOADIDLE1;
+	
+	
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->idr = 
                AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr; 
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mar = 
-                                          (U32)(&RxBuffer[0].xnl_channel.dword);
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcr = 3;
+                                          (U32)(RxBuffer[0]);
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcr = 120;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->psr = 
                                                           AVR32_PDCA_PID_SSC_RX;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr = 
-                                          (U32)(&RxBuffer[1].xnl_channel.dword);
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 3;
+                                          (U32)(RxBuffer[1]);
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 120;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mr = AVR32_PDCA_WORD;
 
-	TxBuffer[0].xnl_channel.dword = XNL_IDLE;
-	TxBuffer[0].payload_channel.dword[0] = PAYLOADIDLE0;
-	TxBuffer[0].payload_channel.dword[1] = PAYLOADIDLE1;
-	TxBuffer[1].xnl_channel.dword = XNL_IDLE;
-	TxBuffer[1].payload_channel.dword[0] = PAYLOADIDLE0;
-	TxBuffer[1].payload_channel.dword[1] = PAYLOADIDLE1;
+	
 
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->idr = 
                AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->isr;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mar = 
-                                          (U32)(&TxBuffer[0].xnl_channel.dword);
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcr = 3;
+                                          (U32)(TxBuffer[0]);
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcr = 120;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->psr = AVR32_PDCA_PID_SSC_TX;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->marr = 
-                                             (U32)(&TxBuffer[1].xnl_channel.dword);
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 3;
+                                             (U32)(TxBuffer[1]);
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 120;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mr = AVR32_PDCA_WORD;
 }/*End of local_start_PDC.*/
 
@@ -229,7 +255,7 @@ void ssc_init(void)
 	INTC_register_interrupt (
 	&pdca_int_handler
 	, AVR32_PDCA_IRQ_0 //PDCA_CHANNEL_SSCRX_EXAMPLE = 0
-	, AVR32_INTC_INT3 //highest priority.
+	, AVR32_INTC_INT0 //highest priority.
 	);
 	
 	Enable_global_interrupt();

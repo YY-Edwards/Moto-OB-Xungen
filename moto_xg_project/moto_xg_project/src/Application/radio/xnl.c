@@ -476,6 +476,7 @@ Description: process while receive data message.
 Calls:xnl_send_msg_ack, xcmp_exec(function in xcmp)
 Register:xnl_proc_list exec in xnl_rx_process
 */
+U16 thrid_ID =0;
 static void xnl_data_msg_func(xnl_fragment_t * xnl)
 {
 	/*
@@ -486,7 +487,11 @@ static void xnl_data_msg_func(xnl_fragment_t * xnl)
 	transmitter, but possibly is waiting in Queue with immediate timeout.
 	 */
 	xnl_send_msg_ack(&xnl->xnl_header);
-	
+	if((xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode &0x0FFF) == 0x41D)
+	{
+		thrid_ID = xnl->xnl_header.source;
+	}
+
 	/*exec xcmp function*/
 	xcmp_exec(xnl->xnl_payload.xnl_content_data_msg);//xcmp_rx
 }

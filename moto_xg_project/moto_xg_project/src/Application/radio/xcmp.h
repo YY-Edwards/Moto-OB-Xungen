@@ -1054,6 +1054,8 @@ An XCMP device can initiate multiple data sessions at one time.
 
 //Function
 #define  Single_Data_Uint   (unsigned char)0x01	//Send a single data uint.
+#define  Priority_Data_Uint   (unsigned char)0x02	//Send a single data uint.
+
 
 #define  Data_Session_Start    (unsigned char)0x10	//Start a session of regular XCMP commands.
 #define  Data_Session_End    (unsigned char)0x11	//End a session of regular XCMP commands.
@@ -1724,6 +1726,7 @@ Create the corresponding task;
 void xcmp_multi_tx( U8 * data_ptr, U32 data_len);
 
 void xcmp_tx( U8 * data_ptr, U32 data_len);
+void xcmp_tx_method( U8 * data_ptr, U32 data_len, U16 target);
 
 void xcmp_init(void);
 

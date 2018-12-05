@@ -83,6 +83,7 @@ void AudioRoutingControl_brdcst_func(xcmp_fragment_t * xcmp);
 void TransmitControl_reply_func(xcmp_fragment_t * xcmp);
 void TransmitControl_brdcst_func(xcmp_fragment_t * xcmp);
 void CallControl_brdcst_func(xcmp_fragment_t * xcmp);
+void DataSession_request_func(xcmp_fragment_t * xcmp);
 void DataSession_reply_func(xcmp_fragment_t * xcmp);
 void ShutDown_brdcst_func(xcmp_fragment_t * xcmp);
 void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp);

@@ -126,7 +126,14 @@ extern volatile U8 connect_flag;
 	//
 	//
 //}
+
 void xcmp_tx( U8 * data_ptr, U32 data_len)
+{
+	xcmp_tx_method( data_ptr, data_len, DEFAULT_VALUE);
+	
+}
+
+void xcmp_tx_method( U8 * data_ptr, U32 data_len, U16 target)
 //static void xcmp_tx( xcmp_fragment_t * xcmp, U8 payload_len)
 {
 	/*xnl frame will be sent*/
@@ -179,7 +186,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 		the xnl_tx*/
 		xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
-		xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+		xnl_frame.xnl_header.destination = target;
 		xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 		xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 		
@@ -206,7 +213,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 			the xnl_tx*/
 			xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
-			xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+			xnl_frame.xnl_header.destination = target;
 			xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 			xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 		
@@ -237,7 +244,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 			the xnl_tx*/
 			xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
-			xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+			xnl_frame.xnl_header.destination = target;
 			xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 			xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 			
@@ -271,7 +278,7 @@ void xcmp_tx( U8 * data_ptr, U32 data_len)
 		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 		the xnl_tx*/
 		xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
-		xnl_frame.xnl_header.destination = DEFAULT_VALUE;
+		xnl_frame.xnl_header.destination = target;
 		xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 		xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
 		
@@ -813,6 +820,47 @@ void xcmp_data_session_req(void *message, U16 length, U32 dest)
 	xcmp_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - length) + sizeof(xcmp_fragment.xcmp_opcode));
 }
 
+
+extern U16 thrid_ID;
+
+void xcmp_data_session_reply(void)
+{
+	
+	/*xcmp frame will be sent*/
+	xcmp_fragment_t xcmp_fragment;	
+
+	/*insert XCMP opcode*/
+	xcmp_fragment.xcmp_opcode = XCMP_REPLY | DATA_SESSION;
+	
+	/*point to xcmp payload*/
+	DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
+	
+	ptr->Function = Priority_Data_Uint;
+	ptr->DataDefinition.Data_Protocol_Version= Raw_Data;
+	ptr->DataDefinition.Dest_Address.Remote_Address_Type = Remote_IPV4_Address;
+	ptr->DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;
+	
+	
+	ptr->DataDefinition.Dest_Address.Remote_Address[0] = 192;
+	ptr->DataDefinition.Dest_Address.Remote_Address[1] = 168;
+	ptr->DataDefinition.Dest_Address.Remote_Address[2] = 10;
+	ptr->DataDefinition.Dest_Address.Remote_Address[3] = 2;
+	
+	ptr->DataDefinition.Dest_Address.Remote_Port_Com[0] = 4004 >> 8;
+	ptr->DataDefinition.Dest_Address.Remote_Port_Com[1] = 4004 & 0xFF;
+	
+	
+	ptr->DataPayload.Session_ID_Number = 0;
+	ptr->DataPayload.DataPayload_Length[0] = 0;
+	ptr->DataPayload.DataPayload_Length[1] = sizeof("hello world");	
+	
+	memcpy(ptr->DataPayload.DataPayload, "hello world", sizeof("hello world"));
+
+
+	xcmp_tx_method((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) + sizeof(xcmp_fragment.xcmp_opcode) - 1024 + sizeof("hello world"), thrid_ID);
+	log_debug("Third IDL : %d", thrid_ID);
+
+}
 /**
 Function: xcmp_data_session_brd
 Parameters:message

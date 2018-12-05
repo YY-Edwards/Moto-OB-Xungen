@@ -36,10 +36,11 @@ int main (void)
 		
 	Disable_global_interrupt();
 	local_start_pll0();
-	
-#if 1
-
 	INTC_init_interrupts();
+	
+#if 0
+
+	
 	
 	tc_init();
 	

@@ -429,7 +429,7 @@ static void prvSetupTimerInterrupt(void)
 
 	#if( configTICK_USE_TC==1 )
 	{
-		INTC_register_interrupt(&vTick, configTICK_TC_IRQ, AVR32_INTC_INT0);
+		INTC_register_interrupt(&vTick, configTICK_TC_IRQ, AVR32_INTC_INT1);
 
 		/* Initialize the timer/counter. */
 		tc_init_waveform(tc, &waveform_opt);
@@ -448,7 +448,7 @@ static void prvSetupTimerInterrupt(void)
 	}
 	#else
 	{
-		INTC_register_interrupt(&vTick, AVR32_CORE_COMPARE_IRQ, AVR32_INTC_INT0);
+		INTC_register_interrupt(&vTick, AVR32_CORE_COMPARE_IRQ, AVR32_INTC_INT1);
 		prvScheduleFirstTick();
 	}
 	#endif
