@@ -523,13 +523,13 @@ void xcmp_opcode_not_supported( void )
 
 extern volatile char XCMP_Version[4];
 /**
-Function: xcmp_DeviceInitializationStatus_request
+Function: xcmp_send_dev_init_brdcst();
 Parameters:
-Description: send device initialization status request
+Description: send device initialization status broadcast
 Calls: xcmp_tx
 Called By:...
 */
-void xcmp_DeviceInitializationStatus_request(void)
+void xcmp_send_dev_init_brdcst()
 {
 	/*xcmp frame will be sent*/
 	xcmp_fragment_t xcmp_fragment;

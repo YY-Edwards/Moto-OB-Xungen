@@ -12,11 +12,13 @@
 #include <physical.h>
 #include "string.h"
 #include "avrflash.h"
+#include "stdbool.h"
 
 static __app_Thread_(app_cfg);
 static void send_message(void * pvParameters);
 
-volatile U32 bunchofrandomstatusflags;
+bool ob_enabled = false;
+volatile U32 bunchofrandomstatusflags = 0;
 
 volatile U8 Speaker_is_unmute = 0;
 volatile U8 Silent_flag = 0;
@@ -73,7 +75,8 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		if (ptr->DeviceInitType == Device_Init_Complete)
 		{
 			bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
-			//log_debug("device init complete...\n");
+			/* Do nothing here. Just wait for Device Management broadcast */
+			log_debug("device init complete...\n");
 		}
 		else if(ptr->DeviceInitType  == Device_Init_Status)
 		{
@@ -82,8 +85,8 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 			XCMP_Version[1]= ptr->XCMPVersion[1];
 			XCMP_Version[2]= ptr->XCMPVersion[2];
 			XCMP_Version[3]= ptr->XCMPVersion[3];
-			xcmp_DeviceInitializationStatus_request();
-			//log_debug("device init request..\n");
+			xcmp_send_dev_init_brdcst();
+			log_debug("device init request...\n");
 		}
 		else//Device_Status_Update
 		{
@@ -100,7 +103,7 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 	//else if(xcmp->u8[4] != 0x02)
 	//{
 		//bunchofrandomstatusflags  &= 0xFFFFFFFC; //Device Init no longer Complete.
-		//xcmp_DeviceInitializationStatus_request();
+		//xcmp_send_dev_init_brdcst();();
 	//}
 }
 
@@ -117,36 +120,23 @@ void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
 		//log_debug("xnl_information.logical_address: %x\n", xnl_information.logical_address);
 		if (temp == xnl_information.logical_address)
 		{
-			if (xcmp->u8[0] == 0x01)
+			if (ptr->Device_State == XCMP_DEV_STATE_ENABLED)
+			//== xcmp->u8[0] == 0x01)
 			{
 				//Enable Option Board
 				bunchofrandomstatusflags |= 0x00000002;
+				ob_enabled = true;
 				log_debug("Enable Option Board\n");
 			}
-			else
+			else if (ptr->Device_State == XCMP_DEV_STATE_DISABLED)
 			{
 				//Disable Option Board.
 				//log_debug("Device State : %d\n", );
 				bunchofrandomstatusflags &= 0xFFFFFFFD;
+				ob_enabled = false;
 				log_debug("Disable Option Board\n");
 			}
-			//log_debug("Function : %d\n", ptr->Function);
-			//log_debug("Device State : %d\n", ptr->Device_State);
 		}	
-		//U8 temp = 0;
-		//temp  = xcmp->u8[1] << 8;
-		//temp |= xcmp->u8[2];
-		////if (temp == theXNL_Ctrlr.XNL_DeviceLogicalAddress)
-		//{
-			//if (xcmp->u8[0] == 0x01)
-			//{
-				//bunchofrandomstatusflags |= 0x00000002;
-			//}
-			//else
-			//{
-				//bunchofrandomstatusflags &= 0xFFFFFFFD;
-			//}
-		//}
 }
 
 void ToneControl_reply_func(xcmp_fragment_t * xcmp)
@@ -1298,7 +1288,8 @@ static __app_Thread_(app_cfg)
 		{
 			case OB_UNCONNECTEDWAITINGSTATUS:
 			
-				if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
+				//if (0x00000003 == (bunchofrandomstatusflags & 0x00000003) && (!connect_flag))//确认连接成功了，再发送请求
+				if ((true == ob_enabled) && (!connect_flag))//确认连接成功了，再发送请求				
 				{
 					connect_flag=1;
 					xcmp_IdleTestTone(Tone_Start, Priority_Beep);//set tone to indicate connection success!!!
@@ -1350,8 +1341,9 @@ static __app_Thread_(app_cfg)
 						////package_usartdata_to_csbkdata(test, sizeof(test));
 					//}
 					log_debug("app task run:%d\n", run_counter);
-					if(0x00000003 != (bunchofrandomstatusflags & 0x00000003))//可能断开
+					if(false == ob_enabled)//可能断开
 					{
+						log_debug("OB disconnected!!!\n");
 						connect_flag =0;
 						OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 					}

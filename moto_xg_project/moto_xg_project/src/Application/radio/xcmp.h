@@ -1632,14 +1632,14 @@ typedef enum
 //State
 typedef enum
 {
-	DEFAULT	= 0x00,
-	NODETECT,
-	ENABLED,
-	DISABLED,
-	PROGRAM,
-	RESET,
-	BOOT_MODE,
-	PASSWORD_LOCK
+	XCMP_DEV_STATE_DEFAULT	= 0x00,
+	XCMP_DEV_STATE_NODETECT,
+	XCMP_DEV_STATE_ENABLED,
+	XCMP_DEV_STATE_DISABLED,
+	XCMP_DEV_STATE_PROGRAM,
+	XCMP_DEV_STATE_RESET,
+	XCMP_DEV_STATE_BOOT_MODE,
+	XCMP_DEV_STATE_PASSWORD_LOCK
 	
 	}DEVMGMTBCST_DeviceState;
 
@@ -1733,8 +1733,8 @@ void xcmp_init(void);
 /*register the app function(callback function)*/
 void xcmp_register_app_list(void * list);
 
-/*send device initialize status request*/
-void xcmp_DeviceInitializationStatus_request(void);
+/*send device initialize status broadcast*/
+void xcmp_send_dev_init_brdcst(void);
 
 /*send not supported XCMP opcode*/
 void xcmp_opcode_not_supported(void);
