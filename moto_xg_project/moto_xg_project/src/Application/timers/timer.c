@@ -24,7 +24,7 @@ volatile U32 tc_tick = 0;
 __attribute__((__interrupt__))
 static void _tc_interrupt(void)
  {
-	// Increment the 10ms  counter
+	// Increment the 1ms  counter
 	tc_tick++;
 	
 	if(tc_tick >= 1000)
@@ -269,7 +269,7 @@ void tc_init()
 	// Initialize the timer/counter.
 	tc_init_waveform(tc, &waveform_opt);
 
-	/*
+	/* reference:23.8.1,module configuration
 	 * Set the compare triggers.
 	 * We configure it to count every 1 milliseconds.
 	 * We want: (1 / (fPBA / 8)) * RC = 1 ms, hence RC = (fPBA / 8) / 1000
