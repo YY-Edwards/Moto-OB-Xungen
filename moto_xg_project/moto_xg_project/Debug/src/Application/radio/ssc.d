@@ -66,7 +66,10 @@ src/Application/radio/ssc.d src/Application/radio/ssc.o \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/portable/gcc/avr32_uc3/portmacro.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/mpu_wrappers.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
- ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h \
+ ../src/ASF/avr32/drivers/gpio/gpio.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/task.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/list.h
 
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
 
@@ -205,3 +208,9 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:
+
+../src/ASF/avr32/drivers/gpio/gpio.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/task.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/list.h:

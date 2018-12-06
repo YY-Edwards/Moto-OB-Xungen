@@ -112,7 +112,7 @@ static void RTC_Test(void)
 
 	
 	
-	Enable_global_interrupt();
+	//Enable_global_interrupt();
 	
 
 }
@@ -123,7 +123,7 @@ void xg_rtc_init(void)
 {
 	
 	// Disable all interrupts. */
-	Disable_global_interrupt();
+	//Disable_global_interrupt();
 	  //
 	//// Register the RTC interrupt handler to the interrupt controller.
 	//INTC_register_interrupt(&rtc_irq, AVR32_RTC_IRQ, AVR32_INTC_INT1);
@@ -149,7 +149,7 @@ void xg_rtc_init(void)
 	Current_time.Second		= 40;
 	
 	// Enable global interrupts
-	Enable_global_interrupt();
+	//Enable_global_interrupt();
 	  
 	//RTC_Test();	
 

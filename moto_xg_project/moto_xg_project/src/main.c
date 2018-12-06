@@ -59,7 +59,7 @@ int main (void)
 
 	local_start_timer();
 		
-	vTaskStartScheduler();
+	vTaskStartScheduler();//运行第一个任务时，会自动开启全局中断，待测试。
 	return 0;
 	
 }

@@ -94,6 +94,7 @@ typedef struct {
 
 /*Initialize the SSC and PDCA */
 void ssc_init(void);
+void sync_ssi(void);
 
 /*register the rx/tx function(callback function)*/
 

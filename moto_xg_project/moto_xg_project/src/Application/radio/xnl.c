@@ -25,6 +25,8 @@ History:
 #include "key.h"
 
 #include "../log/log.h"
+#include "ssc.h"
+
 
 /*information of xnl*/
 volatile xnl_information_t xnl_information;
@@ -655,7 +657,7 @@ static void xnl_tx_process(void * pvParameters)
 	//static xnl_fragment_t * xnl_ptr;
 	static  xnl_fragment_t * ptr;//是否可以修缮为静态变量？请关注
 	
-	
+	sync_ssi();	//同步SSC信号
 	for(;;)
 	{		
 		switch(xnl_tx_state)

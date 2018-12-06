@@ -15,6 +15,13 @@ History:
 #include "ambe.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "gpio.h"
+#include "task.h"
+
+
+#define SSI_SYNC_GPIO AVR32_PIN_PB11
+#define FASTRUN __attribute__ ((section (".fastrun")))
+xSemaphoreHandle ssi_sync_semphr = NULL;
 
 volatile U32 intStartCount;
 volatile U32 intDuration;
@@ -40,6 +47,37 @@ data*/
 //extern volatile  xSemaphoreHandle xBinarySemaphore;
 
 
+
+
+
+#if __GNUC__
+// GCC-specific syntax to declare an interrupt handler. The interrupt handler
+// registration is done in the main function using the INTC software driver module.
+__attribute__((__interrupt__))
+#elif __ICCAVR32__
+// IAR-specific syntax to declare and register an interrupt handler.
+// Register to the interrupt group 0(cf Section "Interrupt Request Signal Map"
+// in the datasheet) with interrupt level 0.
+#pragma handler = AVR32_CORE_IRQ_GROUP, 0
+__interrupt
+#endif
+void GPIOHandler(void)
+{
+	//enable the ssi interrupt, timer interrupt
+	//quit sleep mode
+	//re-start the timer for detect the GPIO
+
+	gpio_get_pin_interrupt_flag(SSI_SYNC_GPIO);
+	gpio_clear_pin_interrupt_flag(SSI_SYNC_GPIO);
+	gpio_disable_pin_interrupt(SSI_SYNC_GPIO);
+
+	//send semaphore to XNL task for SYNC
+	taskENTER_CRITICAL();
+	xSemaphoreGiveFromISR(ssi_sync_semphr, pdFALSE);
+	taskEXIT_CRITICAL();
+}
+
+
 /**
 Function: pdca_int_handler
 Description: interrupt service routine for PDCA （SSC）
@@ -49,7 +87,7 @@ Calls:
 Called By: interrupt
 */
 __attribute__((__interrupt__))
-static void pdca_int_handler(void)
+FASTRUN void pdca_int_handler(void)
 {
     
 	//static portBASE_TYPE xHigherPriorityTaskWoken;
@@ -235,6 +273,18 @@ static void local_start_PDC(void)
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mr = AVR32_PDCA_WORD;
 }/*End of local_start_PDC.*/
 
+
+static void ssc_sync_gpio_init(void)
+{
+	ssi_sync_semphr = xSemaphoreCreateCounting(1,0);//信号量
+
+	gpio_enable_pin_interrupt(SSI_SYNC_GPIO, GPIO_RISING_EDGE);//上升沿中断
+	Disable_global_interrupt();
+	INTC_register_interrupt( &GPIOHandler, AVR32_GPIO_IRQ_0 + (SSI_SYNC_GPIO/8), AVR32_INTC_INT1);
+	//Enable_global_interrupt();
+
+}
+
 /*
 Function: ssc_init
 Description: Initialize the SSC and PDCA 
@@ -246,9 +296,12 @@ Called By: phy_init -- physical.c
 */
 void ssc_init(void)
 {		
-    /*Set up PB01 to watch FS.*/
-    AVR32_GPIO.port[1].oderc = 0x00000002;
-    AVR32_GPIO.port[1].gpers = 0x00000002;
+    ///*Set up PB01 to watch FS.*/不需要观察了吗？
+    //AVR32_GPIO.port[1].oderc = 0x00000002;
+    //AVR32_GPIO.port[1].gpers = 0x00000002;
+	
+	
+	ssc_sync_gpio_init();//用GPIO中断观察并触发SSC初始化
 	
 	Disable_global_interrupt();
 	
@@ -258,30 +311,50 @@ void ssc_init(void)
 	, AVR32_INTC_INT3 //highest priority.
 	);
 	
-	Enable_global_interrupt();
-	
-    /*Waits for radio to start making FSYNC.*/
-    while ((AVR32_GPIO.port[1].pvr & 0x00000002) == 0); //Wait for FS High.
-    while ((AVR32_GPIO.port[1].pvr & 0x00000002) != 0); //Wait for FS Low.
-			
-	Disable_global_interrupt(); // resume to before
-				
-    /*config the SSC*/
-    local_start_SSC();
-
-    /*config the PDCA*/
-    local_start_PDC();
-		
-    /*Start the SSC Physical Layer.*/
-
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
-    (&AVR32_SSC)->cr = AVR32_SSC_CR_RXEN_MASK | AVR32_SSC_CR_TXEN_MASK;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = AVR32_PDCA_RCZ_MASK;
-															
-	Enable_global_interrupt();
+	//Enable_global_interrupt();
+	//
+    ///*Waits for radio to start making FSYNC.*/
+    //while ((AVR32_GPIO.port[1].pvr & 0x00000002) == 0); //Wait for FS High.
+    //while ((AVR32_GPIO.port[1].pvr & 0x00000002) != 0); //Wait for FS Low.
+			//
+	//Disable_global_interrupt(); // resume to before
+				//
+    ///*config the SSC*/
+    //local_start_SSC();
+//
+    ///*config the PDCA*/
+    //local_start_PDC();
+		//
+    ///*Start the SSC Physical Layer.*/
+//
+    //(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
+    //(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;
+    //(&AVR32_SSC)->cr = AVR32_SSC_CR_RXEN_MASK | AVR32_SSC_CR_TXEN_MASK;
+    //(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = AVR32_PDCA_RCZ_MASK;
+															//
+	//Enable_global_interrupt();
 															
 }/*End of ssc_init.*/
+
+
+void sync_ssi(void)
+{
+	//get sema ,and enable ssc
+	xSemaphoreTake( ssi_sync_semphr, portMAX_DELAY );
+	/*config the SSC*/
+	local_start_SSC();
+	/*config the PDCA*/
+	local_start_PDC();
+	   
+	/*Start the SSC Physical Layer.*/
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;//使能PDCA_RX传输
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->cr = AVR32_PDCA_TEN_MASK;//使能PDCA_TX传输
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->ier = AVR32_PDCA_RCZ_MASK;//开启PDCA_RX的重载计数为空中断
+	(&AVR32_SSC)->cr = AVR32_SSC_CR_RXEN_MASK | AVR32_SSC_CR_TXEN_MASK;//使能SSC传输
+
+}
+
+
 
 /*
 Function: register_rx_tx_func

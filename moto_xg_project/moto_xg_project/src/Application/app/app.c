@@ -1291,10 +1291,9 @@ static __app_Thread_(app_cfg)
 	static  portTickType water_value;
 	int i =0;
 	int k= 0;
-		
+	
 	for(;;)
 	{
-		water_value = uxTaskGetStackHighWaterMark(NULL);
 		switch(OB_State)
 		{
 			case OB_UNCONNECTEDWAITINGSTATUS:
@@ -1309,12 +1308,13 @@ static __app_Thread_(app_cfg)
 					log_debug("XCMP_Version: %d.%d.%d.%d\n", XCMP_Version[0],  XCMP_Version[1],
 					XCMP_Version[2],  XCMP_Version[3]);
 					log_debug("OB_Firmware_Version: %d.%d.%d\n", OB_Firmware_Version[0],  OB_Firmware_Version[1], OB_Firmware_Version[2]);
-
-					
+				
 				}
 				else
 				{
 					//package_usartdata_to_csbkdata(test, sizeof(test));
+					/*send device_master_query to connect radio*/
+					xnl_send_device_master_query();
 					nop();
 					nop();
 					nop();
@@ -1323,25 +1323,22 @@ static __app_Thread_(app_cfg)
 					log_debug("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
 					Current_time.Year, Current_time.Month, Current_time.Day,
 					Current_time.Hour, Current_time.Minute, Current_time.Second);
-					/*send device_master_query to connect radio*/
-					xnl_send_device_master_query();
 					
-					//avr_flash_test();
 				}
 								
 			break;
 			case OB_CONNECTEDWAITTINGSYNTIME:
 			
-						if(get_time_okay){
+					if(get_time_okay){
 							
-							OB_State = OB_WAITINGAPPTASK;
-							log_debug("get time okay!\n");
-							//vTaskResume(save_handle);
-						}
-						else
-						{						
-							xcmp_data_session_req(0x00, sizeof(Message_Protocol_t), DEST);//request to get system time						
-						}
+						OB_State = OB_WAITINGAPPTASK;
+						log_debug("get time okay!\n");
+						//vTaskResume(save_handle);
+					}
+					else
+					{						
+						xcmp_data_session_req(0x00, sizeof(Message_Protocol_t), DEST);//request to get system time						
+					}
 			break;
 			case OB_WAITINGAPPTASK:
 														
@@ -1361,14 +1358,13 @@ static __app_Thread_(app_cfg)
 					else
 					{
 						//break;
+						log_debug("avr flash test begin...\n");
 						Disable_interrupt_level(1);
-						//log_debug("avr flash test begin:\n");
 						vTaskSuspendAll();
 						avr_flash_test();
 						xTaskResumeAll();
-						//log_debug("avr flash test end:\n");
-						//Enable_global_interrupt();
 						Enable_interrupt_level(1);
+						log_debug("avr flash test end...\n");
 					}
 				
 			break;
@@ -1377,15 +1373,16 @@ static __app_Thread_(app_cfg)
 				
 		} //End of switch on OB_State.
 		
-		log_debug("app task water: %d\n", water_value);
-		log_debug("log task water: %d\n", log_water_value);
-		log_debug("xnl_rx task water: %d\n", xnl_rx_water_value);
-		log_debug("xnl_tx task water: %d\n", xnl_tx_water_value);
-		log_debug("xcmp_rx task water: %d\n", xcmp_rx_water_value);
+		water_value = uxTaskGetStackHighWaterMark(NULL);
+		log_debug("app     water: %d\n", water_value);
+		log_debug("log     water: %d\n", log_water_value);
+		log_debug("xnl_rx  water: %d\n", xnl_rx_water_value);
+		log_debug("xnl_tx  water: %d\n", xnl_tx_water_value);
+		log_debug("xcmp_rx water: %d\n", xcmp_rx_water_value);
 		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log_debug("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (5000) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	log_debug("app exit:err\n");
 }
