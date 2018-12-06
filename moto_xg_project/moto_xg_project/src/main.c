@@ -23,8 +23,6 @@ History:
 #include "app.h"
 //#include "myusart.h"
 
-//void avr_flash_test();
-//extern volatile U32 tc_tick;
 
 int main (void)
 {

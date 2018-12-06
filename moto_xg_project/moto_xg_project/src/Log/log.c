@@ -484,7 +484,8 @@ static void task_mylog(void * pvParameters)
 	char str[150]={0};
 	for(;;)
 	{
-		if(xQueueReceive( g_logQueue, str, (200) / portTICK_RATE_MS) == pdTRUE )
+		//if(xQueueReceive( g_logQueue, str, (200) / portTICK_RATE_MS) == pdTRUE )
+		if(xQueueReceive( g_logQueue, str, portMAX_DELAY) == pdTRUE)
 		{
 			if( NULL != str)
 			{
