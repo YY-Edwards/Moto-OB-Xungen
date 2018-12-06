@@ -181,7 +181,7 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 {	
 	/*XNL frame will be send*/	
 	xnl_fragment_t xnl_frame;
-	
+	//log_debug("rx master status brdcast.");
 	//log_debug("T_xnl-opcode:%4x", xnl->xnl_header.opcode);
 	
 	/*
@@ -201,7 +201,7 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 	}
 		
 	/*No timeout*/	
-	xSemaphoreGive(xnl_timeout_semphr);	
+	//xSemaphoreGive(xnl_timeout_semphr);	
 
 	//log_debug("xnl-ma:%4x", xnl->xnl_header.source);
 	/*get the master adderss from this message*/	
@@ -261,7 +261,7 @@ static void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 	request. 5.4.4
 	*/
 	//log_debug("R_xnl-opcode:%4x", xnl->xnl_header.opcode);
-	
+	//log_debug("rx auth key reply.");
 	if(xnl_information.is_connected)
 	{
 		return;		
@@ -392,7 +392,9 @@ static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 	
 	/*No timeout*/	
 	xSemaphoreGive(xnl_timeout_semphr);
-
+	
+	//log_debug("rx conn  reply.");
+	
 	/*Test result code*/
 	if((xnl->xnl_payload.xnl_content_device_conn_reply.result_base & 0x0000FF00)
 		!= 0x00000100)
@@ -428,6 +430,19 @@ static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 	
 	//xcmp_audio_route_speaker();
 	
+}
+
+
+static void xnl_device_sysmap_brdcst_func(xnl_fragment_t * xnl)
+{
+	log_debug("ob rx sysmap:");
+	//log_debug("map_array: %d", xnl->xnl_payload.xnl_content_device_sysmap_brdcst.sizeof_sysmap_array);
+	//log_debug("logical ident[0]: %d", xnl->xnl_payload.xnl_content_device_sysmap_brdcst.u8[0]);
+	//log_debug("logical ident[1]: %d", xnl->xnl_payload.xnl_content_device_sysmap_brdcst.u8[1]);
+	//log_debug("xnl addr[0]: %d", xnl->xnl_payload.xnl_content_device_sysmap_brdcst.u8[2]);
+	//log_debug("xnl addr[1]: %d", xnl->xnl_payload.xnl_content_device_sysmap_brdcst.u8[3]);
+	//log_debug("authen index: %d", xnl->xnl_payload.xnl_content_device_sysmap_brdcst.u8[4]);
+	//
 }
 
 /**
@@ -488,6 +503,7 @@ static void xnl_data_msg_func(xnl_fragment_t * xnl)
 	ACK has been scheduled. It most likely is already owned by the 
 	transmitter, but possibly is waiting in Queue with immediate timeout.
 	 */
+	//log_debug("rx xcmp opcode:0x%x",xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 	xnl_send_msg_ack(&xnl->xnl_header);
 	if((xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode &0x0FFF) == 0x41D)
 	{
@@ -515,14 +531,11 @@ static void xnl_get_msg_ack_func(xnl_fragment_t * xnl)
 	//then the program will clear the current MSG sending address and out of standby and will jump to the sending state.
 	if (DestinationAddress == xnl_information.device_address )
 	{
-		//The ack is for me.
-		
+		//The ack is for me.	
 		TransactionID = xnl->xnl_header.transaction_id;
 		xSemaphoreGive(xnl_timeout_semphr);	
 		    
 	}
-	
-	
 	
 	//xSemaphoreGive(xnl_timeout_semphr);	
 }
@@ -552,7 +565,7 @@ static const volatile xnl_proc_list_t xnl_proc_list[20]={
 	NULL,							/*-0x6-XNL_DEVICE_CONN_REQUEST*/
 	(void *)xnl_device_conn_reply_func,		/*-0x7-XNL_DEVICE_CONN_REPLY*/
 	NULL,							/*-0x8-XNL_DEVICE_SYSMAP_REQUEST*/
-	NULL,							/*-0x9-XNL_DEVICE_SYSMAP_BRDCST*/
+	(void *)xnl_device_sysmap_brdcst_func,/*-0x9-XNL_DEVICE_SYSMAP_BRDCST*/
 
 	NULL,							/*-0xA-XNL_INVALID*/
 
@@ -655,7 +668,7 @@ static void xnl_tx_process(void * pvParameters)
 	static U32 xnl_send_times = 0;
 	
 	//static xnl_fragment_t * xnl_ptr;
-	static  xnl_fragment_t * ptr;//是否可以修缮为静态变量？请关注
+	static  xnl_fragment_t * ptr = NULL;//是否可以修缮为静态变量？请关注
 	
 	sync_ssi();	//同步SSC信号
 	for(;;)
@@ -681,23 +694,29 @@ static void xnl_tx_process(void * pvParameters)
 					
 					/*send physical data*/
 					phy_tx((phy_fragment_t *)ptr);
+					log_debug("send xnl:0x%x \n\r", ptr->xnl_header.opcode);
+					
 					//if( ptr->xnl_header.opcode == XNL_DATA_MSG)
 					//{
 						//占用更多的的内存开销，谨慎调用
 						//log_debug("T_xcmp:0x%x \n\r", ptr->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 					//}
 					xnl_send_times = 1;				
-					/*clear timeout semaphore and wait XNL reply*/
-					xSemaphoreTake( xnl_timeout_semphr, ( portTickType )0);			
-					xnl_tx_state = WAITING_FOR_REPLY;
+					if(ptr->xnl_header.opcode != XNL_DATA_MSG_ACK)
+					{
+						/*clear timeout semaphore and wait XNL reply*/
+						xSemaphoreTake( xnl_timeout_semphr, ( portTickType )0);
+						xnl_tx_state = WAITING_FOR_REPLY;
+					}
+						
 					xnl_tx_water_value = uxTaskGetStackHighWaterMark(NULL);
 				}
 				break;
 			
 			/*wait XNL reply*/			
 			case WAITING_FOR_REPLY://直到回答ACK才再发送下一条data/control
-				if(pdTRUE == xSemaphoreTake( xnl_timeout_semphr
-					, ( portTickType )50*2/ portTICK_RATE_MS))//按ADK文档中提示500ms一次超时,但是实际情况下程序中启用freertos的任务延时不够精准。因此根据经验需要降低延时等待的时间
+				if(pdPASS == xSemaphoreTake( xnl_timeout_semphr
+					, ( portTickType )(500*2)/ portTICK_RATE_MS))//按ADK文档中提示500ms一次超时,但是实际情况下程序中启用freertos的任务延时不够精准。因此根据经验需要降低延时等待的时间
 				{
 					/*No timeout*/
 					set_xnl_idle(ptr);			
@@ -705,6 +724,7 @@ static void xnl_tx_process(void * pvParameters)
 				}
 				else
 				{
+					log_debug("send_xcmp: timeout! \n\r");				
 					/*time out*/
 					if(xnl_send_times <= MIN_RESEND_TIMES)
 					{
@@ -746,7 +766,7 @@ static void xnl_rx(xnl_fragment_t * xnl)
 
 	if(NULL != xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec)
 	{
-		//log_debug("\n\r R_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:R_xnl指令
+		log_debug("R_xnl:0x%x \n\r", xnl->xnl_header.opcode);//log:R_xnl指令
 		/*execute the function in list*/
 		xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec(xnl);
 	}
@@ -842,7 +862,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_rx_process
 	,  (const signed portCHAR *)"XNL_RX"
-	,  220//512,220*4=880bytes
+	,  1500//512,220*4=880bytes
 	,  NULL
 	,  tskXNL_PRIORITY //+ 1
 	,  NULL
@@ -852,7 +872,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_tx_process
 	,  (const signed portCHAR *)"XNL_TX"
-	,  120//800,130*4=520bytes
+	,  1024//800,130*4=520bytes
 	,  NULL
 	,  tskXNL_PRIORITY//+1
 	,  NULL

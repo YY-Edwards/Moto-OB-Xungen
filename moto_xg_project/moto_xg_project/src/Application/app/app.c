@@ -76,7 +76,7 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		{
 			bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
 			/* Do nothing here. Just wait for Device Management broadcast */
-			log_debug("device init complete...\n");
+			log_debug("rx device init complete...\n");
 		}
 		else if(ptr->DeviceInitType  == Device_Init_Status)
 		{
@@ -85,8 +85,8 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 			XCMP_Version[1]= ptr->XCMPVersion[1];
 			XCMP_Version[2]= ptr->XCMPVersion[2];
 			XCMP_Version[3]= ptr->XCMPVersion[3];
+			log_debug("rx device init request...\n");
 			xcmp_send_dev_init_brdcst();
-			log_debug("device init request...\n");
 		}
 		else//Device_Status_Update
 		{
@@ -546,7 +546,7 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 	if(ptr->State == Battery_Okay)
 		;//log_debug("\n Battery Okay\n");
 	else
-		log_debug("\n Battery Low !!!\n");
+		log_debug("Battery Low !!!\n");
 		
 	//log_debug("\n Battery charge: %X \n" , ptr->Charge);
 	//log_debug("\n Battery voltage: %X \n" , ptr->Voltage);
@@ -1305,7 +1305,7 @@ static __app_Thread_(app_cfg)
 				{
 					//package_usartdata_to_csbkdata(test, sizeof(test));
 					/*send device_master_query to connect radio*/
-					xnl_send_device_master_query();
+					//xnl_send_device_master_query();
 					nop();
 					nop();
 					nop();
@@ -1366,12 +1366,14 @@ static __app_Thread_(app_cfg)
 		} //End of switch on OB_State.
 		
 		water_value = uxTaskGetStackHighWaterMark(NULL);
-		log_debug("app     water: %d\n", water_value);
-		log_debug("log     water: %d\n", log_water_value);
-		log_debug("xnl_rx  water: %d\n", xnl_rx_water_value);
-		log_debug("xnl_tx  water: %d\n", xnl_tx_water_value);
-		log_debug("xcmp_rx water: %d\n", xcmp_rx_water_value);
-		
+		if(1 == connect_flag)
+		{
+			log_debug("app     water: %d\n", water_value);
+			log_debug("log     water: %d\n", log_water_value);
+			log_debug("xnl_rx  water: %d\n", xnl_rx_water_value);
+			log_debug("xnl_tx  water: %d\n", xnl_tx_water_value);
+			log_debug("xcmp_rx water: %d\n", xcmp_rx_water_value);		
+		}		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log_debug("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。

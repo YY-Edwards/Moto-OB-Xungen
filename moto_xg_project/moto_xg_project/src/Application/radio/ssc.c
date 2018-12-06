@@ -120,7 +120,7 @@ FASTRUN void pdca_int_handler(void)
 	if(phy_rx_exec != NULL)for(int i=0; i < 40;++i)
 	{
 		void  * p = RxBuffer[BufferIndex] + i * 12;
-		phy_rx_exec(p);
+		phy_rx_exec(p);//phy_rx_func
 	}
     
 
@@ -128,7 +128,7 @@ FASTRUN void pdca_int_handler(void)
 	if(phy_tx_exec != NULL)for(int i =0; i< 40; ++i)
 	{
 		void  * p = TxBuffer[BufferIndex] + i * 12;
-		phy_tx_exec(p);
+		phy_tx_exec(p);//phy_tx_func
 	}
 
 	//if(count%20000 == 0)

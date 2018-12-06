@@ -385,7 +385,7 @@ static void xcmp_rx_process(void * pvParameters)
 				continue;
 			}
 			
-			//log_debug("\n\r R_xcmp : %4x \n\r",ptr->xcmp_opcode);//log:R_xcmp÷∏¡Ó	
+			log_debug("R_xcmp : 0x%4x \n\r",ptr->xcmp_opcode);//log:R_xcmp÷∏¡Ó	
 			//static  portTickType water_value;
 			//xcmp_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
 			//log_debug("xcmp_rx_water_value: %d\n", water_value);			
