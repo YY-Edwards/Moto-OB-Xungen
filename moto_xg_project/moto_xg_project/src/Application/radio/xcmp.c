@@ -185,7 +185,8 @@ void xcmp_tx_method( U8 * data_ptr, U32 data_len, U16 target)
 	
 		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 		the xnl_tx*/
-		xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+		xnl_frame.xnl_header.protocol_id = XNL_PROTO_XCMP;
+		xnl_frame.xnl_header.xnl_flags = DEFAULT_VALUE;
 		xnl_frame.xnl_header.destination = target;
 		xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 		xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
@@ -212,7 +213,8 @@ void xcmp_tx_method( U8 * data_ptr, U32 data_len, U16 target)
 		
 			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 			the xnl_tx*/
-			xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+			xnl_frame.xnl_header.protocol_id = XNL_PROTO_XCMP;
+			xnl_frame.xnl_header.xnl_flags = DEFAULT_VALUE;
 			xnl_frame.xnl_header.destination = target;
 			xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 			xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
@@ -243,7 +245,8 @@ void xcmp_tx_method( U8 * data_ptr, U32 data_len, U16 target)
 	
 			/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 			the xnl_tx*/
-			xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+			xnl_frame.xnl_header.protocol_id = XNL_PROTO_XCMP;
+			xnl_frame.xnl_header.xnl_flags = DEFAULT_VALUE;	
 			xnl_frame.xnl_header.destination = target;
 			xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 			xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;
@@ -277,7 +280,8 @@ void xcmp_tx_method( U8 * data_ptr, U32 data_len, U16 target)
 	
 		/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 		the xnl_tx*/
-		xnl_frame.xnl_header.flags = DEFAULT_VALUE;	
+		xnl_frame.xnl_header.protocol_id = XNL_PROTO_XCMP;
+		xnl_frame.xnl_header.xnl_flags = DEFAULT_VALUE;	
 		xnl_frame.xnl_header.destination = target;
 		xnl_frame.xnl_header.source = DEFAULT_VALUE;	
 		xnl_frame.xnl_header.transaction_id = DEFAULT_VALUE;

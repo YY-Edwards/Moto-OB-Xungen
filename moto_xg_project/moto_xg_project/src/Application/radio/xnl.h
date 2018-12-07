@@ -65,18 +65,52 @@ typedef struct {
 
 //Option Board ADK Development Guide [9.1.2.4].
 //The 0xABCD Header is a constant, so need not be stored.
+//Protocol ID:
+#define XNL_PROTO_XNL_CTRL	0x00
+#define XNL_PROTO_XCMP		0x01
+
+//Option Board ADK Development Guide [9.1.2.4].
+//The 0xABCD Header is a constant, so need not be stored.
 typedef struct {   //XCMP/XNL Development Guide Section 5.1
 	U16            opcode;
 	
-	/*Protocol ID << 8 | XNL Flags*/
+	/*Protocol ID << 8 | XNL Flags*///高字节在前，低字节在后（并且AVR32大端存储）
 	/*
 	Protocol ID:
-	XCMP command message 
+		0x00:XNL_PROTO_XNL_CTRL,The payload contains an XNL control message.
+		0x01:XNL_PROTO_XCMP,The payload contains an XCMP message.
+	 
 	XNL Flags:
-	Value ranging from 0-7. This value is incremented for each new data message
-	that is sent. The same value should be used for all retries.
+	Bit 0 – Bit 2: 
+		when Protocol ID is equal to 0x00(XNL_PROTO_XNL_CTRL):
+		This is a 3 bit rollover counter that is used in XNL Data Message and XNL
+		Data Message ACK messages. This value should be incremented for each Data
+		Message that is sent and echoed back in the corresponding Data Message ACK.
+	
+	Bit 3:	
+		Bit 3 is used by the DEVICE_CONN_REQUEST and DEVICE CONN_REPLY
+		messages. The device or application uses Bit 3 within the DEVICE_CONN_REQUEST
+		message to request enabling or disabling of XNL_DATA_MSG_ACKs for all subsequent
+		XNL_DATA_MSGs exchanged between the radio and the requesting device. The radio
+		confirms the enable/disable request with Bit 3 in the corresponding
+		DEVICE_CONN_REPLY message.
+			
+		Note: Bit 3 disables only XNL_DATA_MSG_ACKs. Devices and applications are still
+		required to send replies to all other XNL messages.
+		
+		Note:
+		when Protocol ID is equal to 0x01(XNL_PROTO_XCMP).
+		Value ranging from 0-7. This value is
+		incremented for each new data message that is
+		sent. The same value should be used for all
+		retries.
+		
+	Bit4 – Bit 7: Reserved, and should be set to 0
+	
 	*/
-	U16            flags;
+	//U16            flags;
+	U8	protocol_id;//难道是因为没有字节对齐？
+	U8  xnl_flags;
 	
 	/*XNL address*/
 	U16            destination;
@@ -88,6 +122,8 @@ typedef struct {   //XCMP/XNL Development Guide Section 5.1
 	/*Number of bytes of payload*/
 	U16            payload_length;
 }xnl_header_t;
+
+
 
 /**invalid XNL opcode*/
 #define XNL_INVALID					 0x0000

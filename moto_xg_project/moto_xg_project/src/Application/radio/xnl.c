@@ -153,7 +153,9 @@ void xnl_send_device_master_query(void)
 	xnl_frame.xnl_header.opcode = XNL_DEVICE_MASTER_QUERY;
 	
 	/*The initial value*/
-	xnl_frame.xnl_header.flags = 0;
+	xnl_frame.xnl_header.protocol_id = XNL_PROTO_XNL_CTRL;
+	
+	xnl_frame.xnl_header.xnl_flags = 0;
 	
 	/*XNL address of the master device, if known;otherwise 0x0000*/
 	xnl_frame.xnl_header.destination = 0;
@@ -223,7 +225,9 @@ static void xnl_master_status_brdcst_func(xnl_fragment_t * xnl)
 		
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/	
-	xnl_frame.xnl_header.flags = DEFAULT_VALUE;
+	xnl_frame.xnl_header.protocol_id = xnl->xnl_header.protocol_id;
+	
+	xnl_frame.xnl_header.xnl_flags = xnl->xnl_header.xnl_flags;
 	
 	/*Use actual Master address.*/
 	xnl_frame.xnl_header.destination = xnl_information.master_address;
@@ -325,7 +329,9 @@ static void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 	
 	/*If the value is DEFAULT_VALUE, then say the value will be modified in 
 	the xnl_tx*/
-	xnl_frame.xnl_header.flags = DEFAULT_VALUE;
+	xnl_frame.xnl_header.protocol_id = xnl->xnl_header.protocol_id;
+	
+	xnl_frame.xnl_header.xnl_flags = 0;//enable data ack
 	
 	/*Use actual Master address.*/
 	xnl_frame.xnl_header.destination = xnl_information.master_address;
@@ -471,7 +477,11 @@ static void xnl_send_msg_ack(xnl_header_t * hdr)
 	xnl_frame.xnl_header.opcode = XNL_DATA_MSG_ACK;
 	
 	/*Turn around Flags.*/	
-	xnl_frame.xnl_header.flags = hdr->flags;
+	//xnl_frame.xnl_header.flags = hdr->flags;
+	
+	xnl_frame.xnl_header.protocol_id = hdr->protocol_id;
+	
+	xnl_frame.xnl_header.xnl_flags = hdr->xnl_flags;
 	
 	/*ACK Destination Address is Source of XNL_Message.*/
 	xnl_frame.xnl_header.destination = hdr->source;
@@ -591,11 +601,20 @@ void xnl_tx(xnl_fragment_t * xnl)
 	*/
 	static U8 flags = 0;
 	
-	/*If the value is DEFAULT_VALUE, the value will be modified*/
-	if(DEFAULT_VALUE == xnl->xnl_header.flags)
+	//if(DEFAULT_VALUE == xnl->xnl_header.flags)
+	//{
+	//xnl->xnl_header.flags =  0x0100 | ((++flags) & 0x07);
+	//}
+	if((xnl->xnl_header.protocol_id == XNL_PROTO_XCMP) 
+		&&(xnl->xnl_header.opcode == XNL_DATA_MSG))//xcmp data
 	{
-		xnl->xnl_header.flags =  0x0100 | ((++flags) & 0x07);
+		xnl->xnl_header.xnl_flags =  ((++flags) & 0x07);
 	}
+	else
+	{
+		//xnl,xcmp_ack: This is the same value contained in the XNL_DATA_MSG.
+	}
+	
 	
 	if(DEFAULT_VALUE == xnl->xnl_header.destination)
 	{		
@@ -694,7 +713,9 @@ static void xnl_tx_process(void * pvParameters)
 					
 					/*send physical data*/
 					phy_tx((phy_fragment_t *)ptr);
-					log_debug("send xnl:0x%x \n\r", ptr->xnl_header.opcode);
+					log_debug("send xnl[%d]:0x%x \n\r", 
+					((ptr->xnl_header.protocol_id<<8)+ptr->xnl_header.xnl_flags), 
+					ptr->xnl_header.opcode);
 					
 					//if( ptr->xnl_header.opcode == XNL_DATA_MSG)
 					//{
@@ -766,7 +787,9 @@ static void xnl_rx(xnl_fragment_t * xnl)
 
 	if(NULL != xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec)
 	{
-		log_debug("R_xnl:0x%x \n\r", xnl->xnl_header.opcode);//log:R_xnlÖ¸Áî
+		log_debug("R_xnl[%d]:0x%x \n\r", 
+		((xnl->xnl_header.protocol_id<<8)+xnl->xnl_header.xnl_flags),
+		xnl->xnl_header.opcode);//log:R_xnlÖ¸Áî
 		/*execute the function in list*/
 		xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec(xnl);
 	}
