@@ -25,7 +25,7 @@ static xSemaphoreHandle timer_semphr = NULL;
 volatile U32 tc_tick = 0;
 
 
-//portTickType softtimer_water_value = 0;
+portTickType softtimer_water_value = 0;
 static void softtimer( void *pvParameters )
 {
     for(;;)
@@ -40,8 +40,10 @@ static void softtimer( void *pvParameters )
                     if(--(timers[idx].count)==0)//时间片到了
                     {
                         if(timers[idx].timerHandler)
+						{
                             timers[idx].timerHandler(timers[idx].param);//执行相应任务
-
+							softtimer_water_value = uxTaskGetStackHighWaterMark(NULL);
+						}
                         if(timers[idx].resetCount!=0)	// auto re-arm
                             timers[idx].count = timers[idx].resetCount;
                     }
@@ -249,7 +251,7 @@ void create_soft_timer()
 	xTaskCreate(
 			softtimer
 			,  (const signed portCHAR *)"softtime"
-			,  configMINIMAL_STACK_SIZE
+			,  500
 			,  NULL
 			,  tskTIMER_PRIORITY
 			,  NULL );

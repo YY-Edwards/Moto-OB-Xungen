@@ -880,7 +880,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_rx_process
 	,  (const signed portCHAR *)"XNL_RX"
-	,  1500//512,220*4=880bytes
+	,  800//512,220*4=880bytes
 	,  NULL
 	,  tskXNL_PRIORITY //+ 1
 	,  NULL
@@ -890,7 +890,7 @@ void xnl_init(void)
 	xTaskCreate(
 	xnl_tx_process
 	,  (const signed portCHAR *)"XNL_TX"
-	,  1024//800,130*4=520bytes
+	,  700//800,130*4=520bytes
 	,  NULL
 	,  tskXNL_PRIORITY//+1
 	,  NULL
