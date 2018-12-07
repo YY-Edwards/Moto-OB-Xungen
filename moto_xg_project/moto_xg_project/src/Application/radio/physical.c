@@ -22,6 +22,10 @@ History:
 
 #include "../log/log.h"
 
+#include "semphr.h"
+
+extern volatile xSemaphoreHandle xnl_timeout_semphr;
+
 volatile phy_fragment_t xnl_store[MAX_XNL_STORE];
 volatile xQueueHandle xnl_store_idle = NULL;
 
@@ -277,14 +281,14 @@ static void phy_xnl_tx(xnl_channel_t * xnl_tx_channel)
 	/*To store the elements in the queue*/
 	//static phy_fragment_t phy_frame;
 	
-	//static phy_fragment_t  * phy_ptr;
+	static phy_fragment_t  * phy_ptr;
 	
 	/*Analytical status*/
 	static phy_tx_state_t phy_tx_state;
 	
-	static phy_fragment_t * rx_ptr =NULL;
-	static phy_fragment_t temp_data;//定义一个中间变量
-	static phy_fragment_t * phy_ptr = &temp_data;//定一个临时指针指向中间变量（局部）
+	//static phy_fragment_t * rx_ptr =NULL;
+	//static phy_fragment_t temp_data;//定义一个中间变量
+	//static phy_fragment_t * phy_ptr = &temp_data;//定一个临时指针指向中间变量（局部）
 	
 	static S16 phy_tx_expexted_length = 0;
 	static U8 phy_tx_index = 0;
@@ -294,17 +298,22 @@ static void phy_xnl_tx(xnl_channel_t * xnl_tx_channel)
 	{
 		/*Waiting for the send xnl packet*/
 		case WAITING_FOR_PHY_TX:			
+			//if( pdTRUE == xQueueReceiveFromISR(
+				  //phy_xnl_frame_tx
+				//, &rx_ptr
+				//, &xHigherPriorityTaskWoken 
+			//))
 			if( pdTRUE == xQueueReceiveFromISR(
-				  phy_xnl_frame_tx
-				, &rx_ptr
-				, &xHigherPriorityTaskWoken 
+			phy_xnl_frame_tx
+			, &phy_ptr
+			, &xHigherPriorityTaskWoken
 			))
 			{	
-				memcpy(phy_ptr, rx_ptr, sizeof(phy_fragment_t));//将数据拷贝到中间变量
-				if((rx_ptr->xnl_fragment.xnl_header.opcode) == XNL_DATA_MSG_ACK)
-				{				
-					set_xnl_idle_isr(rx_ptr);//将指针立即归还到空闲队列中。			
-				}							
+				//memcpy(phy_ptr, rx_ptr, sizeof(phy_fragment_t));//将数据拷贝到中间变量
+				//if((rx_ptr->xnl_fragment.xnl_header.opcode) == XNL_DATA_MSG_ACK)
+				//{				
+					//set_xnl_idle_isr(rx_ptr);//将指针立即归还到空闲队列中。			
+				//}							
 				phy_tx_expexted_length = 
 				     phy_ptr->xnl_fragment.phy_header.phy_control & 0x000000FF;
 				
@@ -344,6 +353,13 @@ static void phy_xnl_tx(xnl_channel_t * xnl_tx_channel)
 				
 				/*Go back to waiting.*/
 				phy_tx_state = WAITING_FOR_PHY_TX;
+				
+				//如果发送的是ACK，则立即归还，不用等待master回应。
+				if((phy_ptr->xnl_fragment.xnl_header.opcode) == XNL_DATA_MSG_ACK)
+				{
+					xSemaphoreGiveFromISR(xnl_timeout_semphr, &xHigherPriorityTaskWoken);
+				}
+				
 				break;
 			}
 
@@ -357,6 +373,12 @@ static void phy_xnl_tx(xnl_channel_t * xnl_tx_channel)
 			{
 				/*Must send 0x00BA0000 next interrupt in Slot 3&4*/
 				phy_tx_state = SEND_TAILED;
+				
+				//如果发送的是ACK，则立即归还，不用等待master回应。
+				if((phy_ptr->xnl_fragment.xnl_header.opcode) == XNL_DATA_MSG_ACK)
+				{
+					xSemaphoreGiveFromISR(xnl_timeout_semphr, &xHigherPriorityTaskWoken);
+				}
 			}
 			break;
 

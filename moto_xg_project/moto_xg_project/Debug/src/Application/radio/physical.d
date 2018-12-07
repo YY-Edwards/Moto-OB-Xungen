@@ -70,7 +70,9 @@ src/Application/radio/physical.d src/Application/radio/physical.o \
  ../src/Application/radio/ambe.h ../src/Application/radio/ssc.h \
  ../src/Application/radio/physical.h ../src/Application/radio/xnl.h \
  ../src/Application/radio/payload.h ../src/config/../log/log.h \
- ../src/ASF/avr32/drivers/usart/usart.h
+ ../src/ASF/avr32/drivers/usart/usart.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h \
+ ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h
 
 e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
 
@@ -221,3 +223,7 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/config/../log/log.h:
 
 ../src/ASF/avr32/drivers/usart/usart.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/semphr.h:
+
+../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/queue.h:

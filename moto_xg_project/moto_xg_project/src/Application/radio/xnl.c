@@ -42,7 +42,7 @@ static void xnl_rx_process(void * pvParameters);
 static volatile xQueueHandle xnl_frame_tx = NULL;
 
 /*semaphore is used to wait reply message of XNL*/
-static volatile xSemaphoreHandle xnl_timeout_semphr = NULL;
+volatile xSemaphoreHandle xnl_timeout_semphr = NULL;
 
 extern void xcmp_audio_route_speaker(void);
 
@@ -702,7 +702,7 @@ static void xnl_tx_process(void * pvParameters)
 						//log_debug("T_xcmp:0x%x \n\r", ptr->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 					//}
 					xnl_send_times = 1;				
-					if(ptr->xnl_header.opcode != XNL_DATA_MSG_ACK)
+					//if(ptr->xnl_header.opcode != XNL_DATA_MSG_ACK)
 					{
 						/*clear timeout semaphore and wait XNL reply*/
 						xSemaphoreTake( xnl_timeout_semphr, ( portTickType )0);
@@ -724,7 +724,7 @@ static void xnl_tx_process(void * pvParameters)
 				}
 				else
 				{
-					log_debug("send_xcmp: timeout! \n\r");				
+					log_debug("send_xnl: timeout! \n\r");				
 					/*time out*/
 					if(xnl_send_times <= MIN_RESEND_TIMES)
 					{

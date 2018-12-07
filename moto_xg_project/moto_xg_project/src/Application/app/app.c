@@ -88,23 +88,15 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 			log_debug("rx device init request...\n");
 			xcmp_send_dev_init_brdcst();
 		}
-		else//Device_Status_Update
+		else if(ptr->DeviceInitType  == Device_Status_Update)//Device_Status_Update
 		{
+			log_debug("rx device status update...\n");
 			//log_debug("DeviceInitType : %x\n", ptr->DeviceInitType);
 			//log_debug("Device Type : %x\n", ptr->DeviceStatusInfo.DeviceType);
 			//log_debug("Device Status : %x\n", ptr->DeviceStatusInfo.DeviceStatus[1]);
 			//log_debug("Descriptor size : %x\n", ptr->DeviceStatusInfo.DeviceDescriptorSize);
 			//log_debug("Descriptor : %x\n", ptr->DeviceStatusInfo.DeviceDescriptor[0]);
 		}
-	//if (xcmp->u8[4] == 0x01)
-	//{
-		//bunchofrandomstatusflags |= 0x01;  //Need do nothing else.
-	//}
-	//else if(xcmp->u8[4] != 0x02)
-	//{
-		//bunchofrandomstatusflags  &= 0xFFFFFFFC; //Device Init no longer Complete.
-		//xcmp_send_dev_init_brdcst();();
-	//}
 }
 
 void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
@@ -378,7 +370,7 @@ void AudioRoutingControl_brdcst_func(xcmp_fragment_t * xcmp)
 //	U8 j = 0 ;
 	
 	num_routings = ((xcmp->u8[0]<< 8) | (xcmp->u8[1]) );
-	//log_debug("\n\r num_routings: %d \n\r", num_routings);
+	log_debug("num_routings: %d \n\r", num_routings);
 	
 	//for(j = 0; j< num_routings ; j++ )
 	//{
