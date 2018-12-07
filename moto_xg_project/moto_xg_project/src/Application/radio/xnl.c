@@ -814,9 +814,8 @@ static void xnl_rx_process(void * pvParameters)
 			if(NULL != xnl_ptr)
 			{
 				xnl_rx(xnl_ptr);
-				set_xnl_idle(xnl_ptr);
 				xnl_rx_water_value = uxTaskGetStackHighWaterMark(NULL);
-				
+				set_xnl_idle(xnl_ptr);//用完再处理							
 			}			
 		}
 		

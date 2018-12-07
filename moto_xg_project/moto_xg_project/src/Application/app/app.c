@@ -865,8 +865,7 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 		//log_debug("send message\n");
 		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_9);//set tone to indicate the scan!!!
 			
-		vTaskDelay(1000*2 / portTICK_RATE_MS);//ясЁы1000ms
-		//delay_ms(200);
+		//vTaskDelay(1000*2 / portTICK_RATE_MS);//ясЁы1000ms
 		//rfid_sendID_message();//send message		
 		//scan_rfid_save_message();
 	}
@@ -1362,7 +1361,7 @@ static __app_Thread_(app_cfg)
 			log_debug("log     water: %d\n", log_water_value);
 			log_debug("xnl_rx  water: %d\n", xnl_rx_water_value);
 			log_debug("xnl_tx  water: %d\n", xnl_tx_water_value);
-			log_debug("xcmp_rx water: %d\n", xcmp_rx_water_value);		
+			//log_debug("xcmp_rx water: %d\n", xcmp_rx_water_value);		
 		}		
 		//vTaskDelay(300*2 / portTICK_RATE_MS);//ясЁы300ms
 		//log_debug("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);

@@ -288,34 +288,10 @@ void xcmp_tx_method( U8 * data_ptr, U32 data_len, U16 target)
 		
 		/* send xnl frame*/
 		xnl_tx(&xnl_frame);
-		//if(connect_flag)
-			//log_debug("n sub\n");
-
 	}
-	
-	//xSemaphoreGive(xcmp_mutex);
+
 }
 
-/**
-Function: xcmp_rx
-Parameters: xcmp_fragment_t *
-Description: push xcmp to queue 
-Calls:   
-	xQueueSend -- xnl.c
-Called By: xnl_rx--callback
-*/
-static void xcmp_rx(xcmp_fragment_t xcmp)
-{							
-	
-	xcmp_fragment_t * xcmp_ptr = get_xnl_idle();// pvPortMalloc(sizeof(xcmp_fragment_t));
-	//get_xnl_idle(&xcmp_ptr);
-	
-	if(NULL != xcmp_ptr)
-	{
-		memcpy(xcmp_ptr, &xcmp, sizeof(xcmp_fragment_t));				
-		xQueueSend(xcmp_frame_rx, &xcmp_ptr, 0);	
-	}	
-}
 
 /**
 Function: xcmp_exec_func
@@ -377,6 +353,7 @@ static void xcmp_rx_process(void * pvParameters)
 {
 	/*To store the elements in the queue*/
 	//xcmp_fragment_t xcmp;
+#if 0	
 	xcmp_fragment_t * ptr;
 	//static  portTickType water_value;
 		
@@ -447,6 +424,94 @@ static void xcmp_rx_process(void * pvParameters)
 		}
 
 	}
+	
+	#else
+				
+				xcmp_fragment_t *ptr =(xcmp_fragment_t * )pvParameters;//类型强制转换
+				log_debug("R_xcmp : 0x%4x \n\r",ptr->xcmp_opcode);//log:R_xcmp指令
+				switch(ptr->xcmp_opcode & 0x0FFF)
+				{
+					case RADIO_STATUS:
+						xcmp_exec_func((app_exec_t *)&radio_status, ptr);
+						break;
+					
+					case VERSION_INFORMATION:
+						xcmp_exec_func((app_exec_t *)&version_information, ptr);
+						break;
+					
+					case LANGUAGE_PACK_INFORMATION:
+						xcmp_exec_func((app_exec_t *)&language_pack_information, ptr);
+						break;
+					
+					case AUTOMATIC_FREQUENCY_CORRECTION_CONTROL:
+						xcmp_exec_func((app_exec_t *)&automatic_frequency_correction_control, ptr);
+						break;
+					
+					case CLONE_WRITE:
+						xcmp_exec_func((app_exec_t *)&clone_write, ptr);
+						break;
+					
+					case CLONE_READ:
+						xcmp_exec_func((app_exec_t *)&clone_read, ptr);
+						break;
+					
+					default:
+					
+						/*the xcmp message not in order list*/
+						/*over the length of the list*/
+						if((0x0400 != (ptr->xcmp_opcode & 0x0400))
+						|| (MAX_APP_FUNC <= (ptr->xcmp_opcode & 0x00FF))
+						)
+						{
+							/*xcmp request*/
+							if( XCMP_REQUEST == (ptr->xcmp_opcode & 0xF000))
+							{
+								/*send not supported opcode to raido */
+								xcmp_opcode_not_supported();
+							}
+						}
+						else
+						{
+							xcmp_exec_func( (app_exec_t *)&app_list[ptr->xcmp_opcode & 0x00FF], ptr);
+						}
+					break;
+				}
+		
+	#endif 
+}
+
+
+/**
+Function: xcmp_rx
+Parameters: xcmp_fragment_t *
+Description: push xcmp to queue 
+Calls:   
+	xQueueSend -- xnl.c
+Called By: xnl_rx--callback
+*/
+static void xcmp_rx(xcmp_fragment_t xcmp)
+{							
+
+#if 0 	
+	xcmp_fragment_t * xcmp_ptr = get_xnl_idle();
+	
+	if(NULL != xcmp_ptr)
+	{
+		memcpy(xcmp_ptr, &xcmp, sizeof(xcmp_fragment_t));				
+		xQueueSend(xcmp_frame_rx, &xcmp_ptr, 0);	
+	}	
+	else
+	{
+		log_debug("get idle_ptr failure!");
+	}
+#else
+
+
+	//尝试直接在这里同步处理。因为xcmp_rx的处理没有需要耗时的吧。
+	xcmp_rx_process(&xcmp);
+	
+	#endif
+	
 }
 
 /**
@@ -472,7 +537,9 @@ void xcmp_init(void)
 	
 	/*register the xcmp function(callback function)*/
 	xnl_register_xcmp_func( xcmp_rx );
-	
+
+#if 0	//采取同步处理xcmp协议，测试其效果，如果有耗时操作，再考虑添加单独的任务去执行
+
 	/*initialize the queue*/
 	xcmp_frame_rx = xQueueCreate(100, sizeof(xcmp_fragment_t *));
 	/*create task*/	
@@ -486,6 +553,7 @@ void xcmp_init(void)
 	,  NULL
 	);
 	
+#endif	
 	/*initialize the xnl*/
 	xnl_init();
 	
