@@ -825,9 +825,8 @@ void xcmp_data_session_req(void *message, U16 length, U32 dest)
 }
 
 
-extern U16 thrid_ID;
-
-void xcmp_data_session_reply(void)
+volatile  U16 session_addr =0;
+void xcmp_send_data_session_reply(void)
 {
 	
 	/*xcmp frame will be sent*/
@@ -860,9 +859,9 @@ void xcmp_data_session_reply(void)
 	
 	memcpy(ptr->DataPayload.DataPayload, "hello world", sizeof("hello world"));
 
-
-	xcmp_tx_method((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) + sizeof(xcmp_fragment.xcmp_opcode) - 1024 + sizeof("hello world"), thrid_ID);
-	log_debug("Third IDL : %d", thrid_ID);
+	//可能需要区分目的地址
+	xcmp_tx_method((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) + sizeof(xcmp_fragment.xcmp_opcode) - 1024 + sizeof("hello world"), session_addr);
+	log_debug("data session destination addr : %d", session_addr);
 
 }
 /**

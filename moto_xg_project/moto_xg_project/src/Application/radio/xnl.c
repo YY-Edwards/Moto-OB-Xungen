@@ -26,7 +26,7 @@ History:
 
 #include "../log/log.h"
 #include "ssc.h"
-
+#include "xcmp.h"
 
 /*information of xnl*/
 volatile xnl_information_t xnl_information;
@@ -332,6 +332,22 @@ static void xnl_device_auth_reply_func(xnl_fragment_t * xnl)
 	xnl_frame.xnl_header.protocol_id = xnl->xnl_header.protocol_id;
 	
 	xnl_frame.xnl_header.xnl_flags = 0;//enable data ack
+	/*
+		XNL_DEVICE_CONN_REQUEST:
+		
+		For XCMP v0.0.0.4 and Previous
+		Value = 0x00
+		
+		For XCMP v0.0.0.5 and Later
+		0x00 – Device requests that XNL_ACKs are
+		enabled for bidirectional XNL_DATA_MSGs
+		between the device and the radio.
+		0x08 – Device requests that XNL_ACKs are
+		disabled for bidirectional XNL_DATA_MSGs
+		between the device and the radio.
+	
+	*/
+	
 	
 	/*Use actual Master address.*/
 	xnl_frame.xnl_header.destination = xnl_information.master_address;
@@ -399,8 +415,6 @@ static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 	/*No timeout*/	
 	xSemaphoreGive(xnl_timeout_semphr);
 	
-	//log_debug("rx conn  reply.");
-	
 	/*Test result code*/
 	if((xnl->xnl_payload.xnl_content_device_conn_reply.result_base & 0x0000FF00)
 		!= 0x00000100)
@@ -410,6 +424,7 @@ static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 		point by sending out a new AUTH_KEY_REQUEST message. XCMP/XNL 
 		Development Guide Section 5.2.3
 		*/
+		log_debug("xnl connection failure!");
 		xnl_master_status_brdcst_func(xnl);			
 	}
 	else
@@ -431,10 +446,9 @@ static void xnl_device_conn_reply_func(xnl_fragment_t * xnl)
 		/*connect finish*/
 		xnl_information.is_connected = TRUE;
 		
-		//log_debug("connected finish");
+		log_debug("xnl connection success.");
 	}
 	
-	//xcmp_audio_route_speaker();
 	
 }
 
@@ -503,7 +517,7 @@ Description: process while receive data message.
 Calls:xnl_send_msg_ack, xcmp_exec(function in xcmp)
 Register:xnl_proc_list exec in xnl_rx_process
 */
-U16 thrid_ID =0;
+extern volatile  U16 session_addr;
 static void xnl_data_msg_func(xnl_fragment_t * xnl)
 {
 	/*
@@ -513,15 +527,14 @@ static void xnl_data_msg_func(xnl_fragment_t * xnl)
 	ACK has been scheduled. It most likely is already owned by the 
 	transmitter, but possibly is waiting in Queue with immediate timeout.
 	 */
-	//log_debug("rx xcmp opcode:0x%x",xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
 	xnl_send_msg_ack(&xnl->xnl_header);
-	if((xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode &0x0FFF) == 0x41D)
+	if((xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode &0x0FFF) == DATA_SESSION)
 	{
-		thrid_ID = xnl->xnl_header.source;
+		session_addr = xnl->xnl_header.source;
 	}
 
 	/*exec xcmp function*/
-	xcmp_exec(xnl->xnl_payload.xnl_content_data_msg);//xcmp_rx
+	xcmp_exec(xnl->xnl_payload.xnl_content_data_msg);//xcmp_rx =>> xcmp_rx_process
 }
 
 /**
@@ -546,8 +559,6 @@ static void xnl_get_msg_ack_func(xnl_fragment_t * xnl)
 		xSemaphoreGive(xnl_timeout_semphr);	
 		    
 	}
-	
-	//xSemaphoreGive(xnl_timeout_semphr);	
 }
 
 /**
@@ -638,26 +649,11 @@ void xnl_tx(xnl_fragment_t * xnl)
 	/*count check sum */
 	xnl->phy_header.check_sum = check_sum( xnl );
 	
-	
-	//log_debug("op -%8x", xnl->xnl_header.opcode);
-	
-	//log_debug("\n\r T_xnl:%4x \n\r", xnl->xnl_header.opcode);//log:T_xnl指令
-	//log_debug("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
-	
-	xnl_fragment_t * ptr = get_xnl_idle();//pvPortMalloc(sizeof(xnl_fragment_t));
-	//get_xnl_idle(&ptr);
+	xnl_fragment_t * ptr = get_xnl_idle();
 	if(NULL != ptr)
 	{
-		memcpy(ptr, xnl, sizeof(xnl_fragment_t));
-	
-		/*push to queue and send*/
-		
-		//log_debug("ptr -%8x", ptr);
-		
+		memcpy(ptr, xnl, sizeof(xnl_fragment_t));		
 		xQueueSend(xnl_frame_tx, &ptr, 0);//如果队列已满，则立即返回
-		//log_debug("\n\r T_xcmp:%4x \n\r", xnl->xnl_payload.xnl_content_data_msg.xcmp_opcode);
-		
-		//vPortFree(ptr);
 	}
 	else
 	{

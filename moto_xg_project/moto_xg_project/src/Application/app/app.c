@@ -487,14 +487,12 @@ void CallControl_brdcst_func(xcmp_fragment_t * xcmp)
 	
 }
 
-extern void xcmp_data_session_reply(void);
-
+extern void xcmp_send_data_session_reply(void);
 void DataSession_request_func(xcmp_fragment_t * xcmp)
 {
 	DataSession_req_t * req = (DataSession_req_t *)xcmp->u8;
-
 	log_debug("DATAreq :%s \n", req->DataPayload.DataPayload);
-	xcmp_data_session_reply();
+	xcmp_send_data_session_reply();
 	
 }
 void DataSession_reply_func(xcmp_fragment_t * xcmp)
@@ -536,7 +534,7 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 	/*point to xcmp payload*/
 	BatteryLevel_brdcast_t *ptr = (BatteryLevel_brdcast_t* )(xcmp->u8);
 	if(ptr->State == Battery_Okay)
-		;//log_debug("\n Battery Okay\n");
+		log_debug("Battery Okay\n");
 	else
 		log_debug("Battery Low !!!\n");
 		
