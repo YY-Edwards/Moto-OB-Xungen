@@ -13,6 +13,7 @@
 #include "string.h"
 #include "avrflash.h"
 #include "stdbool.h"
+#include "timer.h"
 
 static __app_Thread_(app_cfg);
 static void send_message(void * pvParameters);
@@ -842,7 +843,7 @@ void ButtonConfig_reply_func(xcmp_fragment_t * xcmp)
 	
 }
 
-
+extern volatile bool is_rfid_scan;
 void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 PUI_Source =0;
@@ -862,9 +863,11 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 	log_debug("PhysicalUserInput_broadcast  \n\r"  );
 	
 	if((PUI_ID == 0x0060) && (PUI_State = 0x02) && (connect_flag == 1)){
-		//log_debug("send message\n");
+
 		xcmp_IdleTestTone(Tone_Start, Ring_Style_Tone_9);//set tone to indicate the scan!!!
-			
+		
+		if(is_rfid_scan == false)
+			setTimer(RFID_TIMER, TIME_BASE_500MS, false, rfid_sendID_message, NULL);
 		//vTaskDelay(1000*2 / portTICK_RATE_MS);//ясЁы1000ms
 		//rfid_sendID_message();//send message		
 		//scan_rfid_save_message();

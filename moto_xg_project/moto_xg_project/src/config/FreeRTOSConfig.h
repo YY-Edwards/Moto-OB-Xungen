@@ -135,6 +135,7 @@ to exclude the API function. */
 #define tskXNL_PRIORITY		(tskIDLE_PRIORITY + 3)
 #define tskXCMP_PRIORITY	(tskIDLE_PRIORITY + 3)
 #define tskUSART_PRIORITY	(tskIDLE_PRIORITY + 2)
+#define tskTIMER_PRIORITY	(tskIDLE_PRIORITY + 2)
 #define tskLOG_PRIORITY		(tskIDLE_PRIORITY + 1)
 #define tskFLASH_PRIORITY   (tskIDLE_PRIORITY + 1)
 

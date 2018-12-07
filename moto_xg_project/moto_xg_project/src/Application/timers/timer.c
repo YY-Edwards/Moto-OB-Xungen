@@ -14,27 +14,68 @@
 #include "intc.h"
 
 #include "../log/log.h"
+#include "semphr.h"
+#include "task.h"
 
 //#include "Interface/xcmp.h"
 
+timer_info timers[MAX_TIMERS];
 
+static xSemaphoreHandle timer_semphr = NULL;
 volatile U32 tc_tick = 0;
+
+
+//portTickType softtimer_water_value = 0;
+static void softtimer( void *pvParameters )
+{
+    for(;;)
+    {
+        if( xSemaphoreTake(timer_semphr, ( portTickType ) portMAX_DELAY ) == pdTRUE )
+        {
+            unsigned int idx = 0;
+            for(idx = 0; idx<MAX_TIMERS; ++idx)
+            {
+                if(timers[idx].count!=0)	// timer enabled
+                {
+                    if(--(timers[idx].count)==0)//时间片到了
+                    {
+                        if(timers[idx].timerHandler)
+                            timers[idx].timerHandler(timers[idx].param);//执行相应任务
+
+                        if(timers[idx].resetCount!=0)	// auto re-arm
+                            timers[idx].count = timers[idx].resetCount;
+                    }
+                }
+            }
+        }
+
+    }
+}
 
 //brief Default interrupt handler.
 __attribute__((__interrupt__))
 static void _tc_interrupt(void)
  {
-	// Increment the 1ms  counter
-	tc_tick++;
-	
-	if(tc_tick >= 1000)
-	{		
-		tc_tick = 0;
-	}
+	//// Increment the 1ms  counter
+	//tc_tick++;
+	//
+	//if(tc_tick >= 1000)
+	//{		
+		//tc_tick = 0;
+	//}
 	/*
 	 * TODO: Place a breakpoint here and watch the update of tc_tick variable
 	 * in the Watch Window.
 	 */
+	
+	static portBASE_TYPE xTaskWoken;
+	xTaskWoken = pdFALSE;
+	
+	portENTER_CRITICAL();
+	// 25ms each interrupt
+	xSemaphoreGiveFromISR(timer_semphr, &xTaskWoken);
+	portEXIT_CRITICAL();
+	
 	// Clear the interrupt flag. This is a side effect of reading the TC SR.
 	tc_read_sr(EXAMPLE_TC, EXAMPLE_TC_CHANNEL);
 	
@@ -195,6 +236,26 @@ void local_start_timer(void)
 
 
 
+void setTimer(unsigned char timer, unsigned int delay, unsigned char rearm, handler timehandler, void *param)
+{
+	timers[timer].param				= param;//参数
+	timers[timer].timerHandler		= timehandler;//句柄
+	timers[timer].resetCount		= rearm?delay:0;//是否循环执行
+	timers[timer].count				= delay;//定时时间
+}
+
+void create_soft_timer()
+{
+	xTaskCreate(
+			softtimer
+			,  (const signed portCHAR *)"softtime"
+			,  configMINIMAL_STACK_SIZE
+			,  NULL
+			,  tskTIMER_PRIORITY
+			,  NULL );
+}
+
+
 /**
  * \brief TC Initialization
  *
@@ -208,6 +269,13 @@ void tc_init()
 {
 
 	volatile avr32_tc_t * tc = EXAMPLE_TC;
+	
+	
+	vSemaphoreCreateBinary(timer_semphr);
+	
+	create_soft_timer();
+
+	Disable_global_interrupt();
 	
 	INTC_register_interrupt(&_tc_interrupt, AVR32_TC_IRQ1, AVR32_INTC_INT1);
 
@@ -273,15 +341,15 @@ void tc_init()
 	 * Set the compare triggers.
 	 * We configure it to count every 1 milliseconds.
 	 * We want: (1 / (fPBA / 8)) * RC = 1 ms, hence RC = (fPBA / 8) / 1000
-	 * to get an interrupt every 10 ms.
+	 * to get an interrupt every 1 ms.
 	 */
 	
-	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, ((FOSC0*2)/8/1000));//1ms
+	tc_write_rc(tc, EXAMPLE_TC_CHANNEL, (((FOSC0*2)/8)/1000 *25));// Set RC value.  25ms interval
 	
 	// configure the timer interrupt
 	tc_configure_interrupts(tc, EXAMPLE_TC_CHANNEL, &tc_interrupt);
 	// Start the timer/counter.
-	//tc_start(tc, EXAMPLE_TC_CHANNEL);
+	tc_start(tc, EXAMPLE_TC_CHANNEL);
 }
 
 void start_my_timer(void)
