@@ -123,8 +123,9 @@ typedef struct {
 
 #define DMABUFNUM 16//frame change
 #define DMASIZE 10//frame change
-#define SSI_FRAME_BUF_SIZE 6	/* 6 half-word = 12 bytes */
-#define DMA_BUF_SIZE (DMASIZE * SSI_FRAME_BUF_SIZE)	/* 60 half-word = 120 bytes, total 120* 16 = 1920 bytes */
+#define SSI_FRAME_BUF_SIZE 3	/* 3 word = 12 bytes */
+#define DMA_BUF_HALF_WORD_SIZE  (DMASIZE * SSI_FRAME_BUF_SIZE*2)
+#define DMA_BUF_WORD_SIZE (DMASIZE * SSI_FRAME_BUF_SIZE)	/* 30 word = 120 bytes, total 120* 16 = 1920 bytes */
 
 
 /*Initialize the SSC and PDCA */

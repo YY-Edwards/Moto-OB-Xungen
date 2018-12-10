@@ -196,13 +196,16 @@ static void phy_tx_func( void * ssc)
 	
 	if(NULL != phy_xnl_frame_tx)
 	{
-		U16 offset = SSI_FRAME_BUF_SIZE*2;
+		U16 offset = SSI_FRAME_BUF_SIZE*4;
 		U32 *addr= 0;
 		  	/*send ssc data in xnl frame*/
 		for(int i=0; i < DMASIZE; ++i)
 		{
 			addr = ssc + (i*offset);
 			phy_xnl_tx((xnl_channel_t *)addr);
+			((payload_channel_t * )(((unsigned char *)addr) + 4))->dword[0] = PAYLOADIDLE0;
+			((payload_channel_t * )(((unsigned char *)addr) + 4))->dword[1] = PAYLOADIDLE1;
+
 		}
 	}
 
@@ -259,7 +262,7 @@ static void phy_rx_func( void * ssc)
 
 	if(NULL != phy_xnl_frame_rx)
 	{
-		U16 offset = SSI_FRAME_BUF_SIZE*2;
+		U16 offset = SSI_FRAME_BUF_SIZE*4;
 		U32 *addr= 0;
 		/*receive ssc data in xnl frame*/
 		for(int i=0; i < DMASIZE; ++i)
