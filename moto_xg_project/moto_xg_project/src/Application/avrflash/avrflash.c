@@ -6,6 +6,12 @@
  */ 
 #include "avrflash.h"
 #include <string.h>
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "task.h"
+
+
+
 
 
 #pragma pack(1)
@@ -49,21 +55,23 @@ static nvram_data_t user_nvram_data
 ;
 
 
+
+volatile bool is_writing = false;
+
 void write_flash_in_multitask(volatile void *dst, const void *src, size_t nbytes)
 {
-	//Disable_interrupt_level(1);
-	//vTaskSuspendAll();
+	Disable_interrupt_level(1);
+	vTaskSuspendAll();
 	
-	flashc_lock_page_region(1020, false);
+	is_writing = true;
+	avr_flash_test();
+	is_writing = false;
 	
-	flashc_memcpy(dst, src, nbytes, true);
-	//xTaskResumeAll();
-	//Enable_interrupt_level(1);
-	
-	flashc_lock_page_region(1020, true);
-	
+	xTaskResumeAll();
+	Enable_interrupt_level(1);
 	
 }
+
 
 
 static void flash_rw_example(const char *caption, nvram_data_t *nvram_data)
