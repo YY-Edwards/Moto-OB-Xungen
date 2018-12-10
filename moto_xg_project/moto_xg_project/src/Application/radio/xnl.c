@@ -733,7 +733,7 @@ static void xnl_tx_process(void * pvParameters)
 			/*wait XNL reply*/			
 			case WAITING_FOR_REPLY://直到回答ACK才再发送下一条data/control
 				if(pdPASS == xSemaphoreTake( xnl_timeout_semphr
-					, ( portTickType )(500*2)/ portTICK_RATE_MS))//按ADK文档中提示500ms一次超时,但是实际情况下程序中启用freertos的任务延时不够精准。因此根据经验需要降低延时等待的时间
+					, ( portTickType )(500)/ portTICK_RATE_MS))//按ADK文档中提示500ms一次超时,但是实际情况下程序中启用freertos的任务延时不够精准。因此根据经验需要降低延时等待的时间
 				{
 					/*No timeout*/
 					set_xnl_idle(ptr);			

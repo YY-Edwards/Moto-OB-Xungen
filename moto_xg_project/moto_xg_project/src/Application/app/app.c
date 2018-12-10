@@ -760,7 +760,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			//允许模块向MCU发送数据，并拉低RTS信号
 			//usart_enable_receiver(APP_USART);
 			log_debug("data transmit success\n");
-			//vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
+			//vTaskDelay(1000/ portTICK_RATE_MS);//延迟1000ms
 			xcmp_IdleTestTone(Tone_Start, BT_Connection_Success_Tone);//set tone to indicate connection success!!!
 		}
 		else if(ptr->State == DATA_SESSION_TX_Fail)
@@ -778,7 +778,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 				//{
 					//log_debug("xg_resend_queue: full\n" );
 					//xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
-					//vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+					//vTaskDelay(3000 / portTICK_RATE_MS);//延迟3000ms
 					//xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
 				//}
 				//else
@@ -868,7 +868,7 @@ void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 		
 		if(is_rfid_scan == false)
 			setTimer(RFID_TIMER, TIME_BASE_500MS, false, rfid_sendID_message, NULL);
-		//vTaskDelay(1000*2 / portTICK_RATE_MS);//延迟1000ms
+		//vTaskDelay(1000 / portTICK_RATE_MS);//延迟1000ms
 		//rfid_sendID_message();//send message		
 		//scan_rfid_save_message();
 	}
@@ -1216,11 +1216,11 @@ static void send_message(void * pvParameters)
 			{
 				xcmp_data_session_req(m_buff, (sizeof(Message_Protocol_t)), destination);//send message
 				
-				//if(xSemaphoreTake(SendM_CountingSemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
-				if(xSemaphoreTake(xBinarySemaphore, (20000*2) / portTICK_RATE_MS) == pdTRUE)
+				//if(xSemaphoreTake(SendM_CountingSemaphore, (20000) / portTICK_RATE_MS) == pdTRUE)
+				if(xSemaphoreTake(xBinarySemaphore, (20000) / portTICK_RATE_MS) == pdTRUE)
 				{
 					log_debug("xSemaphoreTake okay!\n");
-					vTaskDelay((2000*2) / portTICK_RATE_MS);
+					vTaskDelay((2000) / portTICK_RATE_MS);
 				}
 				else//短信丢失，手台未响应，超时后默认再次重发
 				{
@@ -1252,7 +1252,7 @@ static void send_message(void * pvParameters)
 		//water_value = uxTaskGetStackHighWaterMark(NULL);
 		//log_debug("send-thread water_value: %d\n", water_value);
 		
-		vTaskDelayUntil(&xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil(&xLastWakeTime, (5000) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	
 	}
 }
@@ -1367,9 +1367,8 @@ static __app_Thread_(app_cfg)
 			log_debug("xnl_tx  water: %d\n", xnl_tx_water_value);
 			log_debug("soft    water: %d\n", softtimer_water_value);		
 		}		
-		//vTaskDelay(300*2 / portTICK_RATE_MS);//延迟300ms
 		//log_debug("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
-		vTaskDelayUntil( &xLastWakeTime, (5000*2) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
+		vTaskDelayUntil( &xLastWakeTime, (5000) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	log_debug("app exit:err\n");
 }

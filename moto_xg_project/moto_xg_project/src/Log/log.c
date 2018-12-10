@@ -493,7 +493,7 @@ static void task_mylog(void * pvParameters)
 				log_water_value = uxTaskGetStackHighWaterMark(NULL);
 			}
 		}
-		//if(xQueueReceive( logQueue, &str, (2000*2) / portTICK_RATE_MS) == pdTRUE )
+		//if(xQueueReceive( logQueue, &str, (2000) / portTICK_RATE_MS) == pdTRUE )
 		//{
 			//if( NULL != str)
 			//{

@@ -86,6 +86,19 @@ Calls:
     void (*phy_rx_exec)(void *)--callback function for receive SSC data 
 Called By: interrupt
 */
+/*
+--------------------------- DETAILED DESCRIPTION ------------------------------
+*
+* Each time when this interrupt handler is called, it's the time that
+* 1. RxBuffer[dma_buffer_index] and TxBuffer[dma_buffer_index] has just been
+* Transferred;
+* 2. Transfer of RxBuffer[next_index] and TxBuffer[next_index] just began.
+* 3. DMA Transfer address and size register has just been cleared.
+*
+*******************************************************************************/
+
+volatile U32 intStartCount;
+volatile U32 intDuration;
 __attribute__((__interrupt__))
 FASTRUN void pdca_int_handler(void)
 {
@@ -94,7 +107,7 @@ FASTRUN void pdca_int_handler(void)
 	//xHigherPriorityTaskWoken = pdFALSE;
 	
 	static U32 count=0;
-	//intStartCount = Get_system_register(AVR32_COUNT);
+	intStartCount = Get_system_register(AVR32_COUNT);
 	
 	count++;
 	/*Toggle Index*/
@@ -143,7 +156,7 @@ FASTRUN void pdca_int_handler(void)
 		/************/
 
 	
-	//intDuration = Get_system_register(AVR32_COUNT) - intStartCount;
+	intDuration = Get_system_register(AVR32_COUNT) - intStartCount;
 	
 	
 }/*End of pdca_int_handler.*/

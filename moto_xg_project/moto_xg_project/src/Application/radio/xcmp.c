@@ -359,7 +359,7 @@ static void xcmp_rx_process(void * pvParameters)
 		
 	for(;;)
 	{
-		if(pdTRUE  ==xQueueReceive( xcmp_frame_rx, &ptr,  (10*2) / portTICK_RATE_MS ))//测试启用10ms超时机制
+		if(pdTRUE  ==xQueueReceive( xcmp_frame_rx, &ptr,  (10) / portTICK_RATE_MS ))//测试启用10ms超时机制
 		{									
 			if(NULL == ptr)
 			{

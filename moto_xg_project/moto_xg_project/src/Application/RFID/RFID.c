@@ -148,7 +148,7 @@ extern volatile DateTime_t Current_time;
 			//{
 				//log_debug("xg_resend_queue: full\n" );
 				//xcmp_IdleTestTone(Tone_Start, Dispatch_Busy);//set tone to indicate queue full!!!
-				//vTaskDelay(3000*2 / portTICK_RATE_MS);//延迟3000ms
+				//vTaskDelay(3000 / portTICK_RATE_MS);//延迟3000ms
 				//xcmp_IdleTestTone(Tone_Stop, Dispatch_Busy);//set tone to indicate queue full!!!
 			//}
 			//else
@@ -198,7 +198,7 @@ U8 rfid_sendID_message(void)
 		if(return_err == 0)break;
 		else
 		{
-			vTaskDelay(400*2 / portTICK_RATE_MS);//延迟400ms
+			vTaskDelay(400/ portTICK_RATE_MS);//延迟400ms
 		}
 		connect_counts++;
 		
@@ -248,7 +248,7 @@ U8 rfid_sendID_message(void)
 	}
 	else
 	{
-		vTaskDelay(500*2 / portTICK_RATE_MS);//延迟500ms
+		vTaskDelay(500/ portTICK_RATE_MS);//延迟500ms
 		xcmp_IdleTestTone(Tone_Start, Low_Battery_3);//set tone to indicate scan rfid failure!!!
 		log_debug("no card find...\n");
 	}

@@ -18,6 +18,9 @@
 #include "task.h"
 
 //#include "Interface/xcmp.h"
+#ifndef FRCOSC
+#define FRCOSC    AVR32_PM_RCOSC_FREQUENCY  //!< Default RCOsc frequency.
+#endif
 
 timer_info timers[MAX_TIMERS];
 
@@ -73,10 +76,10 @@ static void _tc_interrupt(void)
 	static portBASE_TYPE xTaskWoken;
 	xTaskWoken = pdFALSE;
 	
-	portENTER_CRITICAL();
+	//portENTER_CRITICAL();
 	// 25ms each interrupt
 	xSemaphoreGiveFromISR(timer_semphr, &xTaskWoken);
-	portEXIT_CRITICAL();
+	//portEXIT_CRITICAL();
 	
 	// Clear the interrupt flag. This is a side effect of reading the TC SR.
 	tc_read_sr(EXAMPLE_TC, EXAMPLE_TC_CHANNEL);
@@ -388,4 +391,25 @@ void delay_ms(U32 ms)
 		delay_us(1000);
 	}
 	
+}
+
+void wait_10_ms(void)
+{
+	Set_system_register(AVR32_COUNT, 0);
+	while ((U32)Get_system_register(AVR32_COUNT) < (FRCOSC * 10 + 999) / 1000);
+}
+
+
+unsigned long get_system_time()
+{
+	unsigned long ms_value = xTaskGetTickCount();
+	
+	unsigned long us_value = Get_system_register(AVR32_COUNT);
+	
+	//us_value = us_value / (configCPU_CLOCK_HZ/1000 000);
+	us_value = us_value / 60;
+	
+	us_value += ms_value * 1000;
+	
+	return us_value;
 }
