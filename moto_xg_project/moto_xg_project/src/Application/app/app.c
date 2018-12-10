@@ -548,7 +548,7 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 
 extern volatile unsigned char host_flag;
 void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
-{
+{	
 	U8 Session_number = 0;
 	U16 data_length = 0;
 	static  portBASE_TYPE queue_ret = pdPASS;
@@ -558,12 +558,35 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 	static U8 last_temp[10]={0};
 	U16 offset=0;
 	//static csbk_rx_state_t rx_status = WAITING_CSBK_P_HEADER;
-//	U32 card_id =0;
+	//	U32 card_id =0;
 	U8 i = 0;
-//	xgflash_status_t return_value = XG_ERROR;
+	//	xgflash_status_t return_value = XG_ERROR;
 	
 	/*point to xcmp payload*/
 	DataSession_brdcst_t *ptr = (DataSession_brdcst_t* )xcmp->u8;
+
+
+#if 1
+
+		if (ptr->State == DATA_SESSION_UNIT)
+		{			
+			log_debug("\n\r RX DATA SESSION BRDCAST okay \n\r");
+			Session_number = ptr->DataPayload.Session_ID_Number;//xcmp->u8[1];		
+			//大端数据：高字节在前	
+			data_length = (ptr->DataPayload.DataPayload_Length[0]<<8) | (ptr->DataPayload.DataPayload_Length[1]);//( xcmp->u8[2]<<8) | (xcmp->u8[3]);
+			
+			flash_proto_t * new_ptr = (flash_proto_t *)(ptr->DataPayload.DataPayload);
+			
+			parse_flash_protocol(new_ptr);
+		}
+		else
+		{
+			log_debug("RX DATA SESSION BRDCAST failure \n\r");
+			log_debug("ptr->State:0x%x \n\r", ptr->State);
+		}
+
+#else
+
 	
 	if (ptr->State == CSBK_DATA_RX_Suc)
 	{
@@ -821,7 +844,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 		//}
 		
 	}
-	
+#endif
 }
 
 void ButtonConfig_reply_func(xcmp_fragment_t * xcmp)

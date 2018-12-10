@@ -9,7 +9,8 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
-
+#include "log.h"
+#include "xcmp.h"
 
 
 
@@ -64,6 +65,7 @@ void write_flash_in_multitask(volatile void *dst, const void *src, size_t nbytes
 	vTaskSuspendAll();
 	
 	is_writing = true;
+	//flashc_memcpy(dst, src, nbytes, TRUE);
 	avr_flash_test();
 	is_writing = false;
 	
@@ -107,4 +109,88 @@ static void flash_rw_example(const char *caption, nvram_data_t *nvram_data)
 void avr_flash_test()
 {
 	flash_rw_example("user_page", &user_nvram_data);		
+}
+
+
+uint8_t df_payload_checksunm(void *p, uint8_t len)
+{
+	unsigned char  sumScratch = 0;
+
+	for(unsigned short i =0; i<len; i++)
+	{
+		sumScratch += *(unsigned char*)p++;
+	}
+	  
+	 return sumScratch;
+
+}
+
+void parse_flash_protocol(flash_proto_t *p)
+{
+	uint8_t opcode = p->opcode;
+	flash_proto_t tx_buf;
+
+	switch(opcode)
+	{
+		case ENTER_BOOT_REQ_OPCODE:
+		
+				log_debug("rx ENTER_BOOT_REQ_OPCODE.");
+				tx_buf.opcode = ENTER_BOOT_RLY_OPCODE;
+				tx_buf.payload_len =1;
+				tx_buf.proto_payload.df_enter_boot_reply.result = 0;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(ENTER_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len);
+				
+			break;
+			
+		case READ_INFO_REQ_OPCODE:
+				log_debug("rx READ_INFO_REQ_OPCODE.");
+				tx_buf.opcode = READ_INFO_RLY_OPCODE;
+				tx_buf.payload_len =33;
+				tx_buf.proto_payload.df_read_info_reply.result = 0;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(READ_INFO_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len);
+				
+			break;
+			
+		case WRITE_ID_REQ_OPCODE:
+				log_debug("rx WRITE_ID_REQ_OPCODE.");
+				tx_buf.opcode = WRITE_ID_RLY_OPCODE;
+				tx_buf.payload_len =5;
+				tx_buf.proto_payload.df_write_id_reply.result= 0;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(WRITE_ID_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len);
+				
+			break;
+			
+		case PROGRAM_FLASH_REQ_OPCODE:
+		
+				log_debug("rx PROGRAM_FLASH_REQ_OPCODE.");
+				tx_buf.opcode = PROGRAM_FLASH_RLY_OPCODE;
+				tx_buf.payload_len =5;
+				tx_buf.proto_payload.df_program_reply.result = 0;
+				tx_buf.proto_payload.df_program_reply.addr = 0xABCD5A5A;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(PROGRAM_FLASH_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len);
+				
+			break;
+			
+		case EXIT_BOOT_REQ_OPCODE:
+		
+				log_debug("rx EXIT_BOOT_REQ_OPCODE.");
+				tx_buf.opcode = EXIT_BOOT_RLY_OPCODE;
+				tx_buf.payload_len =1;
+				tx_buf.proto_payload.df_exit_boot_reply.result = 0;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(EXIT_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len);
+				
+			break;
+			
+		default:
+			log_debug("flash opcode err:[0x%x]", opcode);
+			break;
+		
+	}
+	
+	
 }

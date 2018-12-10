@@ -979,6 +979,36 @@ void xcmp_data_session_brd( void *message, U16 length, U8 SessionID)
 }
 
 
+void xcmp_send_session_broadcast(uint8_t type , uint8_t data[], uint8_t data_len )
+{
+	
+	/*xcmp frame will be sent*/
+	xcmp_fragment_t xcmp_fragment;
+	
+	/*insert XCMP opcode*/
+	xcmp_fragment.xcmp_opcode = XCMP_BRDCAST | DATA_SESSION;
+	
+	/*point to xcmp payload*/
+	DataSession_brdcst_t * ptr = (DataSession_brdcst_t *)xcmp_fragment.u8;
+	
+	
+	ptr->State = DATA_SESSION_UNIT;
+
+	ptr->DataPayload.Session_ID_Number = 1;//0x00++
+	
+	
+	
+	ptr->DataPayload.DataPayload_Length[0] =(data_len >> 8) & 0xFF ;//可能会变化
+	ptr->DataPayload.DataPayload_Length[1] =data_len & 0xFF  ;//可能会变化
+		
+	memcpy(&(ptr->DataPayload.DataPayload[0]), data, data_len);
+
+	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DataSession_brdcst_t)-(sizeof(DataPayload_t) - data_len) + sizeof(xcmp_fragment.xcmp_opcode));
+
+	
+}
+
+
 /**
 Function: xcmp_button_config
 Parameters:

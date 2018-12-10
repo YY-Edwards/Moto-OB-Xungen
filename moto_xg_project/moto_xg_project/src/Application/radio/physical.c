@@ -191,6 +191,7 @@ Called By: phy_xnl_rx
 */
 static void phy_tx_func( void * ssc)
 {
+	
     if(NULL != phy_xnl_frame_tx)
     {
   	  	/*send ssc data in xnl frame*/
@@ -217,6 +218,7 @@ static void phy_tx_func( void * ssc)
 		
 	((payload_channel_t * )(((unsigned char *)ssc) + sizeof(xnl_channel_t)))->dword[0] = PAYLOADIDLE0;
 	((payload_channel_t * )(((unsigned char *)ssc) + sizeof(xnl_channel_t)))->dword[1] = PAYLOADIDLE1;
+
 }
 
 
