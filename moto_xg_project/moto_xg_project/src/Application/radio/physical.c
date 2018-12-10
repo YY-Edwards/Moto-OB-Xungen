@@ -191,32 +191,53 @@ Called By: phy_xnl_rx
 */
 static void phy_tx_func( void * ssc)
 {
-    if(NULL != phy_xnl_frame_tx)
-    {
-  	  	/*send ssc data in xnl frame*/
-  	  	phy_xnl_tx(ssc);		
-    }
+
+#if 1
 	
-    /*if enable send/receive payload(media)and enable playback function, defined in physical.h*/
-    //#if (ENABLE == PAYLOAD_ENABLE) 
-    ////if(NULL != phy_payload_frame_tx)
-    //{
-		////启用回放功能
-		////if (ENABLE == PLAYBACK_ENABLE)
-		//{
-			///*send ssc data in payload(media) frame*/
-			//phy_payload_tx(&(((ssc_fragment_t * )ssc)->payload_channel));	
-			//
-		//}
-    //}
-	//#else
-	///*send idle frame*/	
-	//((ssc_fragment_t * )ssc)->payload_channel.dword[0] = PAYLOADIDLE0;
-	//((ssc_fragment_t * )ssc)->payload_channel.dword[1] = PAYLOADIDLE1;
-	//#endif /*end if*/
-		
-	((payload_channel_t * )(((unsigned char *)ssc) + 4))->dword[0] = PAYLOADIDLE0;
-	((payload_channel_t * )(((unsigned char *)ssc) + 4))->dword[1] = PAYLOADIDLE1;
+	if(NULL != phy_xnl_frame_tx)
+	{
+		U16 offset = SSI_FRAME_BUF_SIZE*2;
+		U32 *addr= 0;
+		  	/*send ssc data in xnl frame*/
+		for(int i=0; i < DMASIZE; ++i)
+		{
+			addr = ssc + (i*offset);
+			phy_xnl_tx((xnl_channel_t *)addr);
+		}
+	}
+
+
+#else
+
+  if(NULL != phy_xnl_frame_tx)
+  {
+	  /*send ssc data in xnl frame*/
+	  phy_xnl_tx(ssc);
+  }
+  
+  /*if enable send/receive payload(media)and enable playback function, defined in physical.h*/
+  //#if (ENABLE == PAYLOAD_ENABLE)
+  ////if(NULL != phy_payload_frame_tx)
+  //{
+  ////启用回放功能
+  ////if (ENABLE == PLAYBACK_ENABLE)
+  //{
+  ///*send ssc data in payload(media) frame*/
+  //phy_payload_tx(&(((ssc_fragment_t * )ssc)->payload_channel));
+  //
+  //}
+  //}
+  //#else
+  ///*send idle frame*/
+  //((ssc_fragment_t * )ssc)->payload_channel.dword[0] = PAYLOADIDLE0;
+  //((ssc_fragment_t * )ssc)->payload_channel.dword[1] = PAYLOADIDLE1;
+  //#endif /*end if*/
+  
+  ((payload_channel_t * )(((unsigned char *)ssc) + 4))->dword[0] = PAYLOADIDLE0;
+  ((payload_channel_t * )(((unsigned char *)ssc) + 4))->dword[1] = PAYLOADIDLE1;
+
+#endif	
+	
 }
 
 
@@ -233,23 +254,40 @@ Called By: phy_xnl_rx
 */
 static void phy_rx_func( void * ssc)
 {    
-		
+
+#if 1 
+
 	if(NULL != phy_xnl_frame_rx)
 	{
+		U16 offset = SSI_FRAME_BUF_SIZE*2;
+		U32 *addr= 0;
 		/*receive ssc data in xnl frame*/
-		phy_xnl_rx(ssc);
-	}	
-	
-	/*if enable send/receive payload(media), defined in physical.h*/
-	#if ENABLE == PAYLOAD_ENABLE
-	//if(NULL != phy_payload_frame_rx)
-	{
-		/*receive ssc data in payload frame*/
-		phy_payload_rx(((unsigned char *)ssc) + 4);
+		for(int i=0; i < DMASIZE; ++i)
+		{
+			addr = ssc + (i*offset);
+			phy_xnl_rx((xnl_channel_t *)addr);
+		}
 	}
-	#endif /*end if*/
-	
-	
+
+
+#else
+		if(NULL != phy_xnl_frame_rx)
+		{
+			/*receive ssc data in xnl frame*/
+			phy_xnl_rx(ssc);
+		}
+		
+		/*if enable send/receive payload(media), defined in physical.h*/
+		#if ENABLE == PAYLOAD_ENABLE
+		//if(NULL != phy_payload_frame_rx)
+		{
+			/*receive ssc data in payload frame*/
+			phy_payload_rx(((unsigned char *)ssc) + 4);
+		}
+		#endif /*end if*/
+
+#endif		
+
 }
 
 /**

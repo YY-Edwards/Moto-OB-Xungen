@@ -30,15 +30,58 @@ volatile U32 intDuration = 0;
 volatile U8 BufferIndex; // Index is used to toggle send/receive buffer
 
 
-U16 TxIdle[] = {
+U16 TxIdle[DMA_BUF_SIZE] = {
 	0xABCD, 0x5A5A,
 	0xABCD, 0x5A5A,
-	0x0000, 0x0000
-};
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000,
+	0xABCD, 0x5A5A,
+	0xABCD, 0x5A5A,
+	0x0000, 0x0000};
 
-/*Set the PDCA data channel address to rend/receive SSC data*/
-volatile unsigned char RxBuffer[2][480];
-volatile unsigned char TxBuffer[2][480];
+///*Set the PDCA data channel address to rend/receive SSC data*/
+//volatile unsigned char RxBuffer[2][480];
+//volatile unsigned char TxBuffer[2][480];
+
+/*
+ * Define one Tx buffer queue and one Rx buffer queue:
+ * 16 frames for Tx DMA and 16 frames for Rx DMA, with each size 60 words.
+ */
+volatile U16 RxBuffer[DMABUFNUM][DMA_BUF_SIZE];//16*60*2 = 1920bytes
+volatile U16 TxBuffer[DMABUFNUM][DMA_BUF_SIZE];
+
+/*
+ * Define 3 indexes to record DMA frame transfer status:
+ * Which tx/rx buffer has just been transferred;
+ * Which tx/rx buffer is now being transferred;
+ * Which tx/rx buffer will be transferred next.
+ */
+volatile static U8 previous_index = DMABUFNUM - 1;
+volatile static U8 dma_buffer_index = 0;
+volatile static U8 next_index = 1;
 
 /*
 Defines the interface function (callback function) is used to send/receive SSC 
@@ -46,8 +89,6 @@ data*/
  void (*phy_rx_exec)(void *) = NULL;
  void (*phy_tx_exec)(void *) = NULL;
 //extern volatile  xSemaphoreHandle xBinarySemaphore;
-
-
 
 
 
@@ -103,47 +144,72 @@ volatile U32 intDuration;
 __attribute__((__interrupt__))
 FASTRUN void pdca_int_handler(void)
 {
-    
-	//static portBASE_TYPE xHigherPriorityTaskWoken;
-	//xHigherPriorityTaskWoken = pdFALSE;
-	
-	static U32 count=0;
+    U32 addr;
+	U16 i;
+	static U8 int_counter = 0;
+	static portBASE_TYPE xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE;	
+	//static U32 count=0;
 	intStartCount = get_system_time();//Get_system_register(AVR32_COUNT);
 	
-	count++;
+	//count++;
 	/*Toggle Index*/
-	//U8 temp = BufferIndex;
-	BufferIndex ^= 0x01;
+	//BufferIndex ^= 0x01;
+	
+	
+
+	/* Fill the buffer just sent with idle frame */
+	for (i = 0; i < DMA_BUF_SIZE; i++)
+	{
+		TxBuffer[dma_buffer_index][i] = TxIdle[i];//如果，当前发送buff里没有用户数据，那么默认发送空闲帧数据
+	}
+	
+	/* update buffer index record */	
+	previous_index = (previous_index + 1) % DMABUFNUM;//已传输完成的索引
+	dma_buffer_index = (dma_buffer_index + 1) % DMABUFNUM;//当前正在传输的索引
+	next_index = (next_index + 1) % DMABUFNUM;//下一个等待传输的索引
 	
 	/*Software reset PDCA */
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->marr 
-                              = (U32)(TxBuffer[BufferIndex]);
-
-    /*Three words xfered each DMA.*/
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 120;
-
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr 
-                              = (U32)(RxBuffer[BufferIndex]);
-
-    /*Three words xfered each DMA.*/
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 120;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr;
+	/* Update Rx address and size for next transfer */
+	addr = (U32)&(RxBuffer[next_index]);
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr = addr;
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = DMA_BUF_SIZE;
+	
+	 /* Update Tx address and size for next transfer */
+	addr = (U32)&(TxBuffer[next_index]);
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->marr = addr;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = DMA_BUF_SIZE;
+	
+	
+	if(phy_rx_exec != NULL)
+	{
+		void  * p = RxBuffer[previous_index];//处理已传输完成的rx_buff
+		phy_rx_exec(p);//phy_rx_func
+	}
+	if(phy_tx_exec != NULL)
+	{
+		void  * p = TxBuffer[dma_buffer_index];//处理当前正在传输的tx_buff：即应该将即将需要传输的数据拷贝到此地址上
+		phy_tx_exec(p);//phy_tx_func
+	}
+	
+	
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr;//clear isr
 	
 	/*receive SSC data*/
 	
-	if(phy_rx_exec != NULL)for(int i=0; i < 40;++i)
-	{
-		void  * p = RxBuffer[BufferIndex] + i * 12;
-		phy_rx_exec(p);//phy_rx_func
-	}
-    
-
-    /*transmit SSC data*/
-	if(phy_tx_exec != NULL)for(int i =0; i< 40; ++i)
-	{
-		void  * p = TxBuffer[BufferIndex] + i * 12;
-		phy_tx_exec(p);//phy_tx_func
-	}
+	//if(phy_rx_exec != NULL)for(int i=0; i < 40;++i)
+	//{
+		//void  * p = RxBuffer[BufferIndex] + i * 12;
+		//phy_rx_exec(p);//phy_rx_func
+	//}
+    //
+//
+    ///*transmit SSC data*/
+	//if(phy_tx_exec != NULL)for(int i =0; i< 40; ++i)
+	//{
+		//void  * p = TxBuffer[BufferIndex] + i * 12;
+		//phy_tx_exec(p);//phy_tx_func
+	//}
 
 	//if(count%20000 == 0)
 	{
@@ -243,14 +309,14 @@ Called By: void ssc_init(void) -- ssc.c
 static void local_start_PDC(void)
 {
     /*Toggle Index*/	
-    BufferIndex = 1;
-	
-	memset(RxBuffer, 0, 960);
-	for(int i = 0; i < 80; ++i)
-	{
-		memcpy(TxBuffer[0] + i * 12 , TxIdle, 12);
-	}
-	
+    //BufferIndex = 1;
+
+	//memset(RxBuffer, 0, 960);
+	//for(int i = 0; i < 80; ++i)
+	//{
+		//memcpy(TxBuffer[0] + i * 12 , TxIdle, 12);
+	//}
+	//
 	//TxBuffer[0].xnl_channel.dword = XNL_IDLE;
 	//TxBuffer[0].payload_channel.dword[0] = PAYLOADIDLE0;
 	//TxBuffer[0].payload_channel.dword[1] = PAYLOADIDLE1;
@@ -258,33 +324,42 @@ static void local_start_PDC(void)
 	//TxBuffer[1].payload_channel.dword[0] = PAYLOADIDLE0;
 	//TxBuffer[1].payload_channel.dword[1] = PAYLOADIDLE1;
 	
+	U16 i = 0, j=0;
 	
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->idr = 
-               AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr; 
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mar = 
-                                          (U32)(RxBuffer[0]);
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcr = 120;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->psr = 
-                                                          AVR32_PDCA_PID_SSC_RX;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr = 
-                                          (U32)(RxBuffer[1]);
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 120;
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mr = AVR32_PDCA_WORD;
+	/* Clear RxBuffer and set TxBuffer to idle frame. */
+	for(j = 0; j < DMABUFNUM; j++)
+	{
+		for (i = 0; i < DMA_BUF_SIZE; i++)
+		{
+			RxBuffer[j][i] = 0;
+			TxBuffer[j][i] = TxIdle[i];
+		}
+	}
 
 	
+	dma_buffer_index = 0;
+	
+	//disable interrupt
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->idr =  AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr;							//clear interrupt
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mar = (U32)(RxBuffer[0]);	/* 1st RxBuffer address */
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcr = DMA_BUF_SIZE;			/* 1st transfer size:60 */
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->psr = AVR32_PDCA_PID_SSC_RX; /* set DMA source to SSC RX */
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr = (U32)(RxBuffer[1]);   /* next RxBuffer address */
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = DMA_BUF_SIZE;			/* 2nd transfer size:60 */
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mr = AVR32_PDCA_HALF_WORD;		//data size:2bytes. 
+																						//transfer bytes:2*60=120bytes,12bytes per 125us,
+																						//then,it takes 10*125us=1.25ms/per interrupt.
+	
 
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->idr = 
-               AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->idr = AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->isr;
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mar = 
-                                          (U32)(TxBuffer[0]);
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcr = 120;
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->psr = AVR32_PDCA_PID_SSC_TX;
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->marr = 
-                                             (U32)(TxBuffer[1]);
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 120;
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mr = AVR32_PDCA_WORD;
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mar = (U32)(TxBuffer[0]);
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcr = DMA_BUF_SIZE;
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->psr = AVR32_PDCA_PID_SSC_TX;/* set DMA source to SSC TX */
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->marr =  (U32)(TxBuffer[1]);
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = DMA_BUF_SIZE;
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mr = AVR32_PDCA_HALF_WORD;
 }/*End of local_start_PDC.*/
 
 

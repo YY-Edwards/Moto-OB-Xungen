@@ -92,6 +92,41 @@ typedef struct {
     payload_channel_t    payload_channel;
 } ssc_fragment_t;
 
+
+
+
+
+/* Define the DMA buffer size and buffer number:
+ *
+ * For SSI interface, 1 slot is 2bytes.
+ * For 8 slot mode used in GOB, McBsp/SSC frame length is 8*2 = 16bytes.
+ * A DMA frame consists of 10 McBsp frames, whose size is 10*16=160 bytes.
+ *
+ * How to decide the total buffer size for DMA frames?
+ *
+ * For 8 slot mode, SSI CLK rate is 8K*8*16 = 1.024MHz,
+ * Within one second, there will be 1024000/8=128000Bytes received.
+ * That's 128000/160=800 DMA frames, means each DMA frame takes 1.25ms.
+ * Every 5ms, physical layer will check the data received in DMA buffer.
+ * During the 5ms, there will be 4 DMA frames of data received.
+ * Thus theoretically, to prevent buffer overflow, minimum buffer depth is 4.
+ *
+ * However, to make enough buffer space, 16 (instead of 4) DMA buffers are used
+ * in actual code. In this way, in worst case, only 25% buffers (that's 4 of 16)
+ * are occupied with received data which has not been processed by physical layer.
+ *
+ * And since GOB olny tx/rx on 6 slots of all 8 slots, thus the total buffer
+ * size is 6*2*10*16=1920bytes.
+ *
+ * To simplify control logic, tx buffer use the same size and number of rx.
+ */
+
+#define DMABUFNUM 16//frame change
+#define DMASIZE 10//frame change
+#define SSI_FRAME_BUF_SIZE 6	/* 6 half-word = 12 bytes */
+#define DMA_BUF_SIZE (DMASIZE * SSI_FRAME_BUF_SIZE)	/* 60 half-word = 120 bytes, total 120* 16 = 1920 bytes */
+
+
 /*Initialize the SSC and PDCA */
 void ssc_init(void);
 void sync_ssi(void);
