@@ -92,6 +92,10 @@ typedef struct {
     payload_channel_t    payload_channel;
 } ssc_fragment_t;
 
+#define DMA_BUFF_BYTE_SZIE 480
+#define DMA_BUFF_WORD_SZIE 120 //480/4
+#define SSI_FRAME_BUF_SIZE 6	/* 6 half-word = 12 bytes */
+
 /*Initialize the SSC and PDCA */
 void ssc_init(void);
 void sync_ssi(void);

@@ -37,8 +37,8 @@ U16 TxIdle[] = {
 };
 
 /*Set the PDCA data channel address to rend/receive SSC data*/
-volatile unsigned char RxBuffer[2][480];
-volatile unsigned char TxBuffer[2][480];
+volatile unsigned char RxBuffer[2][DMA_BUFF_BYTE_SZIE];
+volatile unsigned char TxBuffer[2][DMA_BUFF_BYTE_SZIE];
 
 /*
 Defines the interface function (callback function) is used to send/receive SSC 
@@ -120,13 +120,13 @@ FASTRUN void pdca_int_handler(void)
                               = (U32)(TxBuffer[BufferIndex]);
 
     /*Three words xfered each DMA.*/
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 120;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = DMA_BUFF_WORD_SZIE;//120*4=480bytes;
 
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr 
                               = (U32)(RxBuffer[BufferIndex]);
 
     /*Three words xfered each DMA.*/
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 120;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = DMA_BUFF_WORD_SZIE;//120*4=480bytes;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr;
 	
 	/*receive SSC data*/
@@ -246,9 +246,9 @@ static void local_start_PDC(void)
     BufferIndex = 1;
 	
 	memset(RxBuffer, 0, 960);
-	for(int i = 0; i < 80; ++i)
+	for(int i = 0; i < (DMA_BUFF_BYTE_SZIE/SSI_FRAME_BUF_SIZE); ++i)
 	{
-		memcpy(TxBuffer[0] + i * 12 , TxIdle, 12);
+		memcpy(TxBuffer[0] + i * (sizeof(TxIdle)) , TxIdle, sizeof(TxIdle));
 	}
 	
 	//TxBuffer[0].xnl_channel.dword = XNL_IDLE;
@@ -264,12 +264,12 @@ static void local_start_PDC(void)
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr; 
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mar = 
                                           (U32)(RxBuffer[0]);
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcr = 120;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcr = DMA_BUFF_WORD_SZIE;//480bytes
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->psr = 
                                                           AVR32_PDCA_PID_SSC_RX;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->marr = 
                                           (U32)(RxBuffer[1]);
-    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = 120;
+    (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = DMA_BUFF_WORD_SZIE;//480bytes
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mr = AVR32_PDCA_WORD;
 
 	
@@ -279,11 +279,11 @@ static void local_start_PDC(void)
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->isr;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mar = 
                                           (U32)(TxBuffer[0]);
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcr = 120;
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcr = DMA_BUFF_WORD_SZIE;//120 word:480bytes
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->psr = AVR32_PDCA_PID_SSC_TX;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->marr = 
                                              (U32)(TxBuffer[1]);
-	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = 120;
+	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->tcrr = DMA_BUFF_WORD_SZIE;//120 word:480bytes
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->mr = AVR32_PDCA_WORD;
 }/*End of local_start_PDC.*/
 
