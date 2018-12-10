@@ -112,7 +112,6 @@ FASTRUN void pdca_int_handler(void)
 	
 	count++;
 	/*Toggle Index*/
-	//U8 temp = BufferIndex;
 	BufferIndex ^= 0x01;
 	
 	/*Software reset PDCA */
@@ -131,30 +130,19 @@ FASTRUN void pdca_int_handler(void)
 	
 	/*receive SSC data*/
 	
-	if(phy_rx_exec != NULL)for(int i=0; i < 40;++i)
+	if(phy_rx_exec != NULL)for(int i=0; i < (DMA_BUFF_BYTE_SZIE/SSI_FRAME_BUF_BYTE_SIZE);++i)
 	{
-		void  * p = RxBuffer[BufferIndex] + i * 12;
+		void  * p = RxBuffer[BufferIndex] + i * SSI_FRAME_BUF_BYTE_SIZE;
 		phy_rx_exec(p);//phy_rx_func
 	}
     
 
     /*transmit SSC data*/
-	if(phy_tx_exec != NULL)for(int i =0; i< 40; ++i)
+	if(phy_tx_exec != NULL)for(int i =0; i<  (DMA_BUFF_BYTE_SZIE/SSI_FRAME_BUF_BYTE_SIZE); ++i)
 	{
-		void  * p = TxBuffer[BufferIndex] + i * 12;
+		void  * p = TxBuffer[BufferIndex] + i * SSI_FRAME_BUF_BYTE_SIZE;
 		phy_tx_exec(p);//phy_tx_func
 	}
-
-	//if(count%20000 == 0)
-	{
-		/* 'Give' the semaphore to unblock the task. */
-		//xSemaphoreGiveFromISR(xBinarySemaphore, &xHigherPriorityTaskWoken );
-	}
-	
-		///*****测试：payload通道上把payload-RX数据直接回发*******/
-		//TxBuffer[BufferIndex].payload_channel.dword[0] = RxBuffer[BufferIndex].payload_channel.dword[0];
-		//TxBuffer[BufferIndex].payload_channel.dword[1] = RxBuffer[BufferIndex].payload_channel.dword[1];
-		/************/
 
 	
 	intDuration = get_system_time() - intStartCount;
@@ -245,7 +233,7 @@ static void local_start_PDC(void)
     /*Toggle Index*/	
     BufferIndex = 1;
 	
-	memset(RxBuffer, 0, 960);
+	memset(RxBuffer, 0, sizeof(RxBuffer));
 	for(int i = 0; i < (DMA_BUFF_BYTE_SZIE/SSI_FRAME_BUF_SIZE); ++i)
 	{
 		memcpy(TxBuffer[0] + i * (sizeof(TxIdle)) , TxIdle, sizeof(TxIdle));

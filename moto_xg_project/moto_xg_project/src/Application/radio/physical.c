@@ -215,8 +215,8 @@ static void phy_tx_func( void * ssc)
 	//((ssc_fragment_t * )ssc)->payload_channel.dword[1] = PAYLOADIDLE1;
 	//#endif /*end if*/
 		
-	((payload_channel_t * )(((unsigned char *)ssc) + 4))->dword[0] = PAYLOADIDLE0;
-	((payload_channel_t * )(((unsigned char *)ssc) + 4))->dword[1] = PAYLOADIDLE1;
+	((payload_channel_t * )(((unsigned char *)ssc) + sizeof(xnl_channel_t)))->dword[0] = PAYLOADIDLE0;
+	((payload_channel_t * )(((unsigned char *)ssc) + sizeof(xnl_channel_t)))->dword[1] = PAYLOADIDLE1;
 }
 
 
@@ -245,7 +245,7 @@ static void phy_rx_func( void * ssc)
 	//if(NULL != phy_payload_frame_rx)
 	{
 		/*receive ssc data in payload frame*/
-		phy_payload_rx(((unsigned char *)ssc) + 4);
+		phy_payload_rx(((unsigned char *)ssc) + sizeof(xnl_channel_t));
 	}
 	#endif /*end if*/
 	
