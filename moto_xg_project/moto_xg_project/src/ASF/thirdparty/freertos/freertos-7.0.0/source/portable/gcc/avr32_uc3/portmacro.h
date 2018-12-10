@@ -108,8 +108,9 @@ extern "C" {
 
 /* Architecture specifics. */
 #define portSTACK_GROWTH      ( -1 )
-//1ms需要中断的次数：2
-#define portTICK_RATE_MS      ( ( portTickType ) ((2*2000)/ configTICK_RATE_HZ) )//注意此处相应的调整:lms,需要的ticks(中断)次数
+//应该是一个时间片需要的ms数
+//因为此处是整形，不能做小数运算。所以无法计算<1ms 的延时
+#define portTICK_RATE_MS      ( ( portTickType ) ((1000)/ configTICK_RATE_HZ) )//注意此处相应的调整
 #define portBYTE_ALIGNMENT    4
 #define portNOP()             {__asm__ __volatile__ ("nop");}
 /*-----------------------------------------------------------*/

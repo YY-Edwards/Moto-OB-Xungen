@@ -81,9 +81,9 @@
 														  //
 
 //RTOS 系统节拍中断的频率。即一秒中断的次数，每次中断RTOS都会进行任务调度。
-//2000:0.5ms?														  //configTICK_RATE_HZ定义正确， 因为程序FreeRTOS调度会影响任务的延时等待，所以为保证稳定运行建议降低等待时间
-#define configTICK_RATE_HZ        ( ( portTickType ) 2000)//任务调度频率提高可以有效解决重发机制的超时重发问题，但是否会引起其它问题，有待测试。125us
-													      //或者降低任务的延时等待时间，因为其等待时间是相对时间，不够精准。
+//2000:0.5ms	
+//1000:1ms													  //configTICK_RATE_HZ定义正确， 因为程序FreeRTOS调度会影响任务的延时等待，所以为保证稳定运行建议降低等待时间
+#define configTICK_RATE_HZ        ( ( portTickType ) 1000)
 #define configMAX_PRIORITIES      ( ( unsigned portBASE_TYPE ) 8 )
 #define configMINIMAL_STACK_SIZE  ( ( unsigned portSHORT ) 256 )
 /* configTOTAL_HEAP_SIZE is not used when heap_3.c is used. */
