@@ -68,29 +68,16 @@ volatile static U32 AMBE_HT[2];
 volatile xQueueHandle test_tx = NULL;
 extern U32 tc_tick;
 extern void xnl_send_device_master_query(void);
-/**
-Function: phy_init
-Description: initialize the SSC;
-    register the func to send/receive ssc packet;
-	initialize the queue
-Calls:   
-    ssc_init -- ssc.c
-    register_rx_tx_func -- ssc.c
-	xQueueCreate -- freertos
-Called By: xnl_init -- xnl.c
-*/
-void phy_init( void )
+
+
+void physical_layer_task(void*p)
 {
-    /*register the func to send/receive ssc packet*/
-    register_rx_tx_func(phy_rx_func, phy_tx_func);	
-	
-	/*initialize the SSC*/
-	ssc_init();
-	
-	/*send device_master_query to connect radio*/
-	//xnl_send_device_master_query();
-	
+	while(1)
+	{
+		//xSemaphoreTake( modem_semphr, portMAX_DELAY );
+	}
 }
+
 
 /**
 Function: phy_tx
@@ -2579,6 +2566,43 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel)
 	}//End of RxMedia Phy Handler.
 }
 #endif /*end if*/
+
+
+/**
+Function: phy_init
+Description: initialize the SSC;
+    register the func to send/receive ssc packet;
+	initialize the queue
+Calls:   
+    ssc_init -- ssc.c
+    register_rx_tx_func -- ssc.c
+	xQueueCreate -- freertos
+Called By: xnl_init -- xnl.c
+*/
+void phy_init( void )
+{
+    /*register the func to send/receive ssc packet*/
+    register_rx_tx_func(phy_rx_func, phy_tx_func);	
+	
+	//xTaskCreate(
+	//physical_layer_task
+	//,  (const signed portCHAR *)"PHY_Assemble_Parse"
+	//,  500
+	//,  NULL
+	//,  tskPHY_PRIORITY
+	//,  NULL );
+	
+	
+	
+	/*initialize the SSC*/
+	ssc_init();
+	
+	/*send device_master_query to connect radio*/
+	//xnl_send_device_master_query();
+	
+}
+
+
 
 void * get_idle_store(xQueueHandle store)
 {

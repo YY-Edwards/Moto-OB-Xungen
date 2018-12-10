@@ -400,7 +400,7 @@ void wait_10_ms(void)
 }
 
 
-unsigned long get_system_time()
+unsigned long get_system_time(void)
 {
 	unsigned long ms_value = xTaskGetTickCount();
 	

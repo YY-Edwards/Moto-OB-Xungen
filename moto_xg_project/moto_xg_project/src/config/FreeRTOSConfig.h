@@ -133,7 +133,7 @@ to exclude the API function. */
 // #define INCLUDE_vResumeFromISR              1
 #define INCLUDE_uxTaskGetStackHighWaterMark 1
 
-#define tskPHY_PRIORITY		(tskIDLE_PRIORITY + 3)
+#define tskPHY_PRIORITY		(tskIDLE_PRIORITY + 4)
 #define tskXNL_PRIORITY		(tskIDLE_PRIORITY + 3)
 #define tskXCMP_PRIORITY	(tskIDLE_PRIORITY + 3)
 #define tskUSART_PRIORITY	(tskIDLE_PRIORITY + 2)

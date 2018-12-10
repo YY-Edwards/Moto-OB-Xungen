@@ -17,14 +17,15 @@ History:
 #include "semphr.h"
 #include "gpio.h"
 #include "task.h"
+#include "timer.h"
 
 
 #define SSI_SYNC_GPIO AVR32_PIN_PB11
 #define FASTRUN __attribute__ ((section (".fastrun")))
 xSemaphoreHandle ssi_sync_semphr = NULL;
 
-volatile U32 intStartCount;
-volatile U32 intDuration;
+volatile U32 intStartCount = 0;
+volatile U32 intDuration = 0;
 
 volatile U8 BufferIndex; // Index is used to toggle send/receive buffer
 
@@ -107,7 +108,7 @@ FASTRUN void pdca_int_handler(void)
 	//xHigherPriorityTaskWoken = pdFALSE;
 	
 	static U32 count=0;
-	intStartCount = Get_system_register(AVR32_COUNT);
+	intStartCount = get_system_time();//Get_system_register(AVR32_COUNT);
 	
 	count++;
 	/*Toggle Index*/
@@ -156,7 +157,7 @@ FASTRUN void pdca_int_handler(void)
 		/************/
 
 	
-	intDuration = Get_system_register(AVR32_COUNT) - intStartCount;
+	intDuration = get_system_time() - intStartCount;
 	
 	
 }/*End of pdca_int_handler.*/

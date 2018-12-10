@@ -47,7 +47,7 @@ void delay_ns(U32 ns);
 void delay_us(U32 us);
 void delay_ms(U32 ms);
 void setTimer(unsigned char timer, unsigned int delay, unsigned char rearm, handler timehandler, void *param);
-
+unsigned long get_system_time(void);
 
 
 
