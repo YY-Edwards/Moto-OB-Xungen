@@ -25,6 +25,7 @@ History:
 #include "semphr.h"
 
 extern volatile xSemaphoreHandle xnl_timeout_semphr;
+xSemaphoreHandle modem_semphr = NULL;
 
 volatile phy_fragment_t xnl_store[MAX_XNL_STORE];
 volatile xQueueHandle xnl_store_idle = NULL;
@@ -32,6 +33,9 @@ volatile xQueueHandle xnl_store_idle = NULL;
 /*define the queue are used to send/receive xnl packet*/
 volatile xQueueHandle phy_xnl_frame_tx = NULL;
 volatile xQueueHandle phy_xnl_frame_rx = NULL;
+
+volatile xQueueHandle phy_frame_rx_queue = NULL;
+volatile xQueueHandle phy_frame_tx_queue = NULL;
 
 /*Defines the callback function is used to rend/receive SSC data*/
 static void phy_tx_func(void * ssc);
@@ -72,9 +76,72 @@ extern void xnl_send_device_master_query(void);
 
 void physical_layer_task(void*p)
 {
+	void * rx_ptr = NULL;
+	U16 offset = SSI_FRAME_BUF_SIZE*4;
+	U32 *addr= NULL;
+	unsigned char temp_buff[DMA_BUF_WORD_SIZE*sizeof(void*)] ={0};
+		
 	while(1)
 	{
-		//xSemaphoreTake( modem_semphr, portMAX_DELAY );
+		xSemaphoreTake( modem_semphr, portMAX_DELAY);
+		
+		//rx
+		/*take the phy packet from queue*/
+		if( pdTRUE == xQueueReceive(
+								phy_frame_rx_queue
+								, &rx_ptr
+								, portMAX_DELAY)
+			)
+		{
+			if(rx_ptr != NULL)
+			{
+				memcpy(temp_buff, rx_ptr, sizeof(temp_buff));//拷贝到临时空间
+				set_xnl_idle(rx_ptr);//归还指针
+				rx_ptr =NULL;
+				
+				/*receive ssc data in xnl frame*/
+				for(int i=0; i < DMASIZE; ++i)
+				{
+					addr = temp_buff + (i*offset);
+					phy_xnl_rx((xnl_channel_t *)addr);
+				}
+			}		
+		}
+			
+		//tx
+		/*push the phy packet to queue*/
+		
+			
+		//void * tx_ptr = get_xnl_idle();
+		//if(NULL != tx_ptr)
+		//{			
+			///*send ssc data in xnl frame*/
+			//for(int i=0; i < DMASIZE; ++i)
+			//{
+				//addr = tx_ptr + (i*offset);
+				//phy_xnl_tx((xnl_channel_t *)addr);
+				//((payload_channel_t * )(((unsigned char *)addr) + 4))->dword[0] = PAYLOADIDLE0;
+				//((payload_channel_t * )(((unsigned char *)addr) + 4))->dword[1] = PAYLOADIDLE1;
+										//
+			//}
+			//
+			//if(((xnl_channel_t *)tx_ptr)->dword != XNL_IDLE)//非空闲帧
+			//{
+					//if(pdTRUE == xQueueSend(phy_frame_tx_queue, &tx_ptr, 0))//如果队列已满，则立即返回
+					//{
+					 //
+					//}
+					//else
+					//{
+						//log_debug("push phy_frame_tx_queue failure/full!");
+					//}
+			//}
+		//}
+		//else
+		//{
+			//log_debug("get tx_ptr(phy) - failure\n");
+		//}	
+		//log_debug("phy run.");
 	}
 }
 
@@ -189,10 +256,30 @@ Calls:
 Called By: phy_xnl_rx
     phy_init(register_rx_tx_func)
 */
+extern U16 TxIdle[DMA_BUF_HALF_WORD_SIZE];
 static void phy_tx_func( void * ssc)
 {
 
 #if 1
+		//void * tx_ptr = NULL;
+		//if( pdTRUE == xQueueReceiveFromISR(
+									//phy_frame_tx_queue
+									//, &tx_ptr
+									//, 0))
+		//{
+			//if(tx_ptr !=NULL)
+			//{
+				//memcpy(ssc, tx_ptr, DMA_BUF_WORD_SIZE*sizeof(void*));//120bytes
+				//set_xnl_idle_isr(tx_ptr);
+				//tx_ptr = NULL;
+			//}
+			//
+		//}
+		//else//nothing,填充空闲帧
+		//{
+			//memcpy(ssc, (void*)TxIdle, DMA_BUF_WORD_SIZE*sizeof(void*));			
+		//}
+									
 	
 	if(NULL != phy_xnl_frame_tx)
 	{
@@ -259,18 +346,44 @@ static void phy_rx_func( void * ssc)
 {    
 
 #if 1 
-
-	if(NULL != phy_xnl_frame_rx)
-	{
-		U16 offset = SSI_FRAME_BUF_SIZE*4;
-		U32 *addr= 0;
-		/*receive ssc data in xnl frame*/
-		for(int i=0; i < DMASIZE; ++i)
+		//if(
+		//(((xnl_channel_t *)ssc)->dword == XNL_IDLE)
+		//||(((xnl_channel_t *)ssc)->dword == 0))
+		//{
+			//return;
+		//}
+		xnl_channel_t * phy_frame_ptr =NULL;
+		phy_frame_ptr= get_xnl_idle_isr();
+		if(NULL == phy_frame_ptr)
 		{
-			addr = ssc + (i*offset);
-			phy_xnl_rx((xnl_channel_t *)addr);
+			log_debugFromISR("get idle_ptr(phy) failure!");
 		}
-	}
+		else
+		{
+			memcpy((void*)phy_frame_ptr, ssc, DMA_BUF_WORD_SIZE*sizeof(void*));//120bytes
+			 /*push the phy packet to queue*/
+			 if( pdTRUE == xQueueSendFromISR(
+			 phy_frame_rx_queue
+			 , &phy_frame_ptr
+			 ,0
+			 ))
+			 {
+			 
+			 }
+			
+		}
+
+	//if(NULL != phy_xnl_frame_rx)
+	//{
+		//U16 offset = SSI_FRAME_BUF_SIZE*4;
+		//U32 *addr= 0;
+		///*receive ssc data in xnl frame*/
+		//for(int i=0; i < DMASIZE; ++i)
+		//{
+			//addr = ssc + (i*offset);
+			//phy_xnl_rx((xnl_channel_t *)addr);
+		//}
+	//}
 
 
 #else
@@ -2622,16 +2735,20 @@ Called By: xnl_init -- xnl.c
 */
 void phy_init( void )
 {
-    /*register the func to send/receive ssc packet*/
-    register_rx_tx_func(phy_rx_func, phy_tx_func);	
+	phy_frame_rx_queue = xQueueCreate(RX_PHY_QUEUE_DEEP, sizeof(void*));
+	phy_frame_tx_queue = xQueueCreate(TX_PHY_QUEUE_DEEP, sizeof(void*));
 	
-	//xTaskCreate(
-	//physical_layer_task
-	//,  (const signed portCHAR *)"PHY_Assemble_Parse"
-	//,  500
-	//,  NULL
-	//,  tskPHY_PRIORITY
-	//,  NULL );
+    /*register the func to send/receive ssc packet*/
+    register_rx_tx_func(phy_rx_func, phy_tx_func);		
+	modem_semphr = xSemaphoreCreateCounting(1,0);	
+	
+	xTaskCreate(
+	physical_layer_task
+	,  (const signed portCHAR *)"PHY_Assemble_Parse"
+	,  1200
+	,  NULL
+	,  tskPHY_PRIORITY
+	,  NULL );
 	
 	
 	

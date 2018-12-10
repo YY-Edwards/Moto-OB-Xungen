@@ -19,11 +19,15 @@ History:
 #define TRUE 1
 #define FALSE 0
 
-#define MAX_XNL_STORE	 30//30*256=7680bytes
+#define MAX_XNL_STORE	 50//50*256=12800bytes
 
 /*the queue depth is used to create xnl queue*/
 #define TX_XNL_QUEUE_DEEP	17
 #define RX_XNL_QUEUE_DEEP	13
+
+/*the queue depth is used to create phy queue*/
+#define RX_PHY_QUEUE_DEEP	15
+#define TX_PHY_QUEUE_DEEP	15
 
 /*Enable payload(media) or disable*/
 #define PAYLOAD_ENABLE	DISABLE	

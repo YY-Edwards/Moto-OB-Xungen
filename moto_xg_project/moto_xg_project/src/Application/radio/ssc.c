@@ -23,6 +23,8 @@ History:
 #define SSI_SYNC_GPIO AVR32_PIN_PB11
 #define FASTRUN __attribute__ ((section (".fastrun")))
 xSemaphoreHandle ssi_sync_semphr = NULL;
+extern volatile bool is_writing;
+extern xSemaphoreHandle modem_semphr;
 
 volatile U32 intStartCount = 0;
 volatile U32 intDuration = 0;
@@ -151,16 +153,15 @@ FASTRUN void pdca_int_handler(void)
 	xHigherPriorityTaskWoken = pdFALSE;	
 	//static U32 count=0;
 	intStartCount = get_system_time();//Get_system_register(AVR32_COUNT);
-	
-	//count++;
+
 	/*Toggle Index*/
-	//BufferIndex ^= 0x01;
 	
 	/* Fill the buffer just sent with idle frame */
-	for (i = 0; i < DMA_BUF_HALF_WORD_SIZE; i++)
-	{
-		TxBuffer[dma_buffer_index][i] = TxIdle[i];//如果，当前发送buff里没有用户数据，那么默认发送空闲帧数据
-	}
+	//将tx_buff已传输完毕的数据全部再次重置为空闲，貌似不用这样的操作。待测试
+	//for (i = 0; i < DMA_BUF_HALF_WORD_SIZE; i++)
+	//{
+		//TxBuffer[dma_buffer_index][i] = TxIdle[i];
+	//}
 	
 	/* update buffer index record */	
 	previous_index = (previous_index + 1) % DMABUFNUM;//已传输完成的索引
@@ -193,33 +194,18 @@ FASTRUN void pdca_int_handler(void)
 	
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr;//clear isr
 	
-	/*receive SSC data*/
-	
-	//if(phy_rx_exec != NULL)for(int i=0; i < 40;++i)
-	//{
-		//void  * p = RxBuffer[BufferIndex] + i * 12;
-		//phy_rx_exec(p);//phy_rx_func
-	//}
-    //
-//
-    ///*transmit SSC data*/
-	//if(phy_tx_exec != NULL)for(int i =0; i< 40; ++i)
-	//{
-		//void  * p = TxBuffer[BufferIndex] + i * 12;
-		//phy_tx_exec(p);//phy_tx_func
-	//}
-
-	//if(count%20000 == 0)
+	int_counter++;
+	if (5 == int_counter) //hanle slower than before:5ms
 	{
-		/* 'Give' the semaphore to unblock the task. */
-		//xSemaphoreGiveFromISR(xBinarySemaphore, &xHigherPriorityTaskWoken );
+		if (!is_writing)
+		{
+			portENTER_CRITICAL();
+			xSemaphoreGiveFromISR(modem_semphr, 0 );
+			portEXIT_CRITICAL();
+		}
+		int_counter = 0;
 	}
-	
-		///*****测试：payload通道上把payload-RX数据直接回发*******/
-		//TxBuffer[BufferIndex].payload_channel.dword[0] = RxBuffer[BufferIndex].payload_channel.dword[0];
-		//TxBuffer[BufferIndex].payload_channel.dword[1] = RxBuffer[BufferIndex].payload_channel.dword[1];
-		/************/
-
+		
 	
 	intDuration = get_system_time() - intStartCount;
 	
@@ -306,21 +292,7 @@ Called By: void ssc_init(void) -- ssc.c
 */
 static void local_start_PDC(void)
 {
-    /*Toggle Index*/	
-    //BufferIndex = 1;
 
-	//memset(RxBuffer, 0, 960);
-	//for(int i = 0; i < 80; ++i)
-	//{
-		//memcpy(TxBuffer[0] + i * 12 , TxIdle, 12);
-	//}
-	//
-	//TxBuffer[0].xnl_channel.dword = XNL_IDLE;
-	//TxBuffer[0].payload_channel.dword[0] = PAYLOADIDLE0;
-	//TxBuffer[0].payload_channel.dword[1] = PAYLOADIDLE1;
-	//TxBuffer[1].xnl_channel.dword = XNL_IDLE;
-	//TxBuffer[1].payload_channel.dword[0] = PAYLOADIDLE0;
-	//TxBuffer[1].payload_channel.dword[1] = PAYLOADIDLE1;
 	
 	U16 i = 0, j=0;
 	
@@ -333,10 +305,8 @@ static void local_start_PDC(void)
 			TxBuffer[j][i] = TxIdle[i];
 		}
 	}
-
 	
 	dma_buffer_index = 0;
-	
 	//disable interrupt
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->idr =  AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->isr;							//clear interrupt
@@ -347,8 +317,7 @@ static void local_start_PDC(void)
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->tcrr = DMA_BUF_WORD_SIZE;			/* 2nd transfer size:30 */
     (&AVR32_PDCA.channel[PDCA_CHANNEL_SSCRX_EXAMPLE])->mr = AVR32_PDCA_WORD;		//data size:4bytes. 
 																						//transfer bytes:4*30=120bytes,12bytes per 125us,
-																						//then,it takes 10*125us=1.25ms/per interrupt.
-	
+																						//then,it takes 10*125us=1.25ms/per interrupt.	
 
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->idr = AVR32_PDCA_RCZ_MASK | AVR32_PDCA_TRC_MASK | AVR32_PDCA_TERR_MASK;
 	(&AVR32_PDCA.channel[PDCA_CHANNEL_SSCTX_EXAMPLE])->isr;

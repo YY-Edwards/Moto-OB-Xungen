@@ -1345,11 +1345,7 @@ static __app_Thread_(app_cfg)
 					{
 						////break;
 						//log_debug("avr flash test begin...\n");
-						//Disable_interrupt_level(1);
-						//vTaskSuspendAll();
-						//avr_flash_test();
-						//xTaskResumeAll();
-						//Enable_interrupt_level(1);
+						//write_flash_in_multitask(0, 0, 0);
 						//log_debug("avr flash test end...\n");
 					}
 				
