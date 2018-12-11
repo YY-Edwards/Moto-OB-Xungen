@@ -21,7 +21,7 @@ History:
 //#include "xgflash.h"
 #include "RFID.h"
 #include "app.h"
-#include "avrflash.h"
+#include "bootloader.h"
 
 
 //#include "myusart.h"
@@ -43,7 +43,8 @@ int main (void)
 	log_debug("----start debug----");
 	
 	flash_size = flashc_get_flash_size();
-	bootloader_info_init();
+	//will jump to 3-party if needed
+	bootloader_init();
 	//avr_flash_test();
 	
 	//third_party_interface_init();//usart1

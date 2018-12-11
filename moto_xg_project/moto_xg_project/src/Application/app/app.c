@@ -11,7 +11,7 @@
 #include <rtc.h>
 #include <physical.h>
 #include "string.h"
-#include "avrflash.h"
+#include "bootloader.h"
 #include "stdbool.h"
 #include "timer.h"
 

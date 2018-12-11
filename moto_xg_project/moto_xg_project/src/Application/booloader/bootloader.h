@@ -1,13 +1,13 @@
 /*
- * avrflash.h
+ * bootloader.h
  *
  * Created: 2018/12/3 16:40:52
  *  Author: Edwards
  */ 
 
 
-#ifndef AVRFLASH_H_
-#define AVRFLASH_H_
+#ifndef BOOTLOADER_H_
+#define BOOTLOADER_H_
 #include "flashc.h"
 
 #define ERASE_FLASH_TIMER 2
@@ -40,7 +40,7 @@
 #define BOOT_LOADER_SIZE				(0x00010000)   //64K ?
 #define MAX_FIRMWARE_BYTE_ZISE			(0x00020000)   //128K ?
 
-//#define BOOT_3_PARTY  					(0x80010000)   //3 party
+#define MIN_BOOT_3_PARTY  				(0x80010000)   //3 party
 
 
 #pragma  pack(1)
@@ -198,11 +198,13 @@ typedef struct
 
 #pragma  pack()
 
+//will jump to 3-party if needed
+//int flash_read_app_start();
 bool avrflash_check_3_party_is_valid(void);
 //void write_flash_in_multitask(volatile void *dst, const void *src, size_t nbytes);
 void avr_flash_test(void);
-void bootloader_info_init(void);
+void bootloader_init(void);
 void parse_flash_protocol(flash_proto_t * , U8 rx_sessionID);
 
 
-#endif /* AVRFLASH_H_ */
+#endif /* BOOTLOADER_H_ */

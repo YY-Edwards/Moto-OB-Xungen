@@ -1,10 +1,10 @@
 /*
- * avrflash.c
+ * bootloader.c
  *
  * Created: 2018/12/3 16:41:10
  *  Author: Edwards
  */ 
-#include "avrflash.h"
+#include "bootloader.h"
 #include <string.h>
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -13,16 +13,19 @@
 #include "xcmp.h"
 #include "timer.h"
 
+
+extern void main();
 extern unsigned int flash_size;
 volatile bool g_is_inBOOT = false;
 volatile bool g_isEraseFlash = false;
 volatile bool g_isEraseFlashFinished_ = false;
 volatile bool g_isFirmwareStartAddrOkay_ = false;
 volatile U8 current_app_type = APP_TYPE_FIRMWARE;//默认是firmware
-volatile U32 firmwareStartAddr_ = (BOOT_LOADER_BEGIN +BOOT_LOADER_SIZE);//默认最小的固件起始地址
+volatile U32 firmwareStartAddr_ = MIN_BOOT_3_PARTY;//默认最小的固件起始地址
 volatile U32 firmwareByteSize_ = MAX_FIRMWARE_BYTE_ZISE;//默认为最大的固件大小
 const U8 firmware_version[4]={0x00, 0x02, 0x00, 0x01};
 const U8 boot_version[4]={0x00, 0x01, 0x00, 0x01};
+void (*start_program) (void) = (void (*)(void))(BOOT_LOADER_BEGIN);//默认是bootloader	
 //The 4-byte OB Firmware Version number uses a reserved byte, a Major Number to track the major changes,
 // Minor Number to track minor changes and Product ID Number to differentiate the product line.
 /*Product ID Number:
@@ -91,6 +94,39 @@ static void write_flash_in_multitask(volatile void *dst, const void *src, size_t
 	xTaskResumeAll();
 	Enable_interrupt_level(1);
 	
+}
+
+
+
+int flash_read_app_start()
+{
+	
+	volatile unsigned long runaddr;
+
+	volatile unsigned long mainaddr = (unsigned long)main;
+	int ret = 0;
+	df_firmware_info_t firmware_info;
+	memset(&firmware_info, 0x00, sizeof(df_firmware_info_t));
+	memcpy((void*)&firmware_info, (void*)FIRMWARE_INFO_START_ADD, FIRMWARE_INFO_SIZE);	
+	runaddr = *(uint32_t *)(firmware_info.addr);
+	start_program = (void *)runaddr;
+
+	if ((mainaddr < MIN_BOOT_3_PARTY) && (firmware_info.isValid == 1))//prevent calling boot loader main again
+	{
+		(*start_program)();
+	}
+
+	/* when reach here, record current application type */
+	if (mainaddr < MIN_BOOT_3_PARTY)
+	{
+		current_app_type = APP_TYPE_BOOTLOADER;
+	}
+	else
+	{
+		current_app_type = APP_TYPE_FIRMWARE;
+	}
+
+	return ret;
 }
 
 bool avrflash_write_firmware_valid_flag(U8 value)
@@ -275,7 +311,7 @@ void avr_flash_test()
 	flash_rw_example("user_page", &user_nvram_data);		
 }
 
-void bootloader_info_init(void)
+void bootloader_init(void)
 {
 	if (current_app_type == APP_TYPE_BOOTLOADER)
 	{
@@ -289,7 +325,10 @@ void bootloader_info_init(void)
 		memcpy(boot_info.version, firmware_version, sizeof(firmware_version));	
 		
 		//write boot_info 
-		flashc_memcpy(BOOT_INFO_START_ADD, &boot_version, FIRMWARE_INFO_SIZE, true);	
+		flashc_memcpy(BOOT_INFO_START_ADD, &boot_version, FIRMWARE_INFO_SIZE, true);
+		
+		flash_read_app_start();
+			
 	}
 	else
 	{

@@ -91,7 +91,7 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/Application/myusart/myusart.h ../src/Application/radio/xnl.h \
  ../src/Application/radio/payload.h ../src/ASF/avr32/drivers/rtc/rtc.h \
  ../src/Application/radio/physical.h ../src/Application/radio/payload.h \
- ../src/Application/avrflash/avrflash.h
+ ../src/Application/booloader/bootloader.h
 
 ../src/Application/app/app.h:
 
@@ -297,4 +297,4 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/Application/radio/payload.h:
 
-../src/Application/avrflash/avrflash.h:
+../src/Application/booloader/bootloader.h:
