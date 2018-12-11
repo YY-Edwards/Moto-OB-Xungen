@@ -12,7 +12,7 @@ History:
 #include "string.h"
 #include "conf_board.h"
 #include "ssc.h"
-#include "ambe.h"
+//#include "ambe.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "gpio.h"

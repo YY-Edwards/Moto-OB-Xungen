@@ -17,9 +17,9 @@ History:
 #include "intc.h"
 #include "timer.h"
 #include "xcmp.h"
-#include "xgrtc.h"
+//#include "xgrtc.h"
 //#include "xgflash.h"
-#include "RFID.h"
+//#include "RFID.h"
 #include "app.h"
 #include "bootloader.h"
 
@@ -45,21 +45,10 @@ int main (void)
 	flash_size = flashc_get_flash_size();
 	//will jump to 3-party if needed
 	bootloader_init();
-	//avr_flash_test();
-	
-	//third_party_interface_init();//usart1
-	
-	//xg_flashc_init();
-		
-	//voc_init();
 
 	tc_init();
-	
-	rfid_init();//csbk-ob：无此硬件接口,注意如果没有先开启flash模块，则需要单独初始化spi引脚接口
-		
+			
 	app_init();
-	
-	xg_rtc_init();
 		
 	xcmp_init();
 

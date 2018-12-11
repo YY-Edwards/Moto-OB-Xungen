@@ -308,43 +308,43 @@ typedef struct
 }Language_Pack_Information_brdcst_t;
 
 
-/*
-Automatic Frequency Correction Control
-
-Automatic Frequency Correction (AFC) is a method the radio uses to adjust its 
-reference oscillator to align its receive frequency with the signal being 
-received. By default, AFC is enabled in the radio. This message is used to 
-toggle this feature on a per personality basis until channel change or 
-power-on/reset.
-
-AFC may also be disabled on a per-personality basis via Clone Write. The radio 
-will enable or disable AFC based on the AFC control mechanism that is last 
-executed (i.e. AFXCON or CLONEWR with Channel Change). 
-
-This opcode is supported in Analog RF Mode operation only.
-*/
-#define AUTOMATIC_FREQUENCY_CORRECTION_CONTROL 0x01C
-
-/*
-Function
-*/
-
-/*Enables AFC*/
-#define AFC_On 0x00
-
-/*Disables AFC*/
-#define AFC_Off 0x01
-
-typedef struct
-{
-	unsigned char  Function;
-}Automatic_Frequency_Correction_Control_req_t;
-
-typedef struct
-{
-	unsigned char  Result;
-	unsigned char  Function;
-}Automatic_Frequency_Correction_Control_reply_t;
+///*
+//Automatic Frequency Correction Control
+//
+//Automatic Frequency Correction (AFC) is a method the radio uses to adjust its 
+//reference oscillator to align its receive frequency with the signal being 
+//received. By default, AFC is enabled in the radio. This message is used to 
+//toggle this feature on a per personality basis until channel change or 
+//power-on/reset.
+//
+//AFC may also be disabled on a per-personality basis via Clone Write. The radio 
+//will enable or disable AFC based on the AFC control mechanism that is last 
+//executed (i.e. AFXCON or CLONEWR with Channel Change). 
+//
+//This opcode is supported in Analog RF Mode operation only.
+//*/
+//#define AUTOMATIC_FREQUENCY_CORRECTION_CONTROL 0x01C
+//
+///*
+//Function
+//*/
+//
+///*Enables AFC*/
+//#define AFC_On 0x00
+//
+///*Disables AFC*/
+//#define AFC_Off 0x01
+//
+//typedef struct
+//{
+	//unsigned char  Function;
+//}Automatic_Frequency_Correction_Control_req_t;
+//
+//typedef struct
+//{
+	//unsigned char  Result;
+	//unsigned char  Function;
+//}Automatic_Frequency_Correction_Control_reply_t;
 
 /*
 Clone Write
@@ -737,98 +737,98 @@ typedef struct
 }ToneControl_brdcst_t;
 
 
-/*
-Volume Control
-This message is used to request information about a device's volume control state, or to
-request a change in volume control state. Because the actual device used as a volume
-attenuator can be different in various devices, XCMP assumes an idealized volume
-attenuator which provides 256 steps, with each step being an equal increment on an audio or logarithmic response.
-In all cases, this request will result in a Volume Control Reply giving the status of the volume control.
-In addition, if the volume attenuator setting is changed, a Volume Control State broadcast will also be sent.
-The Volume Data for all functions is specified in terms of the 0-255 range of the 256
-step attenuator. The value of 255 is interpreted as maximum volume (minimum attenuation), and 0 is interpreted as minimum volume (maximum attenuation). 
-Note that a value of 0 may still result in some audio, the Speaker Control message should be used if it is desired to mute the speaker.
+///*
+//Volume Control
+//This message is used to request information about a device's volume control state, or to
+//request a change in volume control state. Because the actual device used as a volume
+//attenuator can be different in various devices, XCMP assumes an idealized volume
+//attenuator which provides 256 steps, with each step being an equal increment on an audio or logarithmic response.
+//In all cases, this request will result in a Volume Control Reply giving the status of the volume control.
+//In addition, if the volume attenuator setting is changed, a Volume Control State broadcast will also be sent.
+//The Volume Data for all functions is specified in terms of the 0-255 range of the 256
+//step attenuator. The value of 255 is interpreted as maximum volume (minimum attenuation), and 0 is interpreted as minimum volume (maximum attenuation). 
+//Note that a value of 0 may still result in some audio, the Speaker Control message should be used if it is desired to mute the speaker.
+//
+//
+//*/
+//#define VOLUME_CONTROL 0x406
+//
+////Function
+//#define   Enable_IntelligentAudio  0x10
+//#define   Disable_IntelligentAudio  0x11
+//
+////Attenuator Number
+//
+//#define All_Speakers 0xFFFF //Selects all speakers
+//#define Primary_Speakers 0x0001
+//#define Secondary_Speakers 0x0002
+//
+//
+////Volume Data
+//
+//
+//
+//
+////Audio Parameter
+//
+//typedef struct
+//{
+	//unsigned char Attenuator_Number[2];
+	//unsigned char Function;
+	//unsigned char Volume_Data;
+	//
+//}VolumeControl_req_t;
+//
+//typedef struct
+//{
+	//unsigned char Result;
+	//unsigned char Attenuator_Number[2];
+	//unsigned char Function;
+	//unsigned char Volume_Data;
+	//
+//}VolumeControl_reply_t;
+//
+//typedef struct
+//{
+	//unsigned char Attenuator_Number[2];
+//
+	//unsigned char Volume_Data;
+	//unsigned char Audio_Parameter;
+	//
+//}VolumeControl_brdcst_t;
 
-
-*/
-#define VOLUME_CONTROL 0x406
-
-//Function
-#define   Enable_IntelligentAudio  0x10
-#define   Disable_IntelligentAudio  0x11
-
-//Attenuator Number
-
-#define All_Speakers 0xFFFF //Selects all speakers
-#define Primary_Speakers 0x0001
-#define Secondary_Speakers 0x0002
-
-
-//Volume Data
-
-
-
-
-//Audio Parameter
-
-typedef struct
-{
-	unsigned char Attenuator_Number[2];
-	unsigned char Function;
-	unsigned char Volume_Data;
-	
-}VolumeControl_req_t;
-
-typedef struct
-{
-	unsigned char Result;
-	unsigned char Attenuator_Number[2];
-	unsigned char Function;
-	unsigned char Volume_Data;
-	
-}VolumeControl_reply_t;
-
-typedef struct
-{
-	unsigned char Attenuator_Number[2];
-
-	unsigned char Volume_Data;
-	unsigned char Audio_Parameter;
-	
-}VolumeControl_brdcst_t;
-
-/*
- Enhanced Option Board Mode
-This message is sent to request enter or exit Enhanced Option Board Mode.
-
-*/
-#define EN_OB_CONTROL 0x465
-
-//Function
-#define EN_OB_Enter 0x01
-#define EN_OB_Exit  0x00
-
-typedef struct
-{
-	
-	unsigned char Function;
-	
-}En_OB_Control_req_t;
-
-typedef struct
-{
-	unsigned char Result;
-
-	unsigned char Function;
-
-	
-}En_OB_Control_reply_t;
-
-typedef struct
-{
-	unsigned char Function;
-	
-}En_OB_Control_brdcst_t;
+///*
+ //Enhanced Option Board Mode
+//This message is sent to request enter or exit Enhanced Option Board Mode.
+//
+//*/
+//#define EN_OB_CONTROL 0x465
+//
+////Function
+//#define EN_OB_Enter 0x01
+//#define EN_OB_Exit  0x00
+//
+//typedef struct
+//{
+	//
+	//unsigned char Function;
+	//
+//}En_OB_Control_req_t;
+//
+//typedef struct
+//{
+	//unsigned char Result;
+//
+	//unsigned char Function;
+//
+	//
+//}En_OB_Control_reply_t;
+//
+//typedef struct
+//{
+	//unsigned char Function;
+	//
+//}En_OB_Control_brdcst_t;
 
 
 
@@ -852,71 +852,71 @@ request. This message must be sent when the device is actually about to shutdown
 
 
 
-/*
-
- Button Configuration
-This message is used to report the characteristic or to change the logical functionality of
-the radio’s programmable buttons. Changing the logical function of a button is known as
-button re-task.
-
-*/
-
-
-#define BTN_CONFIG_REQUEST   0x412
-
-//Function
-#define Get_Info					0x00
-#define Radio_Wide_Retask			0x01
-#define Current_channel_Retask		0x02
-#define Button_Reset				0x03
-#define Button_Reset_All            0x04
-
-//NumOfButtons
-//ButtonInfoStructSize
-#define Button_Info_StructSize     0x0A
-
-
-//ButtonInfo
-
-typedef struct
-{
-	U8 ButtonIdentifier[2];
-	U8 ShortPressFeature[2];
-	U8 Reserved1[2];
-	U8 LongPressFeature[2];
-	U8 Reserved2[2];
-	
-}ButtonInfo_t;
-
-
-
-typedef struct
-{
-	U8 Function;
-	U8 NumOfButtons;
-	U8 ButtoInfoStructSize;
-	ButtonInfo_t ButtonInfo[1];//*ButtonInfo;//ButtonInfo[1];
-	
-}ButtonConfig_req_t;
-
-
-typedef struct
-{
-	U8 Result;
-	U8 Function;
-
-	
-}ButtonConfig_reply_t;
-
-typedef struct
-{
-	U8 Function;
-	U8 NumOfButtons;
-	U8 ButtoInfoStructSize;
-	ButtonInfo_t ButtonInfo[19];
-	
-	
-}ButtonConfig_brdcst_t;
+///*
+//
+ //Button Configuration
+//This message is used to report the characteristic or to change the logical functionality of
+//the radio’s programmable buttons. Changing the logical function of a button is known as
+//button re-task.
+//
+//*/
+//
+//
+//#define BTN_CONFIG_REQUEST   0x412
+//
+////Function
+//#define Get_Info					0x00
+//#define Radio_Wide_Retask			0x01
+//#define Current_channel_Retask		0x02
+//#define Button_Reset				0x03
+//#define Button_Reset_All            0x04
+//
+////NumOfButtons
+////ButtonInfoStructSize
+//#define Button_Info_StructSize     0x0A
+//
+//
+////ButtonInfo
+//
+//typedef struct
+//{
+	//U8 ButtonIdentifier[2];
+	//U8 ShortPressFeature[2];
+	//U8 Reserved1[2];
+	//U8 LongPressFeature[2];
+	//U8 Reserved2[2];
+	//
+//}ButtonInfo_t;
+//
+//
+//
+//typedef struct
+//{
+	//U8 Function;
+	//U8 NumOfButtons;
+	//U8 ButtoInfoStructSize;
+	//ButtonInfo_t ButtonInfo[1];//*ButtonInfo;//ButtonInfo[1];
+	//
+//}ButtonConfig_req_t;
+//
+//
+//typedef struct
+//{
+	//U8 Result;
+	//U8 Function;
+//
+	//
+//}ButtonConfig_reply_t;
+//
+//typedef struct
+//{
+	//U8 Function;
+	//U8 NumOfButtons;
+	//U8 ButtoInfoStructSize;
+	//ButtonInfo_t ButtonInfo[19];
+	//
+	//
+//}ButtonConfig_brdcst_t;
 
 
 
@@ -1185,246 +1185,246 @@ typedef struct
 
 
 
-/*
- Audio Routing Control
-This message is used to control the audio routing path between audio inputs and audio
-outputs on a device. A device’s default audio routing is defined by the device and can
-be obtained by requesting the default configuration then monitoring the resulting broadcast
-*/
-#define AUDIO_ROUTING_CONTROL   0x414
-
-//Function
-#define Routing_Func_Default_Source (unsigned char)0x00 //Revert to the device’s default input source (platform specific)
-#define Routing_Func_Update_Source (unsigned char)0x01 //Switch the devices input source to the Input Source specified in this message
-#define Routing_Func_Query (unsigned char)0x04 //Request the current audio routing pairs and pre-defined routing type in use
-
-//Routing Data---Audio Input----
-//The device’s selected microphone.
-#define IN_Microphone (unsigned char)0x01
-
-//The device’s raw baseband demodulated data in receive mode.
-//This data is the output of the demodulated mode which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
-//NOTE: Applicable for analog mode only.
-#define IN_Raw_received_audio_demodulated (unsigned char)0x07
-
-//The device’s raw baseband audio data in receive mode.
-//In analog mode this data is the sub-band filtered audio data (raw high speed audio).
-//NOTE: Applicable for analog mode only.
-#define IN_Raw_received_audio_PCM (unsigned char)0x08
-
-//The device’s raw baseband un-modulated data in transmit mode.
-//This data is the input to the RF modulator which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
-//NOTE: Applicable for analog mode only.
-#define IN_Raw_transmit_audio_unmodulated (unsigned char)0x09
-
-//The device’s raw baseband audio data in transmit mode.
-//In analog mode this data is the flat PCM audio data (raw high speed audio).
-//NOTE: Applicable for analog mode only.
-#define IN_Raw_transmit_audio_PCM (unsigned char)0x0B
-
-//The device’s option board input port
-#define IN_Option_Board (unsigned char)0x0C
-
-//The device's non-amplified audio data that is generally routed to the speaker
-#define IN_Pre_Speaker_Audio_Data (unsigned char)0x0D
-
-
-//The device's post-AMBE Audio encode audio data in the transmit mode. 
-#define Post_AMBE_Encoder (unsigned char)0x0F
-
-//The device's pre-AMBE Audio decode audio data in the receive mode. 
-#define Pre_AMBE_Decoder (unsigned char)0x10
-
-//The device's Raw Voice header in Transmit mode
-#define Tx_Voice_Header (unsigned char)0x11
-
-//The device's Raw Voice header in Receive mode
-#define Rx_Voice_Header (unsigned char)0x12
-
-//The device's Voice Terminator in Transmit mode.
-#define Tx_Voice_Terminator (unsigned char)0x13
-
-//The device's Voice Terminator in Receive mode.
-#define Rx_Voice_Terminator (unsigned char)0x14
-
-
-
-
-//Routing Data---Audio Output----
-//The device’s selected speaker.
-#define OUT_Speaker (unsigned char)0x01
-
-//The device’s raw baseband demodulated data in receive mode.
-//This data is the output of the demodulated mode which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
-// NOTE: Applicable for analog mode only.
-#define OUT_Raw_received_audio_demodulated (unsigned char)0x07
-
-//The device’s raw baseband audio data in receive mode.
-//In analog mode this data is the sub-band filtered audio data (raw high speed audio).
-//NOTE: Applicable for analog mode only.
-#define OUT_Raw_received_audio_PCM (unsigned char)0x08
-
-//The device’s raw baseband un-modulated data in transmit mode.
-//This data is the input to the RF modulator which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
-//NOTE: Applicable for analog mode only.
-#define OUT_Raw_transmit_audio_unmodulated (unsigned char)0x09
-
-//The device’s raw baseband audio data in transmit mode.
-//In analog mode this data is the flat PCM audio data (raw high speed audio).
-//NOTE: Applicable for analog mode only.
-#define OUT_Raw_transmit_audio_PCM (unsigned char)0x0B
-
-//The device’s option board input port.
-#define OUT_Option_Board (unsigned char)0x0C
-
-//The device’s microphone voice data that is routed to the radio for transmission.
-#define OUT_Microphone_Data (unsigned char)0x0D
-
-
-
-
-
-typedef struct
-{
-	unsigned char audioInput;
-	unsigned char audioOutput;
-}RoutingData_t;
-
-#define MAX_ROUTING_CTR		10
-
-typedef struct
-{
-	unsigned char Function;
-	unsigned char NumberofRoutings[2];
-	RoutingData_t RoutingData[MAX_ROUTING_CTR];
-}AudioRoutingControl_req_t;
-
-typedef struct
-{
-	unsigned char Result;
-	unsigned char Function;
-	unsigned char NumberofRoutings[2];
-	RoutingData_t RoutingData[MAX_ROUTING_CTR];
-}AudioRoutingControl_reply_t;
-
-typedef struct
-{
-	unsigned char NumberofRoutings[2];
-	RoutingData_t RoutingData[MAX_ROUTING_CTR];
-	unsigned char Function;
-}AudioRoutingControl_brdcst_t;
-/*
-Device Control Mode
-This message is used to request to radio to enable device control mode. In this mode of 
- operation, the radio assumes that the XCMP device is the master that determines 
- actions on the radio. The radio, in this mode, based on the type of control, forwards 
- input signals to the controlling device for the device to decide what action needs to be 
- taken by the radio. In this mode, the radio does not take action on the inputs. The 
- controlling device in this mode uses other XCMP control messages to initiate action on 
- the radio.
-*/
-
-#define DEVICE_CONTROL_MODE 0x421
-
-//function
-#define DCM_EXIT 0x00 //To request exiting the “Device Control Mode” on the radio.
-#define DCM_ENTER 0x01 //To request entering the “Device Control Mode” on the radio.
-#define DCM_REVOKE 0x02 //To revoke the “Device Control Mode” by the radio. 
-//NOTE: This function is valid only for the broadcast message type.Device Control Mode
-						
-//control type
-#define DCM_DEFAULT 0x00 //Default setting. Should be ignored.
-#define DCM_USER_INPUT 0x01 //All user inputs received by the radio are forwarded to the device to take action. 
-//The radio shall use the PUI Broadcast message to indicate the user inputs to the device.
-
-#define DCM_SIG_INPUT 0x02 //All signaling inputs received by the radio are forwarded to the device to take action. 
-//The radio shall use the Sig Detect Broadcast message to indicate the signaling inputs to the device.
-
-#define DCM_SPEAKER_CTRL 0x08 //All Speaker control will be handled by controlling device.
-//Radio shall not mute/unmute the speaker unless controlling device requests.
-
-#define DCM_HYBRID_BT_CTRL 0x20 //Some Bluetooth control can be initiated from the controlling device. 
-//But, the Radio will handle the processing and interaction with the remote Bluetooth device.
-// Some additional Bluetooth related status broadcast message (e.g. connect request failure) 
-//will be sent based on the device requested function.
-
-#define DCM_FORWARD_CAI_IP_DATA 0x40 //Specifies the Radio received In/Out bound IP datagram should be 
-//routed to the controlling device. Filtering of specific IP datagram is product specific implementation
-
-#define DCM_FORWARD_XCMP_INPUT 0x80 //All XCMP Requests received by the radio from any accessory are forwarded 
-//to the device which sends the Device_Control_Mode message. Messages are forwarded using the Forward_Data message.
-//The controlling device creates the reply and sends it back to the accessory via the radio 
-//(also using the Forward_Data message). This message is mutually exclusive with XCMP_INPUT.
-
-//struct
-typedef struct
-{
-	unsigned char Function;
-	unsigned char ControlTypeSize;
-	unsigned char ControlType;
-}DeviceControlMode_req_t;
-
-typedef struct
-{
-	unsigned char Result;
-	unsigned char Function;
-	unsigned char ControlTypeSize;
-	unsigned char ControlType;
-}DeviceControlMode_reply_t;
-
-typedef struct
-{
-	unsigned char Function;
-	unsigned char ControlTypeSize;
-	unsigned char ControlType;
-}DeviceControlMode_brdcst_t;
-
-
-/*
-
-Call Control ----------------------------
-
-This command allows a device to request that a call be initiated, terminated, answered,
-rejected, or to obtain the status of a call. The remote address represents the target 
-address for encode or the source address for decode.
-
-*/
-//Call type
-
-#define NO_Call_Feature				 0x00
-#define Selective_call				0x01
-#define Call_Alert					0x02
-#define Enhanced_Private_call		 0x04
-#define Enhanced_Phone_call			0x05
-#define Group_Call					0x06
-#define Call_Alert_Voice			0x08
-#define Telegram_call				 0x09
-#define Group_Phone_call			0x0A
-#define Braoadcast_Call				0x0B
-
-//Call state
-
-#define Call_Decoded				 0x01
-#define Call_In_Progress			 0x02
-#define Call_Ended					 0x03
-#define Call_Initiated				0x04
-#define NO_ACK						0x06
-#define Call_In_Hangtime			 0x07
-#define Call_Decoded_Clear			0x08
-#define Call_Decoded_Key_Matched	0x09
-#define Call_Decoded_Key_Mismatched	0xA0
+///*
+ //Audio Routing Control
+//This message is used to control the audio routing path between audio inputs and audio
+//outputs on a device. A device’s default audio routing is defined by the device and can
+//be obtained by requesting the default configuration then monitoring the resulting broadcast
+//*/
+//#define AUDIO_ROUTING_CONTROL   0x414
+//
+////Function
+//#define Routing_Func_Default_Source (unsigned char)0x00 //Revert to the device’s default input source (platform specific)
+//#define Routing_Func_Update_Source (unsigned char)0x01 //Switch the devices input source to the Input Source specified in this message
+//#define Routing_Func_Query (unsigned char)0x04 //Request the current audio routing pairs and pre-defined routing type in use
+//
+////Routing Data---Audio Input----
+////The device’s selected microphone.
+//#define IN_Microphone (unsigned char)0x01
+//
+////The device’s raw baseband demodulated data in receive mode.
+////This data is the output of the demodulated mode which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
+////NOTE: Applicable for analog mode only.
+//#define IN_Raw_received_audio_demodulated (unsigned char)0x07
+//
+////The device’s raw baseband audio data in receive mode.
+////In analog mode this data is the sub-band filtered audio data (raw high speed audio).
+////NOTE: Applicable for analog mode only.
+//#define IN_Raw_received_audio_PCM (unsigned char)0x08
+//
+////The device’s raw baseband un-modulated data in transmit mode.
+////This data is the input to the RF modulator which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
+////NOTE: Applicable for analog mode only.
+//#define IN_Raw_transmit_audio_unmodulated (unsigned char)0x09
+//
+////The device’s raw baseband audio data in transmit mode.
+////In analog mode this data is the flat PCM audio data (raw high speed audio).
+////NOTE: Applicable for analog mode only.
+//#define IN_Raw_transmit_audio_PCM (unsigned char)0x0B
+//
+////The device’s option board input port
+//#define IN_Option_Board (unsigned char)0x0C
+//
+////The device's non-amplified audio data that is generally routed to the speaker
+//#define IN_Pre_Speaker_Audio_Data (unsigned char)0x0D
+//
+//
+////The device's post-AMBE Audio encode audio data in the transmit mode. 
+//#define Post_AMBE_Encoder (unsigned char)0x0F
+//
+////The device's pre-AMBE Audio decode audio data in the receive mode. 
+//#define Pre_AMBE_Decoder (unsigned char)0x10
+//
+////The device's Raw Voice header in Transmit mode
+//#define Tx_Voice_Header (unsigned char)0x11
+//
+////The device's Raw Voice header in Receive mode
+//#define Rx_Voice_Header (unsigned char)0x12
+//
+////The device's Voice Terminator in Transmit mode.
+//#define Tx_Voice_Terminator (unsigned char)0x13
+//
+////The device's Voice Terminator in Receive mode.
+//#define Rx_Voice_Terminator (unsigned char)0x14
+//
+//
+//
+//
+////Routing Data---Audio Output----
+////The device’s selected speaker.
+//#define OUT_Speaker (unsigned char)0x01
+//
+////The device’s raw baseband demodulated data in receive mode.
+////This data is the output of the demodulated mode which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
+//// NOTE: Applicable for analog mode only.
+//#define OUT_Raw_received_audio_demodulated (unsigned char)0x07
+//
+////The device’s raw baseband audio data in receive mode.
+////In analog mode this data is the sub-band filtered audio data (raw high speed audio).
+////NOTE: Applicable for analog mode only.
+//#define OUT_Raw_received_audio_PCM (unsigned char)0x08
+//
+////The device’s raw baseband un-modulated data in transmit mode.
+////This data is the input to the RF modulator which has the combined high speed audio and low speed data (e.g. MDC, TPL, DPL and Squelch).
+////NOTE: Applicable for analog mode only.
+//#define OUT_Raw_transmit_audio_unmodulated (unsigned char)0x09
+//
+////The device’s raw baseband audio data in transmit mode.
+////In analog mode this data is the flat PCM audio data (raw high speed audio).
+////NOTE: Applicable for analog mode only.
+//#define OUT_Raw_transmit_audio_PCM (unsigned char)0x0B
+//
+////The device’s option board input port.
+//#define OUT_Option_Board (unsigned char)0x0C
+//
+////The device’s microphone voice data that is routed to the radio for transmission.
+//#define OUT_Microphone_Data (unsigned char)0x0D
+//
+//
+//
+//
+//
+//typedef struct
+//{
+	//unsigned char audioInput;
+	//unsigned char audioOutput;
+//}RoutingData_t;
+//
+//#define MAX_ROUTING_CTR		10
+//
+//typedef struct
+//{
+	//unsigned char Function;
+	//unsigned char NumberofRoutings[2];
+	//RoutingData_t RoutingData[MAX_ROUTING_CTR];
+//}AudioRoutingControl_req_t;
+//
+//typedef struct
+//{
+	//unsigned char Result;
+	//unsigned char Function;
+	//unsigned char NumberofRoutings[2];
+	//RoutingData_t RoutingData[MAX_ROUTING_CTR];
+//}AudioRoutingControl_reply_t;
+//
+//typedef struct
+//{
+	//unsigned char NumberofRoutings[2];
+	//RoutingData_t RoutingData[MAX_ROUTING_CTR];
+	//unsigned char Function;
+//}AudioRoutingControl_brdcst_t;
+///*
+//Device Control Mode
+//This message is used to request to radio to enable device control mode. In this mode of 
+ //operation, the radio assumes that the XCMP device is the master that determines 
+ //actions on the radio. The radio, in this mode, based on the type of control, forwards 
+ //input signals to the controlling device for the device to decide what action needs to be 
+ //taken by the radio. In this mode, the radio does not take action on the inputs. The 
+ //controlling device in this mode uses other XCMP control messages to initiate action on 
+ //the radio.
+//*/
+//
+//#define DEVICE_CONTROL_MODE 0x421
+//
+////function
+//#define DCM_EXIT 0x00 //To request exiting the “Device Control Mode” on the radio.
+//#define DCM_ENTER 0x01 //To request entering the “Device Control Mode” on the radio.
+//#define DCM_REVOKE 0x02 //To revoke the “Device Control Mode” by the radio. 
+////NOTE: This function is valid only for the broadcast message type.Device Control Mode
+						//
+////control type
+//#define DCM_DEFAULT 0x00 //Default setting. Should be ignored.
+//#define DCM_USER_INPUT 0x01 //All user inputs received by the radio are forwarded to the device to take action. 
+////The radio shall use the PUI Broadcast message to indicate the user inputs to the device.
+//
+//#define DCM_SIG_INPUT 0x02 //All signaling inputs received by the radio are forwarded to the device to take action. 
+////The radio shall use the Sig Detect Broadcast message to indicate the signaling inputs to the device.
+//
+//#define DCM_SPEAKER_CTRL 0x08 //All Speaker control will be handled by controlling device.
+////Radio shall not mute/unmute the speaker unless controlling device requests.
+//
+//#define DCM_HYBRID_BT_CTRL 0x20 //Some Bluetooth control can be initiated from the controlling device. 
+////But, the Radio will handle the processing and interaction with the remote Bluetooth device.
+//// Some additional Bluetooth related status broadcast message (e.g. connect request failure) 
+////will be sent based on the device requested function.
+//
+//#define DCM_FORWARD_CAI_IP_DATA 0x40 //Specifies the Radio received In/Out bound IP datagram should be 
+////routed to the controlling device. Filtering of specific IP datagram is product specific implementation
+//
+//#define DCM_FORWARD_XCMP_INPUT 0x80 //All XCMP Requests received by the radio from any accessory are forwarded 
+////to the device which sends the Device_Control_Mode message. Messages are forwarded using the Forward_Data message.
+////The controlling device creates the reply and sends it back to the accessory via the radio 
+////(also using the Forward_Data message). This message is mutually exclusive with XCMP_INPUT.
+//
+////struct
+//typedef struct
+//{
+	//unsigned char Function;
+	//unsigned char ControlTypeSize;
+	//unsigned char ControlType;
+//}DeviceControlMode_req_t;
+//
+//typedef struct
+//{
+	//unsigned char Result;
+	//unsigned char Function;
+	//unsigned char ControlTypeSize;
+	//unsigned char ControlType;
+//}DeviceControlMode_reply_t;
+//
+//typedef struct
+//{
+	//unsigned char Function;
+	//unsigned char ControlTypeSize;
+	//unsigned char ControlType;
+//}DeviceControlMode_brdcst_t;
 
 
-typedef struct
-{
-	unsigned char Calltype;
-	unsigned char Callstate;
-	
-	//后面结构忽略
-	//unsigned char Remote_Address;
-	//unsigned char Group_ID_Information;
-	
-}CallControl_brdcst_t;
+///*
+//
+//Call Control ----------------------------
+//
+//This command allows a device to request that a call be initiated, terminated, answered,
+//rejected, or to obtain the status of a call. The remote address represents the target 
+//address for encode or the source address for decode.
+//
+//*/
+////Call type
+//
+//#define NO_Call_Feature				 0x00
+//#define Selective_call				0x01
+//#define Call_Alert					0x02
+//#define Enhanced_Private_call		 0x04
+//#define Enhanced_Phone_call			0x05
+//#define Group_Call					0x06
+//#define Call_Alert_Voice			0x08
+//#define Telegram_call				 0x09
+//#define Group_Phone_call			0x0A
+//#define Braoadcast_Call				0x0B
+//
+////Call state
+//
+//#define Call_Decoded				 0x01
+//#define Call_In_Progress			 0x02
+//#define Call_Ended					 0x03
+//#define Call_Initiated				0x04
+//#define NO_ACK						0x06
+//#define Call_In_Hangtime			 0x07
+//#define Call_Decoded_Clear			0x08
+//#define Call_Decoded_Key_Matched	0x09
+//#define Call_Decoded_Key_Mismatched	0xA0
+//
+//
+//typedef struct
+//{
+	//unsigned char Calltype;
+	//unsigned char Callstate;
+	//
+	////后面结构忽略
+	////unsigned char Remote_Address;
+	////unsigned char Group_ID_Information;
+	//
+//}CallControl_brdcst_t;
 
 
 
@@ -1462,132 +1462,132 @@ typedef struct
 
 
 
-/*
-
-Transmit Control ----------------------------
-
-This message is used to put the device in the Transmit mode or remove it from the
-Transmit mode. The selection of Microphone and Speaker for the functions shall be
-done using the Speaker Control and the Microphone Control messages.
-
-
-*/
-
-
-#define KEYREQ  0x415
-
-//Function
-
-#define KEY_UP  0x01
-#define DE_KEY  0x02
-
-//Mode 0f Operation
-
-
-#define MODE_VOICE  0x00
-#define MODE_ALL    0x02
-#define MODE_VOICE_TPT  0x03
-
-//State 
-#define STADNDBY_RECEIVE   0x00
-#define Transmit           0x01
-
-typedef struct
-{
-	unsigned char Function;
-	unsigned char Mode_Of_Operation;
-	unsigned char TT_Source;
-	
-}TransmitControl_req_t;
-
-typedef struct
-{
-	unsigned char Result;
-	unsigned char Function;
-	unsigned char Mode_Of_Operation;
-	unsigned char State;
-	
-}TransmitControl_reply_t;
-
-typedef struct
-{
-	unsigned char Mode_Of_Operation;
-	unsigned char State;
-	unsigned char State_change_reason;
-	
-}TransmitControl_brdcast_t;
-
-
+///*
+//
+//Transmit Control ----------------------------
+//
+//This message is used to put the device in the Transmit mode or remove it from the
+//Transmit mode. The selection of Microphone and Speaker for the functions shall be
+//done using the Speaker Control and the Microphone Control messages.
+//
+//
+//*/
+//
+//
+//#define KEYREQ  0x415
+//
+////Function
+//
+//#define KEY_UP  0x01
+//#define DE_KEY  0x02
+//
+////Mode 0f Operation
+//
+//
+//#define MODE_VOICE  0x00
+//#define MODE_ALL    0x02
+//#define MODE_VOICE_TPT  0x03
+//
+////State 
+//#define STADNDBY_RECEIVE   0x00
+//#define Transmit           0x01
+//
+//typedef struct
+//{
+	//unsigned char Function;
+	//unsigned char Mode_Of_Operation;
+	//unsigned char TT_Source;
+	//
+//}TransmitControl_req_t;
+//
+//typedef struct
+//{
+	//unsigned char Result;
+	//unsigned char Function;
+	//unsigned char Mode_Of_Operation;
+	//unsigned char State;
+	//
+//}TransmitControl_reply_t;
+//
+//typedef struct
+//{
+	//unsigned char Mode_Of_Operation;
+	//unsigned char State;
+	//unsigned char State_change_reason;
+	//
+//}TransmitControl_brdcast_t;
 
 
 
 
 
-/*
-Mic control ----------------------------
-The message is used by the device to control the microphone and its gain factor. The
-device is able to control the internal microphone and an external device microphone, if available.
-*/
-
-#define MIC_CONTROL			0x40E
-//Function
-#define Mic_Enable		0x01
-#define Mic_Disable		0x02
-#define Mic_Select		0x03
-#define Mic_Mute		0x08
-#define Mic_Unmute		0x09
-
-//Microphone Type
-#define Mic_Internal		0x00
-#define Mic_External		0x01
-
-//Signaling type
-#define Sig_Type_Analog		0x00
-#define Sig_Type_Digital	0x01
-
-//Mic State
-#define Mic_Invalid			0xFF
-#define Mic_Disabled		0x00
-#define Mic_Enabled			0x01
-#define Mic_Muted			0x03
-#define Mic_Unmuted			0x02
-#define Mic_Enabled_SEL	    0x11	//The microphone is enabled and selected
 
 
-//Gain Factor Offset
-
-typedef struct
-{
-	
-	unsigned char Function;
-	unsigned char Mic_Type;
-	unsigned char Signaling_Type;
-	unsigned char Gain_Offset;
-	
-}MicControl_req_t;
-
-
-typedef struct
-{
-	unsigned char Result;
-	unsigned char Function;
-	unsigned char Mic_Type;
-	unsigned char Signaling_Type;
-	unsigned char Mic_State;
-	unsigned char Gain_Offset;
-	
-}MicControl_reply_t;
-
-
-typedef struct
-{
-
-	unsigned char Mic_Type;
-	unsigned char Signaling_Type;
-	unsigned char Mic_State;
-	unsigned char Gain_Offset;
-	
-}MicControl_brdcast_t;
+///*
+//Mic control ----------------------------
+//The message is used by the device to control the microphone and its gain factor. The
+//device is able to control the internal microphone and an external device microphone, if available.
+//*/
+//
+//#define MIC_CONTROL			0x40E
+////Function
+//#define Mic_Enable		0x01
+//#define Mic_Disable		0x02
+//#define Mic_Select		0x03
+//#define Mic_Mute		0x08
+//#define Mic_Unmute		0x09
+//
+////Microphone Type
+//#define Mic_Internal		0x00
+//#define Mic_External		0x01
+//
+////Signaling type
+//#define Sig_Type_Analog		0x00
+//#define Sig_Type_Digital	0x01
+//
+////Mic State
+//#define Mic_Invalid			0xFF
+//#define Mic_Disabled		0x00
+//#define Mic_Enabled			0x01
+//#define Mic_Muted			0x03
+//#define Mic_Unmuted			0x02
+//#define Mic_Enabled_SEL	    0x11	//The microphone is enabled and selected
+//
+//
+////Gain Factor Offset
+//
+//typedef struct
+//{
+	//
+	//unsigned char Function;
+	//unsigned char Mic_Type;
+	//unsigned char Signaling_Type;
+	//unsigned char Gain_Offset;
+	//
+//}MicControl_req_t;
+//
+//
+//typedef struct
+//{
+	//unsigned char Result;
+	//unsigned char Function;
+	//unsigned char Mic_Type;
+	//unsigned char Signaling_Type;
+	//unsigned char Mic_State;
+	//unsigned char Gain_Offset;
+	//
+//}MicControl_reply_t;
+//
+//
+//typedef struct
+//{
+//
+	//unsigned char Mic_Type;
+	//unsigned char Signaling_Type;
+	//unsigned char Mic_State;
+	//unsigned char Gain_Offset;
+	//
+//}MicControl_brdcast_t;
 
 
 /*
@@ -1673,49 +1673,49 @@ typedef struct
 
 
 
-/*
-Speaker control ----------------------------
-This message is used to request the device to change the state of the currently selected
-speaker. This message is also used to query the current state of the selected speaker.
-
-The radio automatically selects an external speaker device when it is connected to the
-radio. When no external speaker device is connected, the radio selects the internal
-speaker. A mobile radio mutes the control head speakers (MMP) and MAP speakers
-when an external handset speaker is connected.
-*/
-#define SPEAKER_CONTROL			0x407
-
-//Function /State
-#define MUTED (unsigned short )0x0000
-#define UNMUTED (unsigned short) 0x0001
-#define QUREY (unsigned short)0x0080
-
-//Speaker Number
-#define Invalid 0x0000  //Invalid
-#define Primary 0x0001  //Primary speaker
-#define Secondary 0x0002  //Secondary speaker
-#define All 0xFFFF //All Speakers
-
-typedef struct
-{
-	unsigned char SpeakerNumber[2];
-	unsigned char Function[2];
-}SpeakerControl_req_t;
-
-
-typedef struct
-{
-	unsigned char Result;
-	unsigned char SpeakerNumber[2];
-	unsigned char State[2];
-}SpeakerControl_reply_t;
-
-
-typedef struct
-{
-	unsigned char SpeakerNumber[2];
-	unsigned char State[2];
-}SpeakerControl_brdcast_t;
+///*
+//Speaker control ----------------------------
+//This message is used to request the device to change the state of the currently selected
+//speaker. This message is also used to query the current state of the selected speaker.
+//
+//The radio automatically selects an external speaker device when it is connected to the
+//radio. When no external speaker device is connected, the radio selects the internal
+//speaker. A mobile radio mutes the control head speakers (MMP) and MAP speakers
+//when an external handset speaker is connected.
+//*/
+//#define SPEAKER_CONTROL			0x407
+//
+////Function /State
+//#define MUTED (unsigned short )0x0000
+//#define UNMUTED (unsigned short) 0x0001
+//#define QUREY (unsigned short)0x0080
+//
+////Speaker Number
+//#define Invalid 0x0000  //Invalid
+//#define Primary 0x0001  //Primary speaker
+//#define Secondary 0x0002  //Secondary speaker
+//#define All 0xFFFF //All Speakers
+//
+//typedef struct
+//{
+	//unsigned char SpeakerNumber[2];
+	//unsigned char Function[2];
+//}SpeakerControl_req_t;
+//
+//
+//typedef struct
+//{
+	//unsigned char Result;
+	//unsigned char SpeakerNumber[2];
+	//unsigned char State[2];
+//}SpeakerControl_reply_t;
+//
+//
+//typedef struct
+//{
+	//unsigned char SpeakerNumber[2];
+	//unsigned char State[2];
+//}SpeakerControl_brdcast_t;
 
 /*
 initialize the xnl layer

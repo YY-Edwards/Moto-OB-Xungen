@@ -15,7 +15,7 @@ History:
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-#include "ambe.h"
+//#include "ambe.h"
 #include "ssc.h"
 #include "physical.h"
 
@@ -60,7 +60,7 @@ static void phy_payload_rx(payload_channel_t * payload_rx_channel);
 #endif /*end if*/
 
 
-volatile static RxAMBEBurstType m_RxBurstType = VOICE_WATING;
+//volatile static RxAMBEBurstType m_RxBurstType = VOICE_WATING;
 volatile static U32 AMBE_HT[2];
 
 //static U8 AMBE_Per_Burst_Flag = 0;

@@ -443,10 +443,10 @@ static void xcmp_rx_process(void * pvParameters)
 						xcmp_exec_func((app_exec_t *)&language_pack_information, ptr);
 						break;
 					
-					case AUTOMATIC_FREQUENCY_CORRECTION_CONTROL:
-						xcmp_exec_func((app_exec_t *)&automatic_frequency_correction_control, ptr);
-						break;
-					
+					//case AUTOMATIC_FREQUENCY_CORRECTION_CONTROL:
+						//xcmp_exec_func((app_exec_t *)&automatic_frequency_correction_control, ptr);
+						//break;
+					//
 					case CLONE_WRITE:
 						xcmp_exec_func((app_exec_t *)&clone_write, ptr);
 						break;
@@ -699,145 +699,142 @@ Description: send tone request to test
 Calls: xcmp_tx
 Called By:...
 */
-void xcmp_audio_route_mic(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
-	
-	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
-			
-	ptr->Function = Routing_Func_Update_Source;
-	
-	
-	unsigned short NumberofRoutings = 2;
-	ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
-	ptr->NumberofRoutings[1] = NumberofRoutings & 0xFF;
-	
-	ptr->RoutingData[0].audioInput = IN_Microphone;
-	ptr->RoutingData[0].audioOutput = OUT_Option_Board;
-	
-	ptr->RoutingData[1].audioInput = IN_Option_Board;
-	ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;
-		//
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-
-U8 DataPayload[20]={//注意payload的格式很重要，//Each CSBK can carry 10 bytes as payload including 2 bytes as fixed heading.
-	
-	
-	
-	
-	0xBE,//10 11, 1110.byte1
-	0x20,//CSBK munufactturing ID.byte2
-	
-	0x03,//byte3
-	0x04,//byte4
-	0x05,//byte5
-	0x06,//byte6
-	0x07,//byte7
-	0x08,//byte8
-	0x00,
-	0x03,
-	//0x09,//byte9
-	//0x0A,//byte10
-	//
-	0xBF,//10 11, 1111.byte1
-	0x20,//CSBK munufactturing ID.byte2
-	//
-	0x30,//byte3
-	0x40,//byte4
-	0x50,//byte5
-	0x60,//byte6
-	0x70,//byte7
-	0x80,//byte8
-	0x90,//byte9
-	0xA0 //byte10
-
-	
-};
-
-
-extern U8  MAX_ADDRESS_SIZE;
-
-
-
-void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
-{
-	//log_debug("send xcmp_data_session_csbk_raw_req\n");
+//void xcmp_audio_route_mic(void)
+//{
+	///*xcmp frame will be sent*/
 	//xcmp_fragment_t xcmp_fragment;
-
-	/*insert XCMP opcode*/
-	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
-
-	/*point to xcmp payload*/
-	//DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
-	xcmp_datasession_req_t ptr;//新增结构体，以支持分包发送数据
-	memset(&ptr, 0x00, sizeof(ptr));
-	
-	ptr.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
-	
-
-	if (data_ength > (MAX_XCMP_DATA_LENGTH- (sizeof(xcmp_datasession_req_t) - 1024)))
-	{
-		log_debug("csbk data is to long!!!\n");
-		return ;
-	}
-
-	ptr.DataSession_req.Function = Single_Data_Uint;//0x01
-
-	ptr.DataSession_req.DataDefinition.Data_Protocol_Version = CSBK_Raw_Data;//0x54
-
-	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address_Type = Remote_IPV4_Address;//0x02
-
-	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;//0x04
-
-	//unsigned int addr = 0x0C000000 | (dest & 0x00FFFFFF);
-	unsigned int addr = 0x00000000; 
-	memcpy(ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address, &addr, Remote_IPV4_Address_Size);
-	//ptr->DataDefinition.Dest_Address.Remote_Address[0] = 0x0C;//12
-	//ptr->DataDefinition.Dest_Address.Remote_Address[1] = 0x00;//0
-	//ptr->DataDefinition.Dest_Address.Remote_Address[2] = 0x00;//0
-	//ptr->DataDefinition.Dest_Address.Remote_Address[3] = 0x02;//2
-
-	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = 0;//4007
-	ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = 1;//
-	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
-	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
+			//
+	//ptr->Function = Routing_Func_Update_Source;
+	//
+	//
+	//unsigned short NumberofRoutings = 2;
+	//ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
+	//ptr->NumberofRoutings[1] = NumberofRoutings & 0xFF;
+	//
+	//ptr->RoutingData[0].audioInput = IN_Microphone;
+	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;
+	//
+	//ptr->RoutingData[1].audioInput = IN_Option_Board;
+	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;
+		////
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
 
 
-	ptr.DataSession_req.DataPayload.Session_ID_Number = Session_ID;//0x00
-
-	ptr.DataSession_req.DataPayload.DataPayload_Length[0] =(data_ength >> 8) & 0xFF ;//可能会变化
-	ptr.DataSession_req.DataPayload.DataPayload_Length[1] =data_ength & 0xFF  ;//可能会变化
-
-	memcpy(&(ptr.DataSession_req.DataPayload.DataPayload[0]), data, data_ength);//不会出现越界现象，DataPayload：1024bytes
-	//int k=0;
-	//for (; k<data_ength; k++)
+//
+//U8 DataPayload[20]={//注意payload的格式很重要，//Each CSBK can carry 10 bytes as payload including 2 bytes as fixed heading.
+	//
+	//
+	//
+	//
+	//0xBE,//10 11, 1110.byte1
+	//0x20,//CSBK munufactturing ID.byte2
+	//
+	//0x03,//byte3
+	//0x04,//byte4
+	//0x05,//byte5
+	//0x06,//byte6
+	//0x07,//byte7
+	//0x08,//byte8
+	//0x00,
+	//0x03,
+	////0x09,//byte9
+	////0x0A,//byte10
+	////
+	//0xBF,//10 11, 1111.byte1
+	//0x20,//CSBK munufactturing ID.byte2
+	////
+	//0x30,//byte3
+	//0x40,//byte4
+	//0x50,//byte5
+	//0x60,//byte6
+	//0x70,//byte7
+	//0x80,//byte8
+	//0x90,//byte9
+	//0xA0 //byte10
+//
+	//
+//};
+//
+//extern U8  MAX_ADDRESS_SIZE;
+//
+//void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength)
+//{
+	////log_debug("send xcmp_data_session_csbk_raw_req\n");
+	////xcmp_fragment_t xcmp_fragment;
+//
+	///*insert XCMP opcode*/
+	////xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
+//
+	///*point to xcmp payload*/
+	////DataSession_req_t * ptr = (DataSession_req_t *)xcmp_fragment.u8;
+	//xcmp_datasession_req_t ptr;//新增结构体，以支持分包发送数据
+	//memset(&ptr, 0x00, sizeof(ptr));
+	//
+	//ptr.xcmp_opcode = XCMP_REQUEST | DATA_SESSION;
+	//
+//
+	//if (data_ength > (MAX_XCMP_DATA_LENGTH- (sizeof(xcmp_datasession_req_t) - 1024)))
 	//{
-		//log_debug("csbk_t_array_ptr[%d]:%x\n", k, ptr.DataSession_req.DataPayload.DataPayload[k]);
+		//log_debug("csbk data is to long!!!\n");
+		//return ;
 	//}
-	//xcmp_multi_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
-	
-	//目前不支持多包发送，因而需要设定长度限制。
-	U32 xcmp_payload_len = sizeof(xcmp_datasession_req_t) - (1024 - data_ength);//1039-(1024-len)
-	log_debug("xcmp_payload_len:%d\n", xcmp_payload_len);
-	if(xcmp_payload_len>MAX_XCMP_DATA_LENGTH)
-	{
-		log_debug("xcmp_payload_len overflow!!!\n");
-	}
-	else
-	{
-		xcmp_tx((U8 *)&ptr, xcmp_payload_len);
-	}
-
-}
+//
+	//ptr.DataSession_req.Function = Single_Data_Uint;//0x01
+//
+	//ptr.DataSession_req.DataDefinition.Data_Protocol_Version = CSBK_Raw_Data;//0x54
+//
+	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address_Type = Remote_IPV4_Address;//0x02
+//
+	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address_Size = Remote_IPV4_Address_Size;//0x04
+//
+	////unsigned int addr = 0x0C000000 | (dest & 0x00FFFFFF);
+	//unsigned int addr = 0x00000000; 
+	//memcpy(ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Address, &addr, Remote_IPV4_Address_Size);
+	////ptr->DataDefinition.Dest_Address.Remote_Address[0] = 0x0C;//12
+	////ptr->DataDefinition.Dest_Address.Remote_Address[1] = 0x00;//0
+	////ptr->DataDefinition.Dest_Address.Remote_Address[2] = 0x00;//0
+	////ptr->DataDefinition.Dest_Address.Remote_Address[3] = 0x02;//2
+//
+	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = 0;//4007
+	//ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = 1;//
+	////ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[0] = (Remote_Port >>8) & 0xFF;//4007
+	////ptr.DataSession_req.DataDefinition.Dest_Address.Remote_Port_Com[1] = Remote_Port & 0xFF;//
+//
+//
+	//ptr.DataSession_req.DataPayload.Session_ID_Number = Session_ID;//0x00
+//
+	//ptr.DataSession_req.DataPayload.DataPayload_Length[0] =(data_ength >> 8) & 0xFF ;//可能会变化
+	//ptr.DataSession_req.DataPayload.DataPayload_Length[1] =data_ength & 0xFF  ;//可能会变化
+//
+	//memcpy(&(ptr.DataSession_req.DataPayload.DataPayload[0]), data, data_ength);//不会出现越界现象，DataPayload：1024bytes
+	////int k=0;
+	////for (; k<data_ength; k++)
+	////{
+		////log_debug("csbk_t_array_ptr[%d]:%x\n", k, ptr.DataSession_req.DataPayload.DataPayload[k]);
+	////}
+	////xcmp_multi_tx((U8 *)&xcmp_fragment, sizeof(DataSession_req_t) - (1024 - data_ength) + sizeof(xcmp_fragment.xcmp_opcode));
+	//
+	////目前不支持多包发送，因而需要设定长度限制。
+	//U32 xcmp_payload_len = sizeof(xcmp_datasession_req_t) - (1024 - data_ength);//1039-(1024-len)
+	//log_debug("xcmp_payload_len:%d\n", xcmp_payload_len);
+	//if(xcmp_payload_len>MAX_XCMP_DATA_LENGTH)
+	//{
+		//log_debug("xcmp_payload_len overflow!!!\n");
+	//}
+	//else
+	//{
+		//xcmp_tx((U8 *)&ptr, xcmp_payload_len);
+	//}
+//
+//}
 
 /**
 Function: xcmp_data_session_req
@@ -1008,609 +1005,609 @@ void xcmp_send_session_broadcast(uint8_t type , uint8_t data[], uint8_t data_len
 	
 }
 
-
-/**
-Function: xcmp_button_config
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_button_config(void)
-{
-		/*xcmp frame will be sent*/
-		xcmp_fragment_t xcmp_fragment;
-		
-		/*insert XCMP opcode*/
-		xcmp_fragment.xcmp_opcode = XCMP_REQUEST | BTN_CONFIG_REQUEST;
-		
-		/*point to xcmp payload*/
-		ButtonConfig_req_t * ptr = (ButtonConfig_req_t *)xcmp_fragment.u8;
-		
-		//ptr->ButtonInfo = (U8 *)malloc(sizeof(U8) * 1);//使用的时候再分配内存空间？测试看是否可行
-		
-		ptr->Function = Get_Info;//0x00
-		
-		ptr->NumOfButtons = 0x00;
-		
-		ptr->ButtoInfoStructSize = Button_Info_StructSize;
-		
-		ptr->ButtonInfo[0].ButtonIdentifier[0] = 0x00;
-		ptr->ButtonInfo[0].ButtonIdentifier[1] = 0x00;
-		
-		ptr->ButtonInfo[0].ShortPressFeature[0] = 0x00;
-		ptr->ButtonInfo[0].ShortPressFeature[1] = 0x00;
-		
-		ptr->ButtonInfo[0].Reserved1[0] = 0x00;
-		ptr->ButtonInfo[0].Reserved1[1] = 0x00;
-		
-		ptr->ButtonInfo[0].LongPressFeature[0] = 0x00;
-		ptr->ButtonInfo[0].LongPressFeature[1] = 0x00;
-		
-		ptr->ButtonInfo[0].Reserved2[0] = 0x00;
-		ptr->ButtonInfo[0].Reserved2[1] = 0x00;
-		
-		
-		
-		/*send xcmp frame*///注意！！！！！！！！！！
-		xcmp_tx( (U8 *)&xcmp_fragment, sizeof(ButtonConfig_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-	
-}
-
-
-/**
-Function: xcmp_enhanced_OB_mode
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_enter_enhanced_OB_mode(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
-	
-	/*point to xcmp payload*/
-	En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = EN_OB_Enter;
-		
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(En_OB_Control_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-/**
-Function: xcmp_exit_enhanced_OB_mode
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_exit_enhanced_OB_mode(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
-	
-	/*point to xcmp payload*/
-	En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = EN_OB_Exit;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(En_OB_Control_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-/**
-Function: xcmp_volume_control
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_volume_control(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | VOLUME_CONTROL;
-	
-	/*point to xcmp payload*/
-	VolumeControl_req_t * ptr = (VolumeControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Attenuator_Number[0] = (All_Speakers >> 8) & 0xFF;
-	ptr->Attenuator_Number[1] = All_Speakers & 0xff;
-	
-	ptr->Function = Enable_IntelligentAudio;
-	
-	ptr->Volume_Data = 0x00;
-	
-
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(VolumeControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-/**
-Function: xcmp_audio_route_speaker
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_audio_route_speaker(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-		
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
-		
-	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
-		
-	ptr->Function = Routing_Func_Update_Source;
-		
-		
-	unsigned short NumberofRoutings =  2;//2;
-	ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
-	ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
-		
-	
-	
-	
-	ptr->RoutingData[0].audioInput = IN_Pre_Speaker_Audio_Data;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
-	ptr->RoutingData[0].audioOutput = OUT_Option_Board;//OUT_Option_Board;//OUT_Microphone_Data;//测试
-	
-	
-	//ptr->RoutingData[0].audioInput = IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[0].audioOutput =OUT_Option_Board;// OUT_Speaker;
-	
-	ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
-	ptr->RoutingData[1].audioOutput = OUT_Speaker;//OUT_Microphone_Data;//测试
-	
-	//ptr->RoutingData[1].audioInput = IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
-		
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-/**
-Function: xcmp_audio_route_revert
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_audio_route_revert(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
-	
-	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = Routing_Func_Default_Source;
-	
-	
-	unsigned short NumberofRoutings = 0;
-	ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
-	ptr->NumberofRoutings[1] = NumberofRoutings & 0xFF;
-	
-	
-	//ptr->RoutingData[0].audioInput = IN_Option_Board;
-	//ptr->RoutingData[0].audioOutput = OUT_Speaker;
-	
-	//ptr->RoutingData[0].audioInput = IN_Option_Board;
-	//ptr->RoutingData[0].audioOutput = OUT_Microphone_Data;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-void xcmp_audio_route_AMBE(void)
-{
-
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
-	
-	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = Routing_Func_Update_Source;
-	
-	
-	unsigned short NumberofRoutings = 6;// 4;//2;
-	ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
-	ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
-	
-	//ptr->RoutingData[0].audioInput = IN_Microphone;//Post_AMBE_Encoder;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;//Post_AMBE_Encoder;//OUT_Microphone_Data;//测试
-	//注意：经测试发现，这里的路径配置，需要特别注意先后顺序，否则会提示参数错误。
-	ptr->RoutingData[0].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
-	ptr->RoutingData[0].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
-	ptr->RoutingData[1].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
-	
-	ptr->RoutingData[2].audioInput = Pre_AMBE_Decoder;//IN_Option_Board;
-	ptr->RoutingData[2].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
-	ptr->RoutingData[3].audioOutput = Pre_AMBE_Decoder;// OUT_Speaker;
-	
-	ptr->RoutingData[4].audioInput = Tx_Voice_Header;//IN_Option_Board;
-	ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	//ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[3].audioOutput = Tx_Voice_Header;// OUT_Speaker;
-	
-	ptr->RoutingData[5].audioInput = Tx_Voice_Terminator;//IN_Option_Board;
-	ptr->RoutingData[5].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	//ptr->RoutingData[5].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[5].audioOutput = Tx_Voice_Terminator;// OUT_Speaker;
-	
-	//ptr->RoutingData[4].audioInput = IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	
-	//ptr->RoutingData[1].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Option_Board;// OUT_Speaker;
+//
+///**
+//Function: xcmp_button_config
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+////void xcmp_button_config(void)
+////{
+		/////*xcmp frame will be sent*/
+		////xcmp_fragment_t xcmp_fragment;
+		////
+		/////*insert XCMP opcode*/
+		////xcmp_fragment.xcmp_opcode = XCMP_REQUEST | BTN_CONFIG_REQUEST;
+		////
+		/////*point to xcmp payload*/
+		////ButtonConfig_req_t * ptr = (ButtonConfig_req_t *)xcmp_fragment.u8;
+		////
+		//////ptr->ButtonInfo = (U8 *)malloc(sizeof(U8) * 1);//使用的时候再分配内存空间？测试看是否可行
+		////
+		////ptr->Function = Get_Info;//0x00
+		////
+		////ptr->NumOfButtons = 0x00;
+		////
+		////ptr->ButtoInfoStructSize = Button_Info_StructSize;
+		////
+		////ptr->ButtonInfo[0].ButtonIdentifier[0] = 0x00;
+		////ptr->ButtonInfo[0].ButtonIdentifier[1] = 0x00;
+		////
+		////ptr->ButtonInfo[0].ShortPressFeature[0] = 0x00;
+		////ptr->ButtonInfo[0].ShortPressFeature[1] = 0x00;
+		////
+		////ptr->ButtonInfo[0].Reserved1[0] = 0x00;
+		////ptr->ButtonInfo[0].Reserved1[1] = 0x00;
+		////
+		////ptr->ButtonInfo[0].LongPressFeature[0] = 0x00;
+		////ptr->ButtonInfo[0].LongPressFeature[1] = 0x00;
+		////
+		////ptr->ButtonInfo[0].Reserved2[0] = 0x00;
+		////ptr->ButtonInfo[0].Reserved2[1] = 0x00;
+		////
+		////
+		////
+		/////*send xcmp frame*///注意！！！！！！！！！！
+		////xcmp_tx( (U8 *)&xcmp_fragment, sizeof(ButtonConfig_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+	////
+////}
+//
+//
+///**
+//Function: xcmp_enhanced_OB_mode
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_enter_enhanced_OB_mode(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
 	//
-	//ptr->RoutingData[2].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[2].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
-	
-	//ptr->RoutingData[3].audioInput = Post_AMBE_Decoder;//IN_Option_Board;
-	//ptr->RoutingData[3].audioOutput = Post_AMBE_Decoder;// OUT_Speaker;
-	
-	//ptr->RoutingData[1].audioInput = IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Option_Board;//OUT_Microphone_Data;//测试
-	
-	//ptr->RoutingData[1].audioInput = IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
-
-	
-}
-
-
-/**
-Function: xcmp_audio_route_encoder_AMBE
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_audio_route_encoder_AMBE(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
-	
-	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = Routing_Func_Update_Source;
-	
-	
-	unsigned short NumberofRoutings =  4;//2;
-	ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
-	ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
-	
-	//ptr->RoutingData[0].audioInput = IN_Microphone;//Post_AMBE_Encoder;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;//Post_AMBE_Encoder;//OUT_Microphone_Data;//测试
-	//注意：经测试发现，这里的路径配置，需要特别注意先后顺序，否则会提示参数错误。
-	ptr->RoutingData[0].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
-	ptr->RoutingData[0].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
-	ptr->RoutingData[1].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
-	
-	ptr->RoutingData[2].audioInput = Tx_Voice_Header;//IN_Option_Board;
-	ptr->RoutingData[2].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	//ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[3].audioOutput = Tx_Voice_Header;// OUT_Speaker;
-	
-	ptr->RoutingData[3].audioInput = Tx_Voice_Terminator;//IN_Option_Board;
-	ptr->RoutingData[3].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	//ptr->RoutingData[5].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[5].audioOutput = Tx_Voice_Terminator;// OUT_Speaker;
-	
-	//ptr->RoutingData[4].audioInput = IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	
-	//ptr->RoutingData[1].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
 	//
-	//ptr->RoutingData[2].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[2].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
-	
-	//ptr->RoutingData[3].audioInput = Post_AMBE_Decoder;//IN_Option_Board;
-	//ptr->RoutingData[3].audioOutput = Post_AMBE_Decoder;// OUT_Speaker;
-	
-	//ptr->RoutingData[1].audioInput = IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Option_Board;//OUT_Microphone_Data;//测试
-	
-	//ptr->RoutingData[1].audioInput = IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-/**
-Function: xcmp_audio_route_decoder_AMBE
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_audio_route_decoder_AMBE(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
-	
-	/*point to xcmp payload*/
-	AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = Routing_Func_Update_Source;
-	
-	
-	unsigned short NumberofRoutings = 4;//2;
-	ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
-	ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
-	
-	//ptr->RoutingData[0].audioInput = IN_Microphone;//Post_AMBE_Encoder;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;//Post_AMBE_Encoder;//OUT_Microphone_Data;//测试
-	//注意：经测试发现，这里的路径配置，需要特别注意先后顺序，否则会提示参数错误。
-	
-	ptr->RoutingData[0].audioInput = Pre_AMBE_Decoder;//IN_Option_Board;
-	ptr->RoutingData[0].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
-	ptr->RoutingData[1].audioOutput = Pre_AMBE_Decoder;// OUT_Speaker;
-
-	
-	ptr->RoutingData[2].audioInput = Tx_Voice_Header;//IN_Option_Board;
-	ptr->RoutingData[2].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	//ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[3].audioOutput = Tx_Voice_Header;// OUT_Speaker;
-	
-	ptr->RoutingData[3].audioInput = Tx_Voice_Terminator;//IN_Option_Board;
-	ptr->RoutingData[3].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	//ptr->RoutingData[5].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[5].audioOutput = Tx_Voice_Terminator;// OUT_Speaker;
-	
-	//ptr->RoutingData[4].audioInput = IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
-	
-	//ptr->RoutingData[1].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	///*point to xcmp payload*/
+	//En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_fragment.u8;
 	//
-	//ptr->RoutingData[2].audioInput = IN_Option_Board;//IN_Option_Board;
-	//ptr->RoutingData[2].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
-	
-	//ptr->RoutingData[3].audioInput = Post_AMBE_Decoder;//IN_Option_Board;
-	//ptr->RoutingData[3].audioOutput = Post_AMBE_Decoder;// OUT_Speaker;
-	
-	//ptr->RoutingData[1].audioInput = IN_Microphone;//IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Option_Board;//OUT_Microphone_Data;//测试
-	
-	//ptr->RoutingData[1].audioInput = IN_Option_Board;
-	//ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-
-/**
-Function: xcmp_enter_device_control_mode
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_enter_device_control_mode(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
-	
-	/*point to xcmp payload*/
-	DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = DCM_ENTER;
-	ptr->ControlTypeSize = 1;
-	ptr->ControlType = 0x03;// 0xEB;//user-input
-	//ptr->ControlType = DCM_SPEAKER_CTRL;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-/**
-Function: xcmp_enter_device_control_mode
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_exit_device_control_mode(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
-	
-	/*point to xcmp payload*/
-	DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = DCM_EXIT;
-	ptr->ControlTypeSize = 1;
-	ptr->ControlType = 0x03;//DCM_SPEAKER_CTRL;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-/**
-Function: xcmp_transmit_control
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_transmit_control( void )
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | KEYREQ;
-	
-	/*point to xcmp payload*/
-	TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = KEY_UP ;
-	ptr->Mode_Of_Operation = MODE_VOICE;
-	ptr->TT_Source = 0x00;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(TransmitControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-
-
-void xcmp_transmit_dekeycontrol(void)
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | KEYREQ;
-	
-	/*point to xcmp payload*/
-	TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = DE_KEY ;
-	ptr->Mode_Of_Operation = MODE_VOICE;
-	ptr->TT_Source = 0x00;
-	
-	
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(TransmitControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-	
-	
-	
-	
-}
-
-/**
-Function: xcmp_function_mic
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_function_mic( void )
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | MIC_CONTROL;
-	
-	/*point to xcmp payload*/
-	MicControl_req_t * ptr = (MicControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->Function = Mic_Disable;
-	ptr->Mic_Type = Mic_External;
-	ptr->Signaling_Type = Sig_Type_Digital;
-	ptr->Gain_Offset = 0x17;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(MicControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-
-
-/**
-Function: xcmp_unmute_speaker
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_unmute_speaker( void )
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
-	
-	/*point to xcmp payload*/
-	SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->SpeakerNumber[0] = (All >> 8) & 0xFF;
-	ptr->SpeakerNumber[1] = All & 0xFF;
-	
-	ptr->Function[0] = (UNMUTED >> 8) & 0xFF;
-	ptr->Function[1] = UNMUTED & 0xFF;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(SpeakerControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
-
-/**
-Function: xcmp_unmute_speaker
-Parameters:
-Description: send tone request to test
-Calls: xcmp_tx
-Called By:...
-*/
-void xcmp_mute_speaker( void )
-{
-	/*xcmp frame will be sent*/
-	xcmp_fragment_t xcmp_fragment;
-	
-	/*insert XCMP opcode*/
-	xcmp_fragment.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
-	
-	/*point to xcmp payload*/
-	SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_fragment.u8;
-	
-	ptr->SpeakerNumber[0] = (All >> 8) & 0xFF;
-	ptr->SpeakerNumber[1] = All & 0xFF;
-	
-	ptr->Function[0] = (MUTED >> 8) & 0xFF;
-	ptr->Function[1] = MUTED & 0xFF;
-	
-	/*send xcmp frame*/
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(SpeakerControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
-}
+	//ptr->Function = EN_OB_Enter;
+		//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(En_OB_Control_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+///**
+//Function: xcmp_exit_enhanced_OB_mode
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_exit_enhanced_OB_mode(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | EN_OB_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//En_OB_Control_req_t * ptr = (En_OB_Control_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = EN_OB_Exit;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(En_OB_Control_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+///**
+//Function: xcmp_volume_control
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_volume_control(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | VOLUME_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//VolumeControl_req_t * ptr = (VolumeControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Attenuator_Number[0] = (All_Speakers >> 8) & 0xFF;
+	//ptr->Attenuator_Number[1] = All_Speakers & 0xff;
+	//
+	//ptr->Function = Enable_IntelligentAudio;
+	//
+	//ptr->Volume_Data = 0x00;
+	//
+//
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(VolumeControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+//
+///**
+//Function: xcmp_audio_route_speaker
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_audio_route_speaker(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+		//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+		//
+	///*point to xcmp payload*/
+	//AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
+		//
+	//ptr->Function = Routing_Func_Update_Source;
+		//
+		//
+	//unsigned short NumberofRoutings =  2;//2;
+	//ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
+	//ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
+		//
+	//
+	//
+	//
+	//ptr->RoutingData[0].audioInput = IN_Pre_Speaker_Audio_Data;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
+	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;//OUT_Option_Board;//OUT_Microphone_Data;//测试
+	//
+	//
+	////ptr->RoutingData[0].audioInput = IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[0].audioOutput =OUT_Option_Board;// OUT_Speaker;
+	//
+	//ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
+	//ptr->RoutingData[1].audioOutput = OUT_Speaker;//OUT_Microphone_Data;//测试
+	//
+	////ptr->RoutingData[1].audioInput = IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
+		//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+//
+///**
+//Function: xcmp_audio_route_revert
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_audio_route_revert(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = Routing_Func_Default_Source;
+	//
+	//
+	//unsigned short NumberofRoutings = 0;
+	//ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
+	//ptr->NumberofRoutings[1] = NumberofRoutings & 0xFF;
+	//
+	//
+	////ptr->RoutingData[0].audioInput = IN_Option_Board;
+	////ptr->RoutingData[0].audioOutput = OUT_Speaker;
+	//
+	////ptr->RoutingData[0].audioInput = IN_Option_Board;
+	////ptr->RoutingData[0].audioOutput = OUT_Microphone_Data;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+//
+//void xcmp_audio_route_AMBE(void)
+//{
+//
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = Routing_Func_Update_Source;
+	//
+	//
+	//unsigned short NumberofRoutings = 6;// 4;//2;
+	//ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
+	//ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
+	//
+	////ptr->RoutingData[0].audioInput = IN_Microphone;//Post_AMBE_Encoder;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[0].audioOutput = OUT_Option_Board;//Post_AMBE_Encoder;//OUT_Microphone_Data;//测试
+	////注意：经测试发现，这里的路径配置，需要特别注意先后顺序，否则会提示参数错误。
+	//ptr->RoutingData[0].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
+	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	//ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
+	//ptr->RoutingData[1].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
+	//
+	//ptr->RoutingData[2].audioInput = Pre_AMBE_Decoder;//IN_Option_Board;
+	//ptr->RoutingData[2].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	//ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
+	//ptr->RoutingData[3].audioOutput = Pre_AMBE_Decoder;// OUT_Speaker;
+	//
+	//ptr->RoutingData[4].audioInput = Tx_Voice_Header;//IN_Option_Board;
+	//ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[3].audioOutput = Tx_Voice_Header;// OUT_Speaker;
+	//
+	//ptr->RoutingData[5].audioInput = Tx_Voice_Terminator;//IN_Option_Board;
+	//ptr->RoutingData[5].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////ptr->RoutingData[5].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[5].audioOutput = Tx_Voice_Terminator;// OUT_Speaker;
+	//
+	////ptr->RoutingData[4].audioInput = IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	//
+	////ptr->RoutingData[1].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////
+	////ptr->RoutingData[2].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[2].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
+	//
+	////ptr->RoutingData[3].audioInput = Post_AMBE_Decoder;//IN_Option_Board;
+	////ptr->RoutingData[3].audioOutput = Post_AMBE_Decoder;// OUT_Speaker;
+	//
+	////ptr->RoutingData[1].audioInput = IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Option_Board;//OUT_Microphone_Data;//测试
+	//
+	////ptr->RoutingData[1].audioInput = IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//
+	//
+//}
+//
+//
+///**
+//Function: xcmp_audio_route_encoder_AMBE
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_audio_route_encoder_AMBE(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = Routing_Func_Update_Source;
+	//
+	//
+	//unsigned short NumberofRoutings =  4;//2;
+	//ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
+	//ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
+	//
+	////ptr->RoutingData[0].audioInput = IN_Microphone;//Post_AMBE_Encoder;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[0].audioOutput = OUT_Option_Board;//Post_AMBE_Encoder;//OUT_Microphone_Data;//测试
+	////注意：经测试发现，这里的路径配置，需要特别注意先后顺序，否则会提示参数错误。
+	//ptr->RoutingData[0].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
+	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	//ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
+	//ptr->RoutingData[1].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
+	//
+	//ptr->RoutingData[2].audioInput = Tx_Voice_Header;//IN_Option_Board;
+	//ptr->RoutingData[2].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[3].audioOutput = Tx_Voice_Header;// OUT_Speaker;
+	//
+	//ptr->RoutingData[3].audioInput = Tx_Voice_Terminator;//IN_Option_Board;
+	//ptr->RoutingData[3].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////ptr->RoutingData[5].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[5].audioOutput = Tx_Voice_Terminator;// OUT_Speaker;
+	//
+	////ptr->RoutingData[4].audioInput = IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	//
+	////ptr->RoutingData[1].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////
+	////ptr->RoutingData[2].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[2].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
+	//
+	////ptr->RoutingData[3].audioInput = Post_AMBE_Decoder;//IN_Option_Board;
+	////ptr->RoutingData[3].audioOutput = Post_AMBE_Decoder;// OUT_Speaker;
+	//
+	////ptr->RoutingData[1].audioInput = IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Option_Board;//OUT_Microphone_Data;//测试
+	//
+	////ptr->RoutingData[1].audioInput = IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+///**
+//Function: xcmp_audio_route_decoder_AMBE
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_audio_route_decoder_AMBE(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | AUDIO_ROUTING_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//AudioRoutingControl_req_t * ptr = (AudioRoutingControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = Routing_Func_Update_Source;
+	//
+	//
+	//unsigned short NumberofRoutings = 4;//2;
+	//ptr->NumberofRoutings[0] = (NumberofRoutings >> 8) & 0xFF;
+	//ptr->NumberofRoutings[1] =  NumberofRoutings & 0xFF;
+	//
+	////ptr->RoutingData[0].audioInput = IN_Microphone;//Post_AMBE_Encoder;//IN_Pre_Speaker_Audio_Data;//IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[0].audioOutput = OUT_Option_Board;//Post_AMBE_Encoder;//OUT_Microphone_Data;//测试
+	////注意：经测试发现，这里的路径配置，需要特别注意先后顺序，否则会提示参数错误。
+	//
+	//ptr->RoutingData[0].audioInput = Pre_AMBE_Decoder;//IN_Option_Board;
+	//ptr->RoutingData[0].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	//ptr->RoutingData[1].audioInput = IN_Option_Board;//IN_Option_Board;
+	//ptr->RoutingData[1].audioOutput = Pre_AMBE_Decoder;// OUT_Speaker;
+//
+	//
+	//ptr->RoutingData[2].audioInput = Tx_Voice_Header;//IN_Option_Board;
+	//ptr->RoutingData[2].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////ptr->RoutingData[3].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[3].audioOutput = Tx_Voice_Header;// OUT_Speaker;
+	//
+	//ptr->RoutingData[3].audioInput = Tx_Voice_Terminator;//IN_Option_Board;
+	//ptr->RoutingData[3].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////ptr->RoutingData[5].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[5].audioOutput = Tx_Voice_Terminator;// OUT_Speaker;
+	//
+	////ptr->RoutingData[4].audioInput = IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[4].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	//
+	////ptr->RoutingData[1].audioInput = Post_AMBE_Encoder;//IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Option_Board;// OUT_Speaker;
+	////
+	////ptr->RoutingData[2].audioInput = IN_Option_Board;//IN_Option_Board;
+	////ptr->RoutingData[2].audioOutput = Post_AMBE_Encoder;// OUT_Speaker;
+	//
+	////ptr->RoutingData[3].audioInput = Post_AMBE_Decoder;//IN_Option_Board;
+	////ptr->RoutingData[3].audioOutput = Post_AMBE_Decoder;// OUT_Speaker;
+	//
+	////ptr->RoutingData[1].audioInput = IN_Microphone;//IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Option_Board;//OUT_Microphone_Data;//测试
+	//
+	////ptr->RoutingData[1].audioInput = IN_Option_Board;
+	////ptr->RoutingData[1].audioOutput = OUT_Microphone_Data;//测试OUT_Speaker;//
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(AudioRoutingControl_req_t) - (MAX_ROUTING_CTR - NumberofRoutings) * sizeof(RoutingData_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+//
+//
+///**
+//Function: xcmp_enter_device_control_mode
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_enter_device_control_mode(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
+	//
+	///*point to xcmp payload*/
+	//DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = DCM_ENTER;
+	//ptr->ControlTypeSize = 1;
+	//ptr->ControlType = 0x03;// 0xEB;//user-input
+	////ptr->ControlType = DCM_SPEAKER_CTRL;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+//
+///**
+//Function: xcmp_enter_device_control_mode
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_exit_device_control_mode(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | DEVICE_CONTROL_MODE;
+	//
+	///*point to xcmp payload*/
+	//DeviceControlMode_req_t * ptr = (DeviceControlMode_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = DCM_EXIT;
+	//ptr->ControlTypeSize = 1;
+	//ptr->ControlType = 0x03;//DCM_SPEAKER_CTRL;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DeviceControlMode_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+///**
+//Function: xcmp_transmit_control
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_transmit_control( void )
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | KEYREQ;
+	//
+	///*point to xcmp payload*/
+	//TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = KEY_UP ;
+	//ptr->Mode_Of_Operation = MODE_VOICE;
+	//ptr->TT_Source = 0x00;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(TransmitControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+//
+//
+//
+//void xcmp_transmit_dekeycontrol(void)
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | KEYREQ;
+	//
+	///*point to xcmp payload*/
+	//TransmitControl_req_t * ptr = (TransmitControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = DE_KEY ;
+	//ptr->Mode_Of_Operation = MODE_VOICE;
+	//ptr->TT_Source = 0x00;
+	//
+	//
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(TransmitControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+	//
+	//
+	//
+	//
+//}
+//
+///**
+//Function: xcmp_function_mic
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_function_mic( void )
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | MIC_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//MicControl_req_t * ptr = (MicControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->Function = Mic_Disable;
+	//ptr->Mic_Type = Mic_External;
+	//ptr->Signaling_Type = Sig_Type_Digital;
+	//ptr->Gain_Offset = 0x17;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(MicControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+//
+//
+///**
+//Function: xcmp_unmute_speaker
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_unmute_speaker( void )
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->SpeakerNumber[0] = (All >> 8) & 0xFF;
+	//ptr->SpeakerNumber[1] = All & 0xFF;
+	//
+	//ptr->Function[0] = (UNMUTED >> 8) & 0xFF;
+	//ptr->Function[1] = UNMUTED & 0xFF;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(SpeakerControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}
+//
+///**
+//Function: xcmp_unmute_speaker
+//Parameters:
+//Description: send tone request to test
+//Calls: xcmp_tx
+//Called By:...
+//*/
+//void xcmp_mute_speaker( void )
+//{
+	///*xcmp frame will be sent*/
+	//xcmp_fragment_t xcmp_fragment;
+	//
+	///*insert XCMP opcode*/
+	//xcmp_fragment.xcmp_opcode = XCMP_REQUEST | SPEAKER_CONTROL;
+	//
+	///*point to xcmp payload*/
+	//SpeakerControl_req_t * ptr = (SpeakerControl_req_t *)xcmp_fragment.u8;
+	//
+	//ptr->SpeakerNumber[0] = (All >> 8) & 0xFF;
+	//ptr->SpeakerNumber[1] = All & 0xFF;
+	//
+	//ptr->Function[0] = (MUTED >> 8) & 0xFF;
+	//ptr->Function[1] = MUTED & 0xFF;
+	//
+	///*send xcmp frame*/
+	//xcmp_tx( (U8 *)&xcmp_fragment, sizeof(SpeakerControl_req_t) + sizeof(xcmp_fragment.xcmp_opcode));
+//}

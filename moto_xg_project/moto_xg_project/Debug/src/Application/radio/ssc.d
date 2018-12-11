@@ -57,7 +57,6 @@ src/Application/radio/ssc.d src/Application/radio/ssc.o \
  ../src/ASF/common/utils/interrupt/interrupt_avr32.h \
  ../src/ASF/avr32/utils/preprocessor/tpaste.h \
  ../src/ASF/avr32/drivers/intc/intc.h ../src/Application/radio/ssc.h \
- ../src/Application/radio/ambe.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h \
  ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/projdefs.h \
  ../src/config/FreeRTOSConfig.h ../src/ASF/common/boards/board.h \
@@ -197,8 +196,6 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 ../src/ASF/avr32/drivers/intc/intc.h:
 
 ../src/Application/radio/ssc.h:
-
-../src/Application/radio/ambe.h:
 
 ../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include/FreeRTOS.h:
 

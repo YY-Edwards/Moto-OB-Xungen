@@ -81,16 +81,10 @@ src/Application/app/app.d src/Application/app/app.o \
  ../src/ASF/common/services/clock/genclk.h \
  ../src/ASF/common/services/clock/uc3b0_b1/genclk.h \
  ../src/ASF/avr32/drivers/pm/pm.h \
- ../src/ASF/avr32/drivers/flashc/flashc.h ../src/Application/RFID/RFID.h \
- ../src/Application/RFID/MFRC522/rc522.h \
- ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/gpio/gpio.h \
- ../src/Application/flash/data_flash.h ../src/Application/radio/xcmp.h \
- ../src/Application/radio/xnl.h ../src/config/../Log/log.h \
- ../src/Application/myrtc/xgrtc.h ../src/ASF/avr32/drivers/rtc/rtc.h \
- ../src/Application/xgflash/xgflash.h \
- ../src/Application/myusart/myusart.h ../src/Application/radio/xnl.h \
- ../src/Application/radio/payload.h ../src/ASF/avr32/drivers/rtc/rtc.h \
- ../src/Application/radio/physical.h ../src/Application/radio/payload.h \
+ ../src/ASF/avr32/drivers/flashc/flashc.h ../src/Application/radio/xnl.h \
+ ../src/Application/radio/xcmp.h ../src/Application/radio/xnl.h \
+ ../src/Application/radio/payload.h ../src/Application/radio/physical.h \
+ ../src/Application/radio/payload.h \
  ../src/Application/booloader/bootloader.h
 
 ../src/Application/app/app.h:
@@ -263,35 +257,13 @@ e:\program\ x86\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/
 
 ../src/ASF/avr32/drivers/flashc/flashc.h:
 
-../src/Application/RFID/RFID.h:
-
-../src/Application/RFID/MFRC522/rc522.h:
-
-../src/ASF/avr32/drivers/spi/spi.h:
-
-../src/ASF/avr32/drivers/gpio/gpio.h:
-
-../src/Application/flash/data_flash.h:
+../src/Application/radio/xnl.h:
 
 ../src/Application/radio/xcmp.h:
 
 ../src/Application/radio/xnl.h:
 
-../src/config/../Log/log.h:
-
-../src/Application/myrtc/xgrtc.h:
-
-../src/ASF/avr32/drivers/rtc/rtc.h:
-
-../src/Application/xgflash/xgflash.h:
-
-../src/Application/myusart/myusart.h:
-
-../src/Application/radio/xnl.h:
-
 ../src/Application/radio/payload.h:
-
-../src/ASF/avr32/drivers/rtc/rtc.h:
 
 ../src/Application/radio/physical.h:
 
