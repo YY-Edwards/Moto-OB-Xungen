@@ -300,10 +300,8 @@
       <Value>../src/ASF/common/services/spi</Value>
       <Value>../src/ASF/common/services/spi/uc3_usart_spi</Value>
       <Value>../src/Application/app</Value>
-      <Value>../src/Application/flash</Value>
       <Value>../src/Application/radio</Value>
       <Value>../src/Application/timers</Value>
-      <Value>../src/Application/voice</Value>
       <Value>../src/ASF/thirdparty/freertos/freertos-7.0.0</Value>
       <Value>../src/Log</Value>
       <Value>../src/ASF/thirdparty/freertos/freertos-7.0.0/source/include</Value>
@@ -315,8 +313,6 @@
       <Value>../src/ASF/avr32/drivers/pm</Value>
       <Value>../src/ASF/avr32/drivers/tc</Value>
       <Value>../src/ASF/avr32/drivers</Value>
-      <Value>../src/Application/RFID</Value>
-      <Value>../src/Application/RFID/MFRC522</Value>
       <Value>%24(PackRepoDir)\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512</Value>
       <Value>../src/ASF/avr32/drivers/rtc</Value>
       <Value>../src/Application/myrtc</Value>
@@ -326,8 +322,6 @@
       <Value>../src/ASF/avr32/utils</Value>
       <Value>../src/ASF/common/utils</Value>
       <Value>../src/ASF/avr32/drivers/intc</Value>
-      <Value>../src/Application/xgflash</Value>
-      <Value>../src/Application/myusart</Value>
       <Value>../src/Application/booloader</Value>
     </ListValues>
   </avr32gcc.compiler.directories.IncludePaths>
@@ -420,11 +414,8 @@
     <Folder Include="src\" />
     <Folder Include="src\Application\" />
     <Folder Include="src\Application\app\" />
-    <Folder Include="src\Application\myrtc" />
     <Folder Include="src\Application\booloader" />
-    <Folder Include="src\Application\RFID" />
     <Folder Include="src\Application\radio\" />
-    <Folder Include="src\Application\RFID\MFRC522" />
     <Folder Include="src\Application\timers\" />
     <Folder Include="src\ASF\" />
     <Folder Include="src\ASF\avr32\" />
@@ -481,21 +472,6 @@
     <Compile Include="src\Application\booloader\bootloader.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\Application\myrtc\xgrtc.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\myrtc\xgrtc.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\radio\ambe.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\radio\ambe.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\radio\audio.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\Application\radio\key.h">
       <SubType>compile</SubType>
     </Compile>
@@ -527,18 +503,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\Application\radio\xnl.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\RFID\MFRC522\rc522.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\RFID\MFRC522\rc522.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\RFID\RFID.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Application\RFID\RFID.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\Application\timers\conf_board.h">

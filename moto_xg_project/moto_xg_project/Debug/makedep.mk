@@ -6,12 +6,6 @@ src\Application\app\app.c
 
 src\Application\booloader\bootloader.c
 
-src\Application\myrtc\xgrtc.c
-
-src\Application\radio\ambe.c
-
-src\Application\radio\audio.c
-
 src\Application\radio\payload.c
 
 src\Application\radio\physical.c
@@ -21,10 +15,6 @@ src\Application\radio\ssc.c
 src\Application\radio\xcmp.c
 
 src\Application\radio\xnl.c
-
-src\Application\RFID\MFRC522\rc522.c
-
-src\Application\RFID\RFID.c
 
 src\Application\timers\timer.c
 

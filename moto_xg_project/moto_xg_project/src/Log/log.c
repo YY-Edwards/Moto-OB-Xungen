@@ -142,7 +142,7 @@ void log_init(void)
 		xTaskCreate(
 		task_mylog
 		,  (const signed portCHAR *)"LOG"
-		,  120//384,100*4=400bytes
+		,  150//384,100*4=400bytes
 		,  NULL
 		,  tskLOG_PRIORITY
 		,  NULL );	

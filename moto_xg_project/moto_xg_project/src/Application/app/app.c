@@ -1303,7 +1303,7 @@ extern volatile U32 intDuration;
 	//
 	//}
 //}
-
+extern volatile U8 current_app_type;
 static __app_Thread_(app_cfg)
 {
 //	static int coun=0;
@@ -1409,7 +1409,13 @@ static __app_Thread_(app_cfg)
 			log_debug("xnl_rx  water: %d\n", xnl_rx_water_value);
 			log_debug("xnl_tx  water: %d\n", xnl_tx_water_value);
 			log_debug("soft    water: %d\n", softtimer_water_value);
-			log_debug("pdca_int    time_us: %d\n", intDuration);		
+			log_debug("pdca_int    time_us: %d\n", intDuration);
+			if(current_app_type == APP_TYPE_BOOTLOADER)
+				log_debug("current_app: bootloader \n");	
+			else
+			{
+				log_debug("current_app: 3_firmware \n");	
+			}		
 		}		
 		//log_debug("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		vTaskDelayUntil( &xLastWakeTime, (5000) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
