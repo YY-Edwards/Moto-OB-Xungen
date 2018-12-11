@@ -1762,6 +1762,6 @@ void xcmp_audio_route_encoder_AMBE(void);
 void xcmp_audio_route_decoder_AMBE(void);
 void xcmp_audio_route_AMBE(void);
 void xcmp_data_session_csbk_raw_req(void *data, U16 data_ength);
-void xcmp_send_session_broadcast(uint8_t type , uint8_t data[] , uint8_t len);
+void xcmp_send_session_broadcast(uint8_t type , uint8_t data[] , uint8_t len, uint8_t sessionID);
 
 #endif /* XCMP_H_ */

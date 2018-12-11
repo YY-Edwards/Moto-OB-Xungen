@@ -21,8 +21,11 @@ History:
 //#include "xgflash.h"
 #include "RFID.h"
 #include "app.h"
-//#include "myusart.h"
+#include "avrflash.h"
 
+
+//#include "myusart.h"
+unsigned int flash_size = 0;//bytes
 
 int main (void)
 {
@@ -35,10 +38,12 @@ int main (void)
 	Disable_global_interrupt();
 	local_start_pll0();
 	INTC_init_interrupts();
-	
+		
 	log_init();
 	log_debug("----start debug----");
 	
+	flash_size = flashc_get_flash_size();
+	bootloader_info_init();
 	//avr_flash_test();
 	
 	//third_party_interface_init();//usart1

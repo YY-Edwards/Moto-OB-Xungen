@@ -979,7 +979,7 @@ void xcmp_data_session_brd( void *message, U16 length, U8 SessionID)
 }
 
 
-void xcmp_send_session_broadcast(uint8_t type , uint8_t data[], uint8_t data_len )
+void xcmp_send_session_broadcast(uint8_t type , uint8_t data[], uint8_t data_len , uint8_t reply_sessionID)
 {
 	
 	/*xcmp frame will be sent*/
@@ -994,7 +994,7 @@ void xcmp_send_session_broadcast(uint8_t type , uint8_t data[], uint8_t data_len
 	
 	ptr->State = DATA_SESSION_UNIT;
 
-	ptr->DataPayload.Session_ID_Number = 1;//0x00++
+	ptr->DataPayload.Session_ID_Number = reply_sessionID;//0x00++
 	
 	
 	

@@ -254,7 +254,7 @@ void create_soft_timer()
 	xTaskCreate(
 			softtimer
 			,  (const signed portCHAR *)"softtime"
-			,  500
+			,  800
 			,  NULL
 			,  tskTIMER_PRIORITY
 			,  NULL );

@@ -62,6 +62,15 @@ volatile char XCMP_Version[4] ={0};
 extern volatile xSemaphoreHandle xcsbk_rx_finished_Sem;
 extern volatile xQueueHandle usart1_tx_xQueue;
 
+void ( *flashProtoCallback_)(flash_proto_t *, U8 ) = NULL;
+
+void set_flash_proto_callback( void ( *func)(flash_proto_t *, U8 ))
+{
+  
+  flashProtoCallback_ = func;
+
+}
+  
 
 //app func--list
 
@@ -577,7 +586,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 			
 			flash_proto_t * new_ptr = (flash_proto_t *)(ptr->DataPayload.DataPayload);
 			
-			parse_flash_protocol(new_ptr);
+			flashProtoCallback_(new_ptr, Session_number);//parse_flash_protocol
 		}
 		else
 		{
@@ -1171,7 +1180,10 @@ void app_init(void)
 	xcmp_register_app_list((void *)the_app_list);
 	
 	//将app_payload_rx_proc更改为PCM加密功能
-	payload_init( app_payload_rx_proc , app_payload_tx_proc );
+	//payload_init( app_payload_rx_proc , app_payload_tx_proc );
+	
+	//设置flash protocol 回调
+	set_flash_proto_callback(parse_flash_protocol);
 	
 	/* Create the mutex semaphore to guard a shared global_count.*/
 	count_mutex = xSemaphoreCreateMutex();
@@ -1367,9 +1379,9 @@ static __app_Thread_(app_cfg)
 					else
 					{
 						//break;
-						log_debug("avr flash test begin...\n");
-						write_flash_in_multitask(0, 0, 0);
-						log_debug("avr flash test end...\n");
+						//log_debug("avr flash test begin...\n");
+						////write_flash_in_multitask(0, 0, 0, 0);
+						//log_debug("avr flash test end...\n");
 					}
 				
 			break;
