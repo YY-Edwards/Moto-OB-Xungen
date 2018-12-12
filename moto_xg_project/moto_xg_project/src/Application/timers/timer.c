@@ -407,7 +407,7 @@ unsigned long get_system_time(void)
 	unsigned long us_value = Get_system_register(AVR32_COUNT);
 	
 	//us_value = us_value / (configCPU_CLOCK_HZ/1000 000);
-	us_value = us_value / 60;
+	us_value = us_value / 48;
 	
 	us_value += ms_value * 1000;
 	

@@ -12,6 +12,7 @@
 #include "log.h"
 #include "xcmp.h"
 #include "timer.h"
+#include "gpio.h"
 
 
 extern void main();
@@ -97,7 +98,16 @@ static void write_flash_in_multitask(volatile void *dst, const void *src, size_t
 }
 
 
-
+/*---------------------------------- PURPOSE ------------------------------------
+*  Jump to the GOB application start address
+*  The start address points to the application on the Generic Option Board
+*  that launches upon initialization.
+*
+*  If runaddr = BOOT_LOADER_BEGIN the boot loader will start.
+*  If runaddr >= MIN_BOOT_3_PARTY the 3rd party application will start.
+*---------------------------------- SYNOPSIS -----------------------------------
+*--------------------------- DETAILED DESCRIPTION ------------------------------*/
+#define DETECT_TIME (3)
 int flash_read_app_start()
 {
 	
@@ -108,19 +118,30 @@ int flash_read_app_start()
 	df_firmware_info_t firmware_info;
 	memset(&firmware_info, 0x00, sizeof(df_firmware_info_t));
 	memcpy((void*)&firmware_info, (void*)FIRMWARE_INFO_START_ADD, FIRMWARE_INFO_SIZE);	
-	runaddr = *(uint32_t *)(firmware_info.addr);
+	runaddr = *(uint32_t *)(firmware_info.addr);//动态分配的，因此每次启动的时候需要重新读出来
 	start_program = (void *)runaddr;
 
 	if ((mainaddr < MIN_BOOT_3_PARTY) && (firmware_info.isValid == 1))//prevent calling boot loader main again
 	{
-		if(start_program == 0XFFFFFFFF)
+		
+		volatile int forceboot = 0;
+		gpio_enable_gpio_pin(AVR32_PIN_PA04);
+		while (gpio_get_pin_value(AVR32_PIN_PA04) == 0) //detect the PA04 pin for a while (30ms), if set to low longer than 30ms, stay in boot loader
 		{
-			ret = -1;
+			wait_10_ms();
+			forceboot++;
+			if (forceboot >= DETECT_TIME)
+				break;
+		}
+
+		if ((forceboot < DETECT_TIME) && (start_program != 0xFFFFFFFF)) //only AVR32_PIN_PA04 is high, add by a21617
+		{
+			ret = 0;
+			(*start_program)();
 		}
 		else
 		{
-			ret = 0;
-			//(*start_program)();
+			ret = -1;
 		}
 	}
 
@@ -321,6 +342,9 @@ void avr_flash_test()
 
 void bootloader_init(void)
 {
+	
+	flash_read_app_start();
+	
 	if (current_app_type == APP_TYPE_BOOTLOADER)
 	{
 		df_boot_info_t boot_info;
@@ -334,8 +358,6 @@ void bootloader_init(void)
 		
 		//write boot_info 
 		flashc_memcpy(BOOT_INFO_START_ADD, &boot_version, BOOT_INFO_SIZE, true);
-		
-		flash_read_app_start();
 			
 	}
 	else
@@ -349,7 +371,7 @@ void bootloader_init(void)
 		//flashc_erase_user_page(true);
 		//unsigned long mainaddr = (unsigned long)main;
 		firmware_info.type = MOTO_PATROL;
-		firmware_info.isValid = 1;
+		//firmware_info.isValid = 1;
 		//memcpy(firmware_info.addr, &mainaddr, sizeof(mainaddr));不需要重设固件执行地址
 		memcpy(firmware_info.version, firmware_version, sizeof(firmware_version));
 				

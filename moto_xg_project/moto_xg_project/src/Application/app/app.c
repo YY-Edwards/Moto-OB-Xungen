@@ -28,7 +28,7 @@ static const U8 OB_Firmware_Version[3]={0x01, 0x00, 0x03};
 */
 
 static __app_Thread_(app_cfg);
-static void send_message(void * pvParameters);
+//static void send_message(void * pvParameters);
 
 bool ob_enabled = false;
 volatile U32 bunchofrandomstatusflags = 0;
@@ -55,8 +55,8 @@ static volatile U8 get_time_okay =TRUE;
 
 
 /*until receive/transmit payload data*/
-static void app_payload_rx_proc(void  * payload);
-static void app_payload_tx_proc(void  * payload);
+//static void app_payload_rx_proc(void  * payload);
+//static void app_payload_tx_proc(void  * payload);
 
 /*the queue is used to storage failure-send message*/
 extern volatile xQueueHandle message_storage_queue ;
@@ -76,7 +76,7 @@ extern volatile xQueueHandle usart1_tx_xQueue;
 
 void ( *flashProtoCallback_)(flash_proto_t *, U8 ) = NULL;
 
-void set_flash_proto_callback( void ( *func)(flash_proto_t *, U8 ))
+static void set_flash_proto_callback( void ( *func)(flash_proto_t *, U8 ))
 {
   
   flashProtoCallback_ = func;
@@ -86,7 +86,7 @@ void set_flash_proto_callback( void ( *func)(flash_proto_t *, U8 ))
 
 //app func--list
 
-void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
+static void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 {
 		/*point to xcmp payload*/
 		DeviceInitializationStatus_brdcst_t *ptr = (DeviceInitializationStatus_brdcst_t* )xcmp->u8;
@@ -121,7 +121,7 @@ void DeviceInitializationStatus_brdcst_func(xcmp_fragment_t  * xcmp)
 		}
 }
 
-void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
+static void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
 {
 		U16 temp = 0;
 		/*point to xcmp payload*/
@@ -153,7 +153,7 @@ void DeviceManagement_brdcst_func(xcmp_fragment_t * xcmp)
 		}	
 }
 
-void ToneControl_reply_func(xcmp_fragment_t * xcmp)
+static void ToneControl_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{		
@@ -509,14 +509,14 @@ void ToneControl_reply_func(xcmp_fragment_t * xcmp)
 //}
 
 extern void xcmp_send_data_session_reply(void);
-void DataSession_request_func(xcmp_fragment_t * xcmp)
+static void DataSession_request_func(xcmp_fragment_t * xcmp)
 {
 	DataSession_req_t * req = (DataSession_req_t *)xcmp->u8;
 	log_debug("DATAreq :%s \n", req->DataPayload.DataPayload);
 	xcmp_send_data_session_reply();
 	
 }
-void DataSession_reply_func(xcmp_fragment_t * xcmp)
+static void DataSession_reply_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == xcmp_Res_Success)
 	{
@@ -534,7 +534,7 @@ void DataSession_reply_func(xcmp_fragment_t * xcmp)
 	}
 	
 }
-void ShutDown_brdcst_func(xcmp_fragment_t * xcmp)
+static void ShutDown_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	if (xcmp->u8[0] == Shut_Down_Device)
 	{
@@ -550,7 +550,7 @@ void ShutDown_brdcst_func(xcmp_fragment_t * xcmp)
 }
 
 
-void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
+static void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	/*point to xcmp payload*/
 	BatteryLevel_brdcast_t *ptr = (BatteryLevel_brdcast_t* )(xcmp->u8);
@@ -567,19 +567,19 @@ void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 }
 
 extern volatile unsigned char host_flag;
-void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
+static void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {	
 	U8 Session_number = 0;
 	U16 data_length = 0;
-	static  portBASE_TYPE queue_ret = pdPASS;
-	static U16 payload_len = 0;
-	static U8 payload_count =0;
-	static U8 remaining_bytes=0;
-	static U8 last_temp[10]={0};
-	U16 offset=0;
+//	static  portBASE_TYPE queue_ret = pdPASS;
+//	static U16 payload_len = 0;
+//	static U8 payload_count =0;
+//	static U8 remaining_bytes=0;
+//	static U8 last_temp[10]={0};
+//	U16 offset=0;
 	//static csbk_rx_state_t rx_status = WAITING_CSBK_P_HEADER;
 	//	U32 card_id =0;
-	U8 i = 0;
+//	U8 i = 0;
 	//	xgflash_status_t return_value = XG_ERROR;
 	
 	/*point to xcmp payload*/
@@ -887,7 +887,7 @@ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 //}
 
 extern volatile bool is_rfid_scan;
-void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
+static void Phyuserinput_brdcst_func(xcmp_fragment_t * xcmp)
 {
 	U8 PUI_Source =0;
 	U8 PUI_Type =0;
@@ -1308,19 +1308,19 @@ static __app_Thread_(app_cfg)
 {
 //	static int coun=0;
 	static int run_counter=0;
-	static int rx_csbk_count=0;
+//	static int rx_csbk_count=0;
 	static  portTickType xLastWakeTime;
-	static  portBASE_TYPE queue_ret = pdPASS;
+//	static  portBASE_TYPE queue_ret = pdPASS;
 //	const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 //	U8 Burst_ID = 0;
 //	char card_id[4]={0};
-	U16  * data_ptr;
+//	U16  * data_ptr;
 	static	OB_States OB_State = OB_UNCONNECTEDWAITINGSTATUS;
 //	static xgflash_status_t status = XG_ERROR;
 	xLastWakeTime = xTaskGetTickCount();
 	static  portTickType water_value;
-	int i =0;
-	int k= 0;
+//	int i =0;
+//	int k= 0;
 	
 	for(;;)
 	{

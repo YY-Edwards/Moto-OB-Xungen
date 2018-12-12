@@ -107,10 +107,10 @@ FASTRUN void pdca_int_handler(void)
 	//static portBASE_TYPE xHigherPriorityTaskWoken;
 	//xHigherPriorityTaskWoken = pdFALSE;
 	
-	static U32 count=0;
+	//static U32 count=0;
 	intStartCount = get_system_time();//Get_system_register(AVR32_COUNT);
 	
-	count++;
+	//count++;
 	/*Toggle Index*/
 	BufferIndex ^= 0x01;
 	
