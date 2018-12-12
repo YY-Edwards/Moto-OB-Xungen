@@ -10,6 +10,9 @@
 #define BOOTLOADER_H_
 #include "flashc.h"
 
+#define APP_BOOTLOADER 1
+//#define APP_3_PARTY 1
+
 #define ERASE_FLASH_TIMER 2
 #define MAX_PAYLOAD_LEN 150
 #define MAX_PROGRAM_DATA_BYTE_LEN 128
@@ -38,9 +41,11 @@
 #define BOOT_UNINIT 					(0xffffffff)
 #define BOOT_LOADER_BEGIN				(0x80000000)   
 #define BOOT_LOADER_SIZE				(0x00010000)   //64K ?
-#define MAX_FIRMWARE_BYTE_ZISE			(0x00020000)   //128K ?
+#define MAX_3_PARTY_BYTE_SIZE			(0x00020000)   //128K ?
 
 #define MIN_BOOT_3_PARTY  				(0x80010000)   //3 party
+
+
 
 
 #pragma  pack(1)
@@ -108,7 +113,7 @@ typedef enum
 typedef enum
 {
 	APP_TYPE_BOOTLOADER =0x00,
-	APP_TYPE_FIRMWARE =0x01,
+	APP_TYPE_3_PARTY =0x01,
 	
 }df_app_type_t;
 

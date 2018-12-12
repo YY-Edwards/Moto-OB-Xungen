@@ -314,6 +314,7 @@
       <Value>../src/ASF/avr32/drivers/tc</Value>
       <Value>../src/ASF/avr32/drivers</Value>
       <Value>%24(PackRepoDir)\atmel\UC3B_DFP\1.0.29\include\AT32UC3B0512</Value>
+      <Value>../src/Application/booloader</Value>
       <Value>../src/ASF/avr32/drivers/rtc</Value>
       <Value>../src/Application/myrtc</Value>
       <Value>../src/ASF/common/boards/user_board</Value>
@@ -322,7 +323,6 @@
       <Value>../src/ASF/avr32/utils</Value>
       <Value>../src/ASF/common/utils</Value>
       <Value>../src/ASF/avr32/drivers/intc</Value>
-      <Value>../src/Application/booloader</Value>
     </ListValues>
   </avr32gcc.compiler.directories.IncludePaths>
   <avr32gcc.compiler.optimization.OtherFlags>-fdata-sections</avr32gcc.compiler.optimization.OtherFlags>

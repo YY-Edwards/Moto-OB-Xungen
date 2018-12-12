@@ -21,9 +21,9 @@ volatile bool g_is_inBOOT = false;
 volatile bool g_isEraseFlash = false;
 volatile bool g_isEraseFlashFinished_ = false;
 volatile bool g_isFirmwareStartAddrOkay_ = false;
-volatile U8 current_app_type = APP_TYPE_BOOTLOADER;//默认是firmware
+volatile U8 current_app_type = APP_TYPE_BOOTLOADER;//默认是bootloader
 volatile U32 firmwareStartAddr_ = MIN_BOOT_3_PARTY;//默认最小的固件起始地址
-volatile U32 firmwareByteSize_ = MAX_FIRMWARE_BYTE_ZISE;//默认为最大的固件大小
+volatile U32 firmwareByteSize_ = MAX_3_PARTY_BYTE_SIZE;//默认为最大的固件大小
 const U8 firmware_version[4]={0x00, 0x02, 0x00, 0x01};
 const U8 boot_version[4]={0x00, 0x01, 0x00, 0x01};
 void (*start_program) (void) = (void (*)(void))(BOOT_LOADER_BEGIN);//默认是bootloader	
@@ -152,7 +152,7 @@ int flash_read_app_start()
 	}
 	else
 	{
-		current_app_type = APP_TYPE_FIRMWARE;
+		current_app_type = APP_TYPE_3_PARTY;
 	}
 
 	return ret;
@@ -185,7 +185,7 @@ bool avrflash_write_id(U8 condition,  void*p)
 		//flashc_memcpy((BOOT_INFO_START_ADD + BOOT_ID_OFFSET), p, BOOT_ID_SIZE, true);
 
 	}
-	else if(condition == APP_TYPE_FIRMWARE)
+	else if(condition == APP_TYPE_3_PARTY)
 	{
 		write_flash_in_multitask((FIRMWARE_INFO_START_ADD + FIRMWARE_ID_OFFSET), p, FIRMWARE_ID_SIZE, true);
 		//flashc_memcpy((FIRMWARE_INFO_START_ADD + FIRMWARE_ID_OFFSET), p, FIRMWARE_ID_SIZE, true);
@@ -232,7 +232,7 @@ bool avrflash_erase_in_multitask_func()
 		else
 		 ret = false;
 	}
-	else /* current_app == APP_TYPE_FIRMWARE */
+	else /* current_app == APP_TYPE_3_PARTY */
 	{
 		return false;
 	}
@@ -263,7 +263,7 @@ bool avrflash_validate_flashing_addr(uint32_t address, uint32_t len)
 			return true;
 		}
 	}
-	else /* current_app == APP_TYPE_FIRMWARE */
+	else /* current_app == APP_TYPE_3_PARTY */
 	{
 		/* FTA only has the ability to update GOB boot loader app */
 		if (address < BOOT_FLASH_BEGIN || address >= (BOOT_LOADER_BEGIN +BOOT_LOADER_SIZE))
