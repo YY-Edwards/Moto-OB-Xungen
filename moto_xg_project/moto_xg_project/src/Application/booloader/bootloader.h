@@ -162,8 +162,8 @@ typedef struct
 
 typedef struct
 {
-	uint32_t fileSize;//bytes
 	uint32_t programStartAddr;
+	uint32_t fileSize;//bytes
 } df_check_flash_memory_request_t;
 
 typedef struct

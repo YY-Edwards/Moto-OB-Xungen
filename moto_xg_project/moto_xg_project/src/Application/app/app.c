@@ -567,7 +567,7 @@ static void BatteryLevel_brdcst_func(xcmp_fragment_t * xcmp)
 }
 
 extern volatile unsigned char host_flag;
-static void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
+ void DataSession_brdcst_func(xcmp_fragment_t * xcmp)
 {	
 	U8 Session_number = 0;
 	U16 data_length = 0;
@@ -1091,7 +1091,7 @@ static const volatile app_exec_t the_app_list[MAX_APP_FUNC]=
     {NULL, NULL, NULL},// 0x41A --
     {NULL, NULL, (void *)NULL},// 0x41B -- Signal Detection Broadcast
     {NULL, NULL, NULL},// 0x41C -- Remote Radio Control
-    {(void *)NULL, (void *)NULL, (void *)NULL},// 0x41D -- Data Session
+    {(void *)NULL, (void *)NULL, (void *)DataSession_brdcst_func},// 0x41D -- Data Session
     {NULL, NULL, (void *)NULL},// 0x41E -- Call Control
     {NULL, NULL, NULL},// 0x41F -- Menu or List Navigation
     {NULL, NULL, NULL},// 0x420 -- Menu Control

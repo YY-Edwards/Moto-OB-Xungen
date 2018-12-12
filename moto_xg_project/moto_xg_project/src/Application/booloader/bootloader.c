@@ -405,7 +405,7 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 		case ENTER_BOOT_REQ_OPCODE:
 		
 				log_debug("rx ENTER_BOOT_REQ_OPCODE.");
-				if(g_is_inBOOT == true)
+				if(0)
 				{
 					tx_buf.proto_payload.df_enter_boot_reply.result = DF_WAIT_TO_RESET;					
 				}
@@ -455,6 +455,13 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				log_debug("rx CHECK_MEMORY_REQ_OPCODE.");
 				ret = avrflash_validate_flashing_addr(p->proto_payload.df_check_flash_memory_request.programStartAddr,
 												p->proto_payload.df_check_flash_memory_request.fileSize);
+												
+												
+				log_debug("FlashC Check:Start:0x%X, Len:0x%X\t Result:%d."
+				, p->proto_payload.df_check_flash_memory_request.programStartAddr
+				,p->proto_payload.df_check_flash_memory_request.fileSize
+				,ret
+				);
 				
 				if(ret == true)
 				{

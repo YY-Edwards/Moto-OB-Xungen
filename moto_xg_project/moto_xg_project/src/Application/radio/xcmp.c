@@ -1000,9 +1000,7 @@ void xcmp_send_session_broadcast(uint8_t type , uint8_t data[], uint8_t data_len
 		
 	memcpy(&(ptr->DataPayload.DataPayload[0]), data, data_len);
 
-	xcmp_tx( (U8 *)&xcmp_fragment, sizeof(DataSession_brdcst_t)-(sizeof(DataPayload_t) - data_len) + sizeof(xcmp_fragment.xcmp_opcode));
-
-	
+	xcmp_tx_method( (U8 *)&xcmp_fragment, sizeof(DataSession_brdcst_t)-(sizeof(ptr->DataPayload.DataPayload) - data_len) + sizeof(xcmp_fragment.xcmp_opcode), session_addr);
 }
 
 //
