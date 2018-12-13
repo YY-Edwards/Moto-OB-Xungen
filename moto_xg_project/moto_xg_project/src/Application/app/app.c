@@ -1292,7 +1292,7 @@ static void send_message(void * pvParameters)
 	
 	}
 }
-
+extern volatile U8 current_app_type;
 static __app_Thread_(app_cfg)
 {
 //	static int coun=0;
@@ -1327,8 +1327,6 @@ static __app_Thread_(app_cfg)
 					log_debug("connect OB okay!\n");
 					log_debug("XCMP_Version: %d.%d.%d.%d\n", XCMP_Version[0],  XCMP_Version[1],
 					XCMP_Version[2],  XCMP_Version[3]);
-					log_debug("OB_Firmware_Version: %d.%d.%d\n", OB_Firmware_Version[0],  OB_Firmware_Version[1], OB_Firmware_Version[2]);
-				
 				}
 				else
 				{
@@ -1340,10 +1338,10 @@ static __app_Thread_(app_cfg)
 					nop();
 					//xcmp_IdleTestTone(Tone_Start, Bad_Key_Chirp);//set tone to indicate connection failure!!!
 					log_debug("connecting...\n");
-					log_debug("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
-					Current_time.Year, Current_time.Month, Current_time.Day,
-					Current_time.Hour, Current_time.Minute, Current_time.Second);
-					
+					//log_debug("Current time is :20%d:%2d:%2d, %2d:%2d:%2d\n",
+					//Current_time.Year, Current_time.Month, Current_time.Day,
+					//Current_time.Hour, Current_time.Minute, Current_time.Second);
+					//
 				}
 								
 			break;
@@ -1364,24 +1362,12 @@ static __app_Thread_(app_cfg)
 														
 					run_counter++;			
 					nop();
-					//if(run_counter == 2)新增代码，可能需要增大栈空间分配值
-					//{
-						////log_debug("send test csbk data...\n");
-						////package_usartdata_to_csbkdata(test, sizeof(test));
-					//}
 					log_debug("app task run:%d\n", run_counter);
 					if(false == ob_enabled)//可能断开
 					{
 						log_debug("OB disconnected!!!\n");
 						connect_flag =0;
 						OB_State = OB_UNCONNECTEDWAITINGSTATUS;
-					}
-					else
-					{
-						//break;
-						//log_debug("avr flash test begin...\n");
-						////write_flash_in_multitask(0, 0, 0, 0);
-						//log_debug("avr flash test end...\n");
 					}
 				
 			break;
@@ -1399,8 +1385,16 @@ static __app_Thread_(app_cfg)
 			log_debug("xnl_tx  water: %d\n", xnl_tx_water_value);
 			log_debug("soft    water: %d\n", softtimer_water_value);
 			log_debug("pdca_int    time_us: %d\n", intDuration);		
+			if(current_app_type == APP_TYPE_BOOTLOADER)
+				log_debug("current_app: bootloader \n");
+			else
+			{
+				log_debug("current_app: 3_third_party \n");
+				log_debug("OB_Firmware_Version: %d.%d.%d.%d\n",
+				 third_party_version[0],  third_party_version[1], third_party_version[2], third_party_version[3]);
+					
+			}
 		}		
-		//log_debug("\n\r ulIdleCycleCount: %d \n\r", ulIdleCycleCount);
 		vTaskDelayUntil( &xLastWakeTime, (5000) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。
 	}
 	log_debug("app exit:err\n");

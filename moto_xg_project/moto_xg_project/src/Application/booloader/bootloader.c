@@ -12,6 +12,7 @@
 #include "log.h"
 #include "xcmp.h"
 #include "timer.h"
+#include "gpio.h"
 
 
 extern void main();
@@ -19,12 +20,11 @@ extern unsigned int flash_size;
 volatile bool g_is_inBOOT = false;
 volatile bool g_isEraseFlash = false;
 volatile bool g_isEraseFlashFinished_ = false;
-volatile bool g_isFirmwareStartAddrOkay_ = false;
-volatile U8 current_app_type = APP_TYPE_FIRMWARE;//默认是firmware
-volatile U32 firmwareStartAddr_ = MIN_BOOT_3_PARTY;//默认最小的固件起始地址
-volatile U32 firmwareByteSize_ = MAX_FIRMWARE_BYTE_ZISE;//默认为最大的固件大小
-const U8 firmware_version[4]={0x00, 0x02, 0x00, 0x01};
-const U8 boot_version[4]={0x00, 0x01, 0x00, 0x01};
+volatile U8 current_app_type = APP_TYPE_3_PARTY;//默认是3_PARTY
+volatile U32 third_partyStartAddr_ = MIN_BOOT_3_PARTY_BEGIN;//默认最小的固件起始地址
+volatile U32 third_partyByteSize_ = MAX_3_PARTY_BYTE_SIZE;//默认为最大的固件大小
+const U8 third_party_version[4]={0x00, 0x02, 0x00, 0x01};
+const U8 boot_version[4]={0x00, 0x01, 0x00, 0x00};
 void (*start_program) (void) = (void (*)(void))(BOOT_LOADER_BEGIN);//默认是bootloader	
 //The 4-byte OB Firmware Version number uses a reserved byte, a Major Number to track the major changes,
 // Minor Number to track minor changes and Product ID Number to differentiate the product line.
@@ -77,8 +77,6 @@ static nvram_data_t user_nvram_data
 #endif
 ;
 
-
-
 volatile bool is_writing = false;
 
 static void write_flash_in_multitask(volatile void *dst, const void *src, size_t nbytes , bool erase)
@@ -97,7 +95,16 @@ static void write_flash_in_multitask(volatile void *dst, const void *src, size_t
 }
 
 
-
+/*---------------------------------- PURPOSE ------------------------------------
+*  Jump to the GOB application start address
+*  The start address points to the application on the Generic Option Board
+*  that launches upon initialization.
+*
+*  If runaddr = BOOT_LOADER_BEGIN the boot loader will start.
+*  If runaddr >= MIN_BOOT_3_PARTY_BEGIN the 3rd party application will start.
+*---------------------------------- SYNOPSIS -----------------------------------
+*--------------------------- DETAILED DESCRIPTION ------------------------------*/
+#define DETECT_TIME (3)
 int flash_read_app_start()
 {
 	
@@ -105,44 +112,53 @@ int flash_read_app_start()
 
 	volatile unsigned long mainaddr = (unsigned long)main;
 	int ret = 0;
-	df_firmware_info_t firmware_info;
-	memset(&firmware_info, 0x00, sizeof(df_firmware_info_t));
-	memcpy((void*)&firmware_info, (void*)FIRMWARE_INFO_START_ADD, FIRMWARE_INFO_SIZE);	
-	runaddr = *(uint32_t *)(firmware_info.addr);
+	df_third_party_info_t third_party_info;
+	memset(&third_party_info, 0x00, sizeof(df_third_party_info_t));
+	memcpy((void*)&third_party_info, (void*)THIRD_PARTY_INFO_START_ADD, THIRD_PARTY_INFO_SIZE);	
+	runaddr = *(uint32_t *)(third_party_info.addr);//读出APP的地址，并校验是否为预设的起始地址
 	start_program = (void *)runaddr;
 
-	if ((mainaddr < MIN_BOOT_3_PARTY) && (firmware_info.isValid == 1))//prevent calling boot loader main again
+	if ((runaddr == MIN_BOOT_3_PARTY_BEGIN) &&(mainaddr < MIN_BOOT_3_PARTY_BEGIN))//prevent calling boot loader main again
 	{
-		(*start_program)();
+		
+		volatile int forceboot = 0;
+		gpio_enable_gpio_pin(AVR32_PIN_PA04);
+		while (gpio_get_pin_value(AVR32_PIN_PA04) == 0) //detect the PA04 pin for a while (30ms), if set to low longer than 30ms, stay in boot loader
+		{
+			wait_10_ms();
+			forceboot++;
+			if (forceboot >= DETECT_TIME)
+				break;
+		}
+
+		if ((forceboot < DETECT_TIME) && (start_program != 0xFFFFFFFF)) //only AVR32_PIN_PA04 is high, add by a21617
+		{
+			ret = 0;
+			(*start_program)();
+		}
+		else
+		{
+			ret = -1;
+		}
 	}
 
 	/* when reach here, record current application type */
-	if (mainaddr < MIN_BOOT_3_PARTY)
+	if (mainaddr < MIN_BOOT_3_PARTY_BEGIN)
 	{
 		current_app_type = APP_TYPE_BOOTLOADER;
 	}
 	else
 	{
-		current_app_type = APP_TYPE_FIRMWARE;
+		current_app_type = APP_TYPE_3_PARTY;
 	}
 
 	return ret;
 }
 
-bool avrflash_write_firmware_valid_flag(U8 value)
-{
-	//write value to FIRMWARE_VALID_FLAG_START_ADD
-	write_flash_in_multitask(FIRMWARE_VALID_FLAG_START_ADD, &value, FIRMWARE_VALID_FLAG_OFFSET, true);
-	
-	//flashc_memcpy(FIRMWARE_VALID_FLAG_START_ADD, &value, FIRMWARE_VALID_FLAG_OFFSET, true);
-	return true;
-	
-}
-
 bool avrflash_read_info(void *p)
 {
 	//read  boot_info and app_info from BOOT_INFO_START_ADD
-	memcpy((void*)p, (void*)BOOT_INFO_START_ADD, (BOOT_INFO_SIZE+FIRMWARE_INFO_SIZE));
+	memcpy((void*)p, (void*)BOOT_INFO_START_ADD, (BOOT_INFO_SIZE+THIRD_PARTY_INFO_SIZE));
 	return true;
 	
 }
@@ -156,10 +172,10 @@ bool avrflash_write_id(U8 condition,  void*p)
 		//flashc_memcpy((BOOT_INFO_START_ADD + BOOT_ID_OFFSET), p, BOOT_ID_SIZE, true);
 
 	}
-	else if(condition == APP_TYPE_FIRMWARE)
+	else if(condition == APP_TYPE_3_PARTY)
 	{
-		write_flash_in_multitask((FIRMWARE_INFO_START_ADD + FIRMWARE_ID_OFFSET), p, FIRMWARE_ID_SIZE, true);
-		//flashc_memcpy((FIRMWARE_INFO_START_ADD + FIRMWARE_ID_OFFSET), p, FIRMWARE_ID_SIZE, true);
+		write_flash_in_multitask((THIRD_PARTY_INFO_START_ADD + THIRD_PARTY_ID_OFFSET), p, THIRD_PARTY_ID_SIZE, true);
+		//flashc_memcpy((THIRD_PARTY_INFO_START_ADD + THIRD_PARTY_ID_OFFSET), p, THIRD_PARTY_ID_SIZE, true);
 	}
 	return true;
 	
@@ -175,21 +191,21 @@ bool avrflash_erase_in_multitask_func()
 	U16 r = 0;
 	if (current_app_type == APP_TYPE_BOOTLOADER)	
 	{
-		if(firmwareStartAddr_ >= (BOOT_LOADER_BEGIN + BOOT_LOADER_SIZE))
+		if(third_partyStartAddr_ >= (BOOT_LOADER_BEGIN + BOOT_LOADER_MAX_SIZE))
 		{
-			U16 erase_page_count = firmwareByteSize_/FLASH_PAGE_SIZE;
-			erase_page_count += firmwareByteSize_%FLASH_PAGE_SIZE;
-			q = ((firmwareStartAddr_ - BOOT_LOADER_BEGIN)/FLASH_PAGE_SIZE);
-			r = ((firmwareStartAddr_ - BOOT_LOADER_BEGIN)%FLASH_PAGE_SIZE);
-			U16 firmware_start_page_index = (q + r);
-			U16 erase_index = firmware_start_page_index;
+			U16 erase_page_count = third_partyByteSize_/FLASH_PAGE_SIZE;
+			erase_page_count += third_partyByteSize_%FLASH_PAGE_SIZE;
+			q = ((third_partyStartAddr_ - BOOT_LOADER_BEGIN)/FLASH_PAGE_SIZE);
+			r = ((third_partyStartAddr_ - BOOT_LOADER_BEGIN)%FLASH_PAGE_SIZE);
+			U16 third_party_start_page_index = (q + r);
+			U16 erase_index = third_party_start_page_index;
 			do 
 			{
 				Disable_interrupt_level(1);
 				vTaskSuspendAll();
 				
 				is_writing = true;
-				//ret = flashc_erase_page(erase_index, true);//erase firmware
+				//ret = flashc_erase_page(erase_index, true);//erase third_party
 				
 				is_writing = false;
 				
@@ -203,7 +219,7 @@ bool avrflash_erase_in_multitask_func()
 		else
 		 ret = false;
 	}
-	else /* current_app == APP_TYPE_FIRMWARE */
+	else /* current_app == APP_TYPE_3_PARTY */
 	{
 		return false;
 	}
@@ -226,18 +242,17 @@ bool avrflash_validate_flashing_addr(uint32_t address, uint32_t len)
 	if (current_app_type == APP_TYPE_BOOTLOADER)
 	{
 		/* boot loader only has the ability to update 3rd party app */
-		if (address < (BOOT_LOADER_BEGIN +BOOT_LOADER_SIZE) || (address + len) > (BOOT_FLASH_BEGIN + flash_size))
+		if (address < (BOOT_LOADER_BEGIN +BOOT_LOADER_MAX_SIZE) || (address + len) > (BOOT_FLASH_BEGIN + flash_size))
 			return false;
 		else
 		{
-			//firmwareStartAddr_ = address;//更新固件运行的起始地址
 			return true;
 		}
 	}
-	else /* current_app == APP_TYPE_FIRMWARE */
+	else /* current_app == APP_TYPE_3_PARTY */
 	{
 		/* FTA only has the ability to update GOB boot loader app */
-		if (address < BOOT_FLASH_BEGIN || address >= (BOOT_LOADER_BEGIN +BOOT_LOADER_SIZE))
+		if (address < BOOT_FLASH_BEGIN || address >= (BOOT_LOADER_BEGIN +BOOT_LOADER_MAX_SIZE))
 			return false;
 		else
 			return true;
@@ -247,33 +262,33 @@ bool avrflash_validate_flashing_addr(uint32_t address, uint32_t len)
 
 bool avrflash_check_3_party_is_valid(void)
 {
-	df_firmware_info_t firmware_info;
-	memset(&firmware_info, 0x00, sizeof(df_firmware_info_t));
+	df_third_party_info_t third_party_info;
+	memset(&third_party_info, 0x00, sizeof(df_third_party_info_t));
 		
-	//read firmware info
-	memcpy((void*)&firmware_info, (void*)FIRMWARE_INFO_START_ADD, FIRMWARE_INFO_SIZE);
-	if(firmware_info.isValid != 1)return false;
+	//read third_party info
+	memcpy((void*)&third_party_info, (void*)THIRD_PARTY_INFO_START_ADD, THIRD_PARTY_INFO_SIZE);
+	if(third_party_info.isValid != 1)return false;
 	else
 		return true;
 	
 }
 
-bool avrflash_update_firmware_info(void)
+bool avrflash_update_third_party_info(void)
 {
 	
-	df_firmware_info_t firmware_info;
-	memset(&firmware_info, 0x00, sizeof(df_firmware_info_t));
-	//read firmware info
-	memcpy((void*)&firmware_info, (void*)FIRMWARE_INFO_START_ADD, FIRMWARE_INFO_SIZE);
+	df_third_party_info_t third_party_info;
+	memset(&third_party_info, 0x00, sizeof(df_third_party_info_t));
+	//read third_party info
+	memcpy((void*)&third_party_info, (void*)THIRD_PARTY_INFO_START_ADD, THIRD_PARTY_INFO_SIZE);
 
 	
 	//update flag and addr
-	firmware_info.isValid = 1;
-	memcpy(firmware_info.addr, &firmwareStartAddr_, sizeof(firmwareStartAddr_));
+	third_party_info.isValid = 1;
+	memcpy(third_party_info.addr, &third_partyStartAddr_, sizeof(third_partyStartAddr_));
 		
-	//write firmware info
-	write_flash_in_multitask(FIRMWARE_INFO_START_ADD, &firmware_info, FIRMWARE_INFO_SIZE, true);
-	//flashc_memcpy(FIRMWARE_INFO_START_ADD, &firmware_info, FIRMWARE_INFO_SIZE, true);
+	//write third_party info
+	write_flash_in_multitask(THIRD_PARTY_INFO_START_ADD, &third_party_info, THIRD_PARTY_INFO_SIZE, true);
+	//flashc_memcpy(THIRD_PARTY_INFO_START_ADD, &third_party_info, THIRD_PARTY_INFO_SIZE, true);
 	
 }
 static void flash_rw_example(const char *caption, nvram_data_t *nvram_data)
@@ -313,6 +328,9 @@ void avr_flash_test()
 
 void bootloader_init(void)
 {
+	
+	flash_read_app_start();
+	
 	if (current_app_type == APP_TYPE_BOOTLOADER)
 	{
 		df_boot_info_t boot_info;
@@ -322,31 +340,29 @@ void bootloader_init(void)
 		memcpy((void*)&boot_info, (void*)BOOT_INFO_START_ADD, BOOT_INFO_SIZE);
 		
 		//reset version
-		memcpy(boot_info.version, firmware_version, sizeof(firmware_version));	
+		memcpy(boot_info.version, boot_version, sizeof(boot_version));	
 		
 		//write boot_info 
-		flashc_memcpy(BOOT_INFO_START_ADD, &boot_version, FIRMWARE_INFO_SIZE, true);
-		
-		flash_read_app_start();
+		flashc_memcpy(BOOT_INFO_START_ADD, &boot_version, BOOT_INFO_SIZE, true);
 			
 	}
 	else
 	{
-		df_firmware_info_t firmware_info;
-		memset(&firmware_info, 0x00, sizeof(df_firmware_info_t));
+		df_third_party_info_t third_party_info;
+		memset(&third_party_info, 0x00, sizeof(df_third_party_info_t));
 			
-		//read firmware info
-		memcpy((void*)&firmware_info, (void*)FIRMWARE_INFO_START_ADD, FIRMWARE_INFO_SIZE);
+		//read third_party info
+		memcpy((void*)&third_party_info, (void*)THIRD_PARTY_INFO_START_ADD, THIRD_PARTY_INFO_SIZE);
 
 		//flashc_erase_user_page(true);
 		//unsigned long mainaddr = (unsigned long)main;
-		firmware_info.type = MOTO_PATROL;
-		firmware_info.isValid = 1;
-		//memcpy(firmware_info.addr, &mainaddr, sizeof(mainaddr));不需要重设固件执行地址
-		memcpy(firmware_info.version, firmware_version, sizeof(firmware_version));
+		third_party_info.type = MOTO_PATROL;
+		third_party_info.isValid = 1;
+		//memcpy(third_party_info.addr, &mainaddr, sizeof(mainaddr));不需要重设固件执行地址
+		memcpy(third_party_info.version, third_party_version, sizeof(third_party_version));
 				
-		//write firmware info
-		flashc_memcpy(FIRMWARE_INFO_START_ADD, &firmware_info, FIRMWARE_INFO_SIZE, true);
+		//write third_party info
+		flashc_memcpy(THIRD_PARTY_INFO_START_ADD, &third_party_info, THIRD_PARTY_INFO_SIZE, true);
 	}
 	
 }
@@ -372,26 +388,25 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 	uint8_t info_data[sizeof(tx_buf.proto_payload.df_read_info_reply.info)] ={0};
 	switch(opcode)
 	{
-		case ENTER_BOOT_REQ_OPCODE:
-		
-				log_debug("rx ENTER_BOOT_REQ_OPCODE.");
-				if(g_is_inBOOT == true)
-				{
-					tx_buf.proto_payload.df_enter_boot_reply.result = DF_WAIT_TO_RESET;					
-				}
-				else
-				{			
-					tx_buf.proto_payload.df_enter_boot_reply.result = DF_SUCCESS;
-					avrflash_write_firmware_valid_flag(0);
-					g_is_inBOOT = true;
-				}
-										
-				tx_buf.opcode = ENTER_BOOT_RLY_OPCODE;
-				tx_buf.payload_len =1;
-				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
-				xcmp_send_session_broadcast(ENTER_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
-				
-			break;
+		//case ENTER_BOOT_REQ_OPCODE:
+		//
+				//log_debug("rx ENTER_BOOT_REQ_OPCODE.");
+				//if(0)
+				//{
+					//tx_buf.proto_payload.df_enter_boot_reply.result = DF_WAIT_TO_RESET;					
+				//}
+				//else
+				//{			
+					//tx_buf.proto_payload.df_enter_boot_reply.result = DF_SUCCESS;
+					//g_is_inBOOT = true;
+				//}
+										//
+				//tx_buf.opcode = ENTER_BOOT_RLY_OPCODE;
+				//tx_buf.payload_len =1;
+				//tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				//xcmp_send_session_broadcast(ENTER_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
+				//
+			//break;
 			
 		case READ_INFO_REQ_OPCODE:
 		
@@ -425,12 +440,20 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				log_debug("rx CHECK_MEMORY_REQ_OPCODE.");
 				ret = avrflash_validate_flashing_addr(p->proto_payload.df_check_flash_memory_request.programStartAddr,
 												p->proto_payload.df_check_flash_memory_request.fileSize);
+												
+												
+				log_debug("FlashC Check:Start:0x%X, Len:0x%X\t Result:%d."
+				, p->proto_payload.df_check_flash_memory_request.programStartAddr
+				,p->proto_payload.df_check_flash_memory_request.fileSize
+				,ret
+				);
 				
 				if(ret == true)
 				{
 					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_SUCCESS;
-					firmwareStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
-					g_isFirmwareStartAddrOkay_ = true;
+					third_partyStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
+					if (current_app_type == APP_TYPE_3_PARTY)
+						avrflash_update_third_party_info();//更新第三方应用的起始地址。
 				}
 				else
 					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_FAILURE;
@@ -493,21 +516,21 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				xcmp_send_session_broadcast(PROGRAM_FLASH_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
 				
 			break;			
-		
-		case EXIT_BOOT_REQ_OPCODE:
-		
-				log_debug("rx EXIT_BOOT_REQ_OPCODE.");
-				
-				g_is_inBOOT = false;
-				avrflash_update_firmware_info();
-				
-				tx_buf.opcode = EXIT_BOOT_RLY_OPCODE;
-				tx_buf.payload_len =1;
-				tx_buf.proto_payload.df_exit_boot_reply.result = DF_SUCCESS;
-				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
-				xcmp_send_session_broadcast(EXIT_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
-				
-			break;
+		//
+		//case EXIT_BOOT_REQ_OPCODE:
+		//
+				//log_debug("rx EXIT_BOOT_REQ_OPCODE.");
+				//
+				//g_is_inBOOT = false;
+				//avrflash_update_third_party_info();
+				//
+				//tx_buf.opcode = EXIT_BOOT_RLY_OPCODE;
+				//tx_buf.payload_len =1;
+				//tx_buf.proto_payload.df_exit_boot_reply.result = DF_SUCCESS;
+				//tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				//xcmp_send_session_broadcast(EXIT_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
+				//
+			//break;
 			
 		default:
 			log_debug("flash opcode err:[0x%x]", opcode);

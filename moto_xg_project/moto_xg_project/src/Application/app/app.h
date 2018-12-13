@@ -26,8 +26,8 @@
 #define __app_Thread_(x) void x(void * pvParameters)
 
 //#define tskIDLE_PRIORITY			( ( unsigned portBASE_TYPE ) 0 )
-
-static const U8 OB_Firmware_Version[3]={0x01, 0x00, 0x03}; 
+extern const U8 third_party_version[4];
+//static const U8 OB_Firmware_Version[3]={0x01, 0x00, 0x03}; 
 //The 3-byte OB Firmware Version number uses a Major Number to track the major changes,
 // Minor Number to track minor changes and Product ID Number to differentiate the product line.
 /*Product ID Number:
