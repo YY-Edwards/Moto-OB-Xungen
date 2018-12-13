@@ -19,6 +19,7 @@ extern void main();
 extern unsigned int flash_size;
 volatile bool g_is_inBOOT = false;
 volatile bool g_isEraseFlash = false;
+volatile bool g_isEraseErr = false;
 volatile bool g_isEraseFlashFinished_ = false;
 volatile U8 current_app_type = APP_TYPE_BOOTLOADER;//默认是bootloader
 volatile U32 third_partyStartAddr_ = MIN_BOOT_3_PARTY_BEGIN;//默认最小的固件起始地址
@@ -199,13 +200,15 @@ bool avrflash_erase_in_multitask_func()
 			r = ((third_partyStartAddr_ - BOOT_LOADER_BEGIN)%FLASH_PAGE_SIZE);
 			U16 third_party_start_page_index = (q + r);
 			U16 erase_index = third_party_start_page_index;
+			log_debug("erase flash:start_index[%d], page_counts[%d]", erase_index, erase_page_count);
 			do 
 			{
 				Disable_interrupt_level(1);
 				vTaskSuspendAll();
 				
 				is_writing = true;
-				//ret = flashc_erase_page(erase_index, true);//erase third_party
+				
+				ret = flashc_erase_page(erase_index, true);//erase third_party
 				
 				is_writing = false;
 				
@@ -215,6 +218,16 @@ bool avrflash_erase_in_multitask_func()
 				erase_page_count--;
 			} while ((ret==true) && (erase_page_count > 0));
 			
+			if(ret == true)
+			{
+				log_debug("erase flash:okay!");
+				g_isEraseErr =false;
+			}
+			else
+			{
+				log_debug("erase flash:failure[%d,%d]", erase_index, erase_page_count);
+				g_isEraseErr =true;
+			}
 		}
 		else
 		 ret = false;
@@ -451,6 +464,7 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				if(ret == true)
 				{
 					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_SUCCESS;
+					third_partyByteSize_ = p->proto_payload.df_check_flash_memory_request.fileSize;//更新应用的尺寸（bytes）
 					third_partyStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
 					if(current_app_type == APP_TYPE_BOOTLOADER)
 						avrflash_update_third_party_info();//更新第三方应用的起始地址。
@@ -474,12 +488,16 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 					setTimer(ERASE_FLASH_TIMER, TIME_BASE_25MS, false, avrflash_erase_in_multitask_func, NULL);	
 				if(g_isEraseFlashFinished_ == false)
 				{			
-					//avrflash_erase();
+					//avrflash_erase();				
 					tx_buf.proto_payload.df_erase_reply.result = DF_ERASING;
 				}
 				else
 				{
-					tx_buf.proto_payload.df_erase_reply.result = DF_SUCCESS;
+					if(g_isEraseErr == true)
+						tx_buf.proto_payload.df_erase_reply.result = DF_FAILURE;
+					else
+						tx_buf.proto_payload.df_erase_reply.result = DF_SUCCESS;
+						
 					g_isEraseFlashFinished_ = false;//clear flag
 				}
 
