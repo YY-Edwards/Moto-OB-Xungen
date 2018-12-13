@@ -452,7 +452,7 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				{
 					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_SUCCESS;
 					third_partyStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
-					if (current_app_type == APP_TYPE_3_PARTY)
+					if (current_app_type == APP_TYPE_BOOTLOADER)
 						avrflash_update_third_party_info();//更新第三方应用的起始地址。
 				}
 				else
@@ -517,20 +517,21 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				
 			break;			
 		//
-		//case EXIT_BOOT_REQ_OPCODE:
-		//
-				//log_debug("rx EXIT_BOOT_REQ_OPCODE.");
-				//
-				//g_is_inBOOT = false;
-				//avrflash_update_third_party_info();
-				//
-				//tx_buf.opcode = EXIT_BOOT_RLY_OPCODE;
-				//tx_buf.payload_len =1;
-				//tx_buf.proto_payload.df_exit_boot_reply.result = DF_SUCCESS;
-				//tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
-				//xcmp_send_session_broadcast(EXIT_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
-				//
-			//break;
+		case EXIT_BOOT_REQ_OPCODE:
+		
+				log_debug("rx EXIT_BOOT_REQ_OPCODE.");
+				
+				g_is_inBOOT = false;
+				if (current_app_type == APP_TYPE_BOOTLOADER)
+					avrflash_update_third_party_info();
+				
+				tx_buf.opcode = EXIT_BOOT_RLY_OPCODE;
+				tx_buf.payload_len =1;
+				tx_buf.proto_payload.df_exit_boot_reply.result = DF_SUCCESS;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(EXIT_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
+				
+			break;
 			
 		default:
 			log_debug("flash opcode err:[0x%x]", opcode);
