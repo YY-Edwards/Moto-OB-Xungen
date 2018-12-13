@@ -50,8 +50,6 @@
 
 
 #include "trampoline_uc3.h"
-
-
 //! @{
 //! \verbatim
 

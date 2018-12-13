@@ -45,7 +45,6 @@
 
 #include <avr32/io.h>
 
-
 //! @{
 //! \verbatim
 

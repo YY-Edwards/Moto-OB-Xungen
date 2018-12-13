@@ -49,20 +49,10 @@
 #ifndef _TRAMPOLINE_UC3_H_
 #define _TRAMPOLINE_UC3_H_
 
-#include "bootloader.h"
-
 #define PROGRAM_START_ADDRESS         (AVR32_FLASH_ADDRESS + PROGRAM_START_OFFSET)
 
-
-#ifdef APP_BOOTLOADER
-
-	#define PROGRAM_START_OFFSET          0x00002000
-
-#else //APP_3_party
-
-	#define PROGRAM_START_OFFSET         (MIN_BOOT_3_PARTY + 0x00002000)
-
-#endif
+//#if (APP_BOOTLOADER_ENBALE == 1)
+#define PROGRAM_START_OFFSET         0x00000400//1k£¬ //0x00002000(default size is 8KB)
 //#define PROGRAM_START_OFFSET          0x00002000
 
 #endif // _TRAMPOLINE_UC3_H_

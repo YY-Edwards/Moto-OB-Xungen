@@ -22,8 +22,6 @@ History:
 //#include "RFID.h"
 #include "app.h"
 #include "bootloader.h"
-
-
 //#include "myusart.h"
 unsigned int flash_size = 0;//bytes
 

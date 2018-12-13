@@ -10,8 +10,8 @@
 #define BOOTLOADER_H_
 #include "flashc.h"
 
-#define APP_BOOTLOADER 1
-//#define APP_3_PARTY 1
+#define APP_BOOTLOADER_ENBALE	1//boot loader enabled
+//#define APP_3_PARTY_ENBALE		0
 
 #define ERASE_FLASH_TIMER 2
 #define MAX_PAYLOAD_LEN 150
@@ -29,21 +29,32 @@
 #define BOOT_ID_SIZE					(0x00000004)
 #define BOOT_INFO_SIZE    				(0x00000010)//16bytes
 
-#define FIRMWARE_INFO_START_ADD    		(BOOT_INFO_START_ADD+BOOT_INFO_SIZE)//0x80800014
+#define THIRD_PARTY_INFO_START_ADD    		(BOOT_INFO_START_ADD+BOOT_INFO_SIZE)//0x80800014
 
-#define FIRMWARE_VALID_FLAG_OFFSET		(0x00000001)
-#define FIRMWARE_ID_OFFSET				(0x0000000B)
-#define FIRMWARE_ID_SIZE				(0x00000004)
-#define FIRMWARE_VALID_FLAG_START_ADD	(FIRMWARE_INFO_START_ADD + FIRMWARE_VALID_FLAG_OFFSET)//0x80800015
+#define THIRD_PARTY_VALID_FLAG_OFFSET		(0x00000001)
+#define THIRD_PARTY_ID_OFFSET				(0x0000000B)
+#define THIRD_PARTY_ID_SIZE					(0x00000004)
+#define THIRD_PARTY_VALID_FLAG_START_ADD	(THIRD_PARTY_INFO_START_ADD + THIRD_PARTY_VALID_FLAG_OFFSET)//0x80800015
 
-#define FIRMWARE_INFO_SIZE    			(0x00000010)//16bytes
+#define THIRD_PARTY_INFO_SIZE    			(0x00000010)//16bytes
 
 #define BOOT_UNINIT 					(0xffffffff)
 #define BOOT_LOADER_BEGIN				(0x80000000)   
-#define BOOT_LOADER_SIZE				(0x00010000)   //64K ?
+#define BOOT_LOADER_MAX_SIZE			(0x00010000)   //64K 
+
+#define MIN_BOOT_3_PARTY_BEGIN  		(BOOT_LOADER_BEGIN + BOOT_LOADER_MAX_SIZE)   //3 party:0x80010000
 #define MAX_3_PARTY_BYTE_SIZE			(0x00020000)   //128K ?
 
-#define MIN_BOOT_3_PARTY  				(0x80010000)   //3 party
+
+//#if (APP_BOOTLOADER_ENBALE == 1)
+//
+	//#define PROGRAM_START_OFFSET         0x00000400//1k£¬ //0x00002000(default size is 8KB)
+//
+//#else //APP_3_party
+//
+	//#define PROGRAM_START_OFFSET         (MIN_BOOT_3_PARTY_BEGIN + 0x00000400)
+//
+//#endif
 
 
 
@@ -65,7 +76,7 @@ typedef enum
 	MOTO_RECORD =0x02,
 	MOTO_CSBK = 0X03 
 	
-}df_firmware_type_t;
+}df_third_party_type_t;
 
 typedef struct
 {
@@ -73,10 +84,10 @@ typedef struct
 	uint8_t isValid;//0:invalid;1:valid
 	uint8_t reserved[2];
 	uint8_t addr[4];//BOOT_3_PARTY
-	uint8_t version[4];//firmware_version
+	uint8_t version[4];//third_party_version
 	uint8_t id[4];
 	
-} df_firmware_info_t;//16bytes,
+} df_third_party_info_t;//16bytes,
 
 
 
