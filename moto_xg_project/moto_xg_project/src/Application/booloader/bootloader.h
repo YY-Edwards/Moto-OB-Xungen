@@ -107,7 +107,9 @@ typedef enum
 	ERASE_REQ_OPCODE=0x06,
 	ERASE_RLY_OPCODE =REPLYMASk | ERASE_REQ_OPCODE,
 	CHECK_MEMORY_REQ_OPCODE=0x07,
-	CHECK_MEMORY_RLY_OPCODE =REPLYMASk | CHECK_MEMORY_REQ_OPCODE
+	CHECK_MEMORY_RLY_OPCODE =REPLYMASk | CHECK_MEMORY_REQ_OPCODE,
+	QUERY_APP_TYPE_REQ_OPCODE=0x08,
+	QUERY_APP_TYPE_RLY_OPCODE =REPLYMASk | QUERY_APP_TYPE_REQ_OPCODE
 	
 	
 }df_opcode_t;
@@ -120,6 +122,14 @@ typedef enum
 	DF_ERASING = 0x03
 	
 }df_operation_status_t;
+
+
+typedef enum
+{
+	DF_FLASH_IDLE =0x00,
+	DF_FLASH_ERASING = 0x01
+	
+}df_flash_erase_state_t;
 
 typedef enum
 {
@@ -187,6 +197,11 @@ typedef struct
 	uint8_t result;
 } df_check_flash_memory_reply_t;
 
+typedef struct
+{
+	uint8_t type;
+} df_query_app_type_reply_t;
+
 
 typedef union {
 	df_enter_boot_reply_t	df_enter_boot_reply;
@@ -199,6 +214,7 @@ typedef union {
 	df_erase_reply_t		df_erase_reply;
 	df_check_flash_memory_request_t		df_check_flash_memory_request;
 	df_check_flash_memory_reply_t		df_check_flash_memory_reply;
+	df_query_app_type_reply_t			df_query_app_type_reply;
 	uint8_t					u8[MAX_PAYLOAD_LEN];
 } flash_proto_payload_t;
 

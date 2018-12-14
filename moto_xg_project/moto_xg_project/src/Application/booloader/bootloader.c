@@ -18,12 +18,14 @@
 extern void main();
 extern unsigned int flash_size;
 volatile bool g_is_inBOOT = false;
-volatile bool g_isEraseFlash = false;
+//volatile bool g_isEraseFlash = false;
+volatile bool g_isEraseErr = false;
 volatile bool g_isEraseFlashFinished_ = false;
+volatile df_flash_erase_state_t erase_state = DF_FLASH_IDLE;
 volatile U8 current_app_type = APP_TYPE_3_PARTY;//默认是3_PARTY
 volatile U32 third_partyStartAddr_ = MIN_BOOT_3_PARTY_BEGIN;//默认最小的固件起始地址
 volatile U32 third_partyByteSize_ = MAX_3_PARTY_BYTE_SIZE;//默认为最大的固件大小
-const U8 third_party_version[4]={0x00, 0x02, 0x00, 0x01};
+const U8 third_party_version[4]={0x00, 0x02, 0x01, 0x01};
 const U8 boot_version[4]={0x00, 0x01, 0x00, 0x00};
 void (*start_program) (void) = (void (*)(void))(BOOT_LOADER_BEGIN);//默认是bootloader	
 //The 4-byte OB Firmware Version number uses a reserved byte, a Major Number to track the major changes,
@@ -184,12 +186,12 @@ bool avrflash_write_id(U8 condition,  void*p)
 bool avrflash_erase_in_multitask_func()
 {
 
-	g_isEraseFlash = true;
+	//g_isEraseFlash = true;
 	log_debug("start erase flash.");
 	bool ret =false;
 	U16 q = 0;
 	U16 r = 0;
-	if (current_app_type == APP_TYPE_BOOTLOADER)	
+	if (current_app_type == APP_TYPE_BOOTLOADER)
 	{
 		if(third_partyStartAddr_ >= (BOOT_LOADER_BEGIN + BOOT_LOADER_MAX_SIZE))
 		{
@@ -199,13 +201,15 @@ bool avrflash_erase_in_multitask_func()
 			r = ((third_partyStartAddr_ - BOOT_LOADER_BEGIN)%FLASH_PAGE_SIZE);
 			U16 third_party_start_page_index = (q + r);
 			U16 erase_index = third_party_start_page_index;
-			do 
+			log_debug("erase flash:start_index[%d], page_counts[%d]", erase_index, erase_page_count);
+			do
 			{
 				Disable_interrupt_level(1);
 				vTaskSuspendAll();
 				
 				is_writing = true;
-				//ret = flashc_erase_page(erase_index, true);//erase third_party
+				
+				ret = flashc_erase_page(erase_index, true);//erase third_party
 				
 				is_writing = false;
 				
@@ -215,16 +219,58 @@ bool avrflash_erase_in_multitask_func()
 				erase_page_count--;
 			} while ((ret==true) && (erase_page_count > 0));
 			
+			if(ret == true)
+			{
+				log_debug("erase flash:okay!");
+				g_isEraseErr =false;
+			}
+			else
+			{
+				log_debug("erase flash:failure[%d,%d]", erase_index, erase_page_count);
+				g_isEraseErr =true;
+			}
 		}
 		else
-		 ret = false;
+		ret = false;
 	}
 	else /* current_app == APP_TYPE_3_PARTY */
 	{
-		return false;
+	
+		U16 erase_page_count = BOOT_LOADER_MAX_SIZE/FLASH_PAGE_SIZE;
+		erase_page_count += BOOT_LOADER_MAX_SIZE%FLASH_PAGE_SIZE;
+		U16 erase_index = 0;
+		log_debug("erase flash:start_index[%d], page_counts[%d]", erase_index, erase_page_count);
+		do
+		{
+			Disable_interrupt_level(1);
+			vTaskSuspendAll();
+				
+			is_writing = true;
+				
+			ret = flashc_erase_page(erase_index, true);//erase third_party
+				
+			is_writing = false;
+				
+			xTaskResumeAll();
+			Enable_interrupt_level(1);
+			erase_index++;
+			erase_page_count--;
+		} while ((ret==true) && (erase_page_count > 0));
+			
+		if(ret == true)
+		{
+			log_debug("erase flash:okay!");
+			g_isEraseErr =false;
+		}
+		else
+		{
+			log_debug("erase flash:failure[%d,%d]", erase_index, erase_page_count);
+			g_isEraseErr =true;
+		}
+
 	}
 	
-	g_isEraseFlash = false;
+	//g_isEraseFlash = false;
 	g_isEraseFlashFinished_ = true;
 	return ret;
 	
@@ -450,10 +496,14 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				
 				if(ret == true)
 				{
-					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_SUCCESS;
-					third_partyStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
 					if (current_app_type == APP_TYPE_BOOTLOADER)
+					{
+						third_partyStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
+						third_partyByteSize_ = p->proto_payload.df_check_flash_memory_request.fileSize;//更新应用的尺寸（bytes）
 						avrflash_update_third_party_info();//更新第三方应用的起始地址。
+					}
+			
+					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_SUCCESS;
 				}
 				else
 					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_FAILURE;
@@ -469,26 +519,47 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 		case ERASE_REQ_OPCODE:
 				
 				log_debug("rx ERASE_REQ_OPCODE.");
-				//start erase flash
-				if(g_isEraseFlash == false)
-					setTimer(ERASE_FLASH_TIMER, TIME_BASE_25MS, false, avrflash_erase_in_multitask_func, NULL);	
-				if(g_isEraseFlashFinished_ == false)
-				{			
-					//avrflash_erase();
-					tx_buf.proto_payload.df_erase_reply.result = DF_ERASING;
-				}
-				else
+				switch (erase_state)
 				{
-					tx_buf.proto_payload.df_erase_reply.result = DF_SUCCESS;
-					g_isEraseFlashFinished_ = false;//clear flag
+					case DF_FLASH_IDLE:
+					
+						tx_buf.proto_payload.df_erase_reply.result = DF_ERASING;
+						//启动擦除任务
+						setTimer(ERASE_FLASH_TIMER, TIME_BASE_25MS, false, avrflash_erase_in_multitask_func, NULL);
+						erase_state = DF_FLASH_ERASING;//next state
+					
+					break;
+					
+					case DF_FLASH_ERASING:
+					
+						if(g_isEraseFlashFinished_ == true)//擦除操作完成
+						{
+							if(g_isEraseErr == true)//失败
+							tx_buf.proto_payload.df_erase_reply.result = DF_FAILURE;
+							else//成功
+							tx_buf.proto_payload.df_erase_reply.result = DF_SUCCESS;
+						
+							g_isEraseFlashFinished_ = false;//clear flag
+							erase_state = DF_FLASH_IDLE;//next state
+						}
+						else
+						{
+							tx_buf.proto_payload.df_erase_reply.result = DF_ERASING;
+						}
+					
+					break;
+					
+					default:
+						break;
 				}
-
+				
+				
 				tx_buf.opcode = ERASE_RLY_OPCODE;
 				tx_buf.payload_len =1;
 				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
 				xcmp_send_session_broadcast(EXIT_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
 				
-				break;		
+				break;
 			
 		case PROGRAM_FLASH_REQ_OPCODE:
 		
@@ -531,6 +602,17 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
 				xcmp_send_session_broadcast(EXIT_BOOT_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
 				
+			break;
+			
+		case QUERY_APP_TYPE_REQ_OPCODE:	
+				
+				tx_buf.opcode = QUERY_APP_TYPE_RLY_OPCODE;
+				tx_buf.proto_payload.df_query_app_type_reply.type = current_app_type;			
+				tx_buf.payload_len =1;
+				tx_buf.proto_payload.df_exit_boot_reply.result = DF_SUCCESS;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(QUERY_APP_TYPE_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
+							
 			break;
 			
 		default:
