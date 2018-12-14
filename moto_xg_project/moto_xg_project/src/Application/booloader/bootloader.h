@@ -38,10 +38,6 @@
 
 #define THIRD_PARTY_INFO_SIZE    			(0x00000010)//16bytes
 
-#define USER_DATA_INFO_START_ADD    		(USERPAGE_START_ADD+0x00000100)//0x80800100
-#define USER_DATA_INFO_SIZE   			(0x00000004)//4bytes
-
-
 #define BOOT_UNINIT 					(0xffffffff)
 #define BOOT_LOADER_BEGIN				(0x80000000)   
 #define BOOT_LOADER_MAX_SIZE			(0x00010000)   //64K 
@@ -50,10 +46,11 @@
 #define MAX_3_PARTY_BYTE_SIZE			(0x00020000)   //128K ?
 
 #define USER_DATA_INFO_START_ADD    	(USERPAGE_START_ADD+0x00000100)//0x80800100
-#define USER_DATA_INFO_SIZE   			(0x00000100)//256bytes
+#define USER_DATA_INFO_DEFAULT_SIZE   	(0x00000080)//128bytes
+#define USER_DATA_INFO_MAX_SIZE   		(0x00000200)//512bytes
 
-#define PATROL_CENTRAL_ID_START_ADD    	(USER_DATA_INFO_START_ADD)//0x80800100
-#define PATROL_CENTRAL_ID_SIZE   			(0x00000004)//4bytes
+//#define PATROL_CENTRAL_ID_START_ADD    	(USER_DATA_INFO_START_ADD)//0x80800100
+//#define PATROL_CENTRAL_ID_SIZE   			(0x00000004)//4bytes
 
 
 //#if (APP_BOOTLOADER_ENBALE == 1)
@@ -215,9 +212,9 @@ typedef struct
 
 typedef struct
 {
-	uint32_t addr;
-	uint32_t central_id;//³µÌ¨idºÅ
-	uint8_t  reserved[40];//bytes
+	uint32_t addr;//USER_DATA_INFO_START_ADD
+	uint32_t data_len;//<=128
+	uint8_t  data[USER_DATA_INFO_MAX_SIZE];//512bytes
 } df_set_user_data_request_t;
 
 typedef struct

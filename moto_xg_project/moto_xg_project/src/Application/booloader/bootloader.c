@@ -395,6 +395,7 @@ uint8_t df_payload_checksunm(void *p, uint8_t len)
 
 void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 {	
+	U32 temp_len = 0;
 	bool ret =false;
 	uint8_t opcode = p->opcode;
 	flash_proto_t tx_buf;
@@ -586,9 +587,12 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				
 				if(p->proto_payload.df_set_user_data_request.addr == USER_DATA_INFO_START_ADD)
 				{
+					if(p->proto_payload.df_set_user_data_request.data_len > USER_DATA_INFO_DEFAULT_SIZE)
+						temp_len=USER_DATA_INFO_DEFAULT_SIZE;
+						
 					write_flash_in_multitask(USER_DATA_INFO_START_ADD,
-					&(p->proto_payload.df_set_user_data_request.central_id),
-					(USER_DATA_INFO_SIZE + (40)),//预留的也一起写
+					(p->proto_payload.df_set_user_data_request.data),
+					(temp_len),//预留的也一起写
 					true);
 					
 					tx_buf.proto_payload.df_set_user_data_reply.result = DF_SUCCESS;
