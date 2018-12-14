@@ -123,6 +123,13 @@ typedef enum
 
 typedef enum
 {
+	DF_FLASH_IDLE =0x00,
+	DF_FLASH_ERASING = 0x01
+	
+}df_flash_erase_state_t;
+
+typedef enum
+{
 	APP_TYPE_BOOTLOADER =0x00,
 	APP_TYPE_3_PARTY =0x01,
 	

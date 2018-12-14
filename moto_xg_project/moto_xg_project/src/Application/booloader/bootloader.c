@@ -18,14 +18,15 @@
 extern void main();
 extern unsigned int flash_size;
 volatile bool g_is_inBOOT = false;
-volatile bool g_isEraseFlash = false;
+//volatile bool g_isEraseFlash = false;
 volatile bool g_isEraseErr = false;
 volatile bool g_isEraseFlashFinished_ = false;
+volatile df_flash_erase_state_t erase_state = DF_FLASH_IDLE;
 volatile U8 current_app_type = APP_TYPE_BOOTLOADER;//默认是bootloader
 volatile U32 third_partyStartAddr_ = MIN_BOOT_3_PARTY_BEGIN;//默认最小的固件起始地址
 volatile U32 third_partyByteSize_ = MAX_3_PARTY_BYTE_SIZE;//默认为最大的固件大小
-const U8 third_party_version[4]={0x00, 0x02, 0x00, 0x01};
 const U8 boot_version[4]={0x00, 0x01, 0x00, 0x00};
+//const U8 third_party_version[4]={0x00, 0x02, 0x00, 0x01};
 void (*start_program) (void) = (void (*)(void))(BOOT_LOADER_BEGIN);//默认是bootloader	
 //The 4-byte OB Firmware Version number uses a reserved byte, a Major Number to track the major changes,
 // Minor Number to track minor changes and Product ID Number to differentiate the product line.
@@ -181,11 +182,10 @@ bool avrflash_write_id(U8 condition,  void*p)
 	return true;
 	
 }
-
 bool avrflash_erase_in_multitask_func()
 {
 
-	g_isEraseFlash = true;
+	//g_isEraseFlash = true;
 	log_debug("start erase flash.");
 	bool ret =false;
 	U16 q = 0;
@@ -237,7 +237,7 @@ bool avrflash_erase_in_multitask_func()
 		return false;
 	}
 	
-	g_isEraseFlash = false;
+	//g_isEraseFlash = false;
 	g_isEraseFlashFinished_ = true;
 	return ret;
 	
@@ -361,21 +361,21 @@ void bootloader_init(void)
 	}
 	else
 	{
-		df_third_party_info_t third_party_info;
-		memset(&third_party_info, 0x00, sizeof(df_third_party_info_t));
-			
-		//read third_party info
-		memcpy((void*)&third_party_info, (void*)THIRD_PARTY_INFO_START_ADD, THIRD_PARTY_INFO_SIZE);
-
-		//flashc_erase_user_page(true);
-		//unsigned long mainaddr = (unsigned long)main;
-		third_party_info.type = MOTO_PATROL;
-		//third_party_info.isValid = 1;
-		//memcpy(third_party_info.addr, &mainaddr, sizeof(mainaddr));不需要重设固件执行地址
-		memcpy(third_party_info.version, third_party_version, sizeof(third_party_version));
-				
-		//write third_party info
-		flashc_memcpy(THIRD_PARTY_INFO_START_ADD, &third_party_info, THIRD_PARTY_INFO_SIZE, true);
+		//df_third_party_info_t third_party_info;
+		//memset(&third_party_info, 0x00, sizeof(df_third_party_info_t));
+			//
+		////read third_party info
+		//memcpy((void*)&third_party_info, (void*)THIRD_PARTY_INFO_START_ADD, THIRD_PARTY_INFO_SIZE);
+//
+		////flashc_erase_user_page(true);
+		////unsigned long mainaddr = (unsigned long)main;
+		//third_party_info.type = MOTO_PATROL;
+		////third_party_info.isValid = 1;
+		////memcpy(third_party_info.addr, &mainaddr, sizeof(mainaddr));不需要重设固件执行地址
+		//memcpy(third_party_info.version, third_party_version, sizeof(third_party_version));
+				//
+		////write third_party info
+		//flashc_memcpy(THIRD_PARTY_INFO_START_ADD, &third_party_info, THIRD_PARTY_INFO_SIZE, true);
 	}
 	
 }
@@ -483,24 +483,42 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 		case ERASE_REQ_OPCODE:
 				
 				log_debug("rx ERASE_REQ_OPCODE.");
-				//start erase flash
-				if(g_isEraseFlash == false)
-					setTimer(ERASE_FLASH_TIMER, TIME_BASE_25MS, false, avrflash_erase_in_multitask_func, NULL);	
-				if(g_isEraseFlashFinished_ == false)
-				{			
-					//avrflash_erase();				
-					tx_buf.proto_payload.df_erase_reply.result = DF_ERASING;
-				}
-				else
+				
+				switch (erase_state)
 				{
-					if(g_isEraseErr == true)
-						tx_buf.proto_payload.df_erase_reply.result = DF_FAILURE;
-					else
-						tx_buf.proto_payload.df_erase_reply.result = DF_SUCCESS;
+					case DF_FLASH_IDLE:
+					
+						tx_buf.proto_payload.df_erase_reply.result = DF_ERASING;
+						//启动擦除任务
+						setTimer(ERASE_FLASH_TIMER, TIME_BASE_25MS, false, avrflash_erase_in_multitask_func, NULL);
+						erase_state = DF_FLASH_ERASING;//next state
 						
-					g_isEraseFlashFinished_ = false;//clear flag
+						break;
+						
+					case DF_FLASH_ERASING:
+					
+						if(g_isEraseFlashFinished_ == true)//擦除操作完成
+						{
+							if(g_isEraseErr == true)//失败
+								tx_buf.proto_payload.df_erase_reply.result = DF_FAILURE;
+							else//成功
+								tx_buf.proto_payload.df_erase_reply.result = DF_SUCCESS;
+							
+							g_isEraseFlashFinished_ = false;//clear flag	
+							erase_state = DF_FLASH_IDLE;//next state							
+						}
+						else
+						{
+							tx_buf.proto_payload.df_erase_reply.result = DF_ERASING;
+						}
+					
+						break;
+						
+					default:
+						break;
 				}
-
+				
+				
 				tx_buf.opcode = ERASE_RLY_OPCODE;
 				tx_buf.payload_len =1;
 				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));

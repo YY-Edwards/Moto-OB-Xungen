@@ -709,9 +709,9 @@ static void xnl_tx_process(void * pvParameters)
 					
 					/*send physical data*/
 					phy_tx((phy_fragment_t *)ptr);
-					log_debug("send xnl[%d]:0x%x \n\r", 
-					((ptr->xnl_header.protocol_id<<8)+ptr->xnl_header.xnl_flags), 
-					ptr->xnl_header.opcode);
+					//log_debug("send xnl[%d]:0x%x \n\r", 
+					//((ptr->xnl_header.protocol_id<<8)+ptr->xnl_header.xnl_flags), 
+					//ptr->xnl_header.opcode);
 					
 					//if( ptr->xnl_header.opcode == XNL_DATA_MSG)
 					//{
@@ -783,9 +783,9 @@ static void xnl_rx(xnl_fragment_t * xnl)
 
 	if(NULL != xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec)
 	{
-		log_debug("R_xnl[%d]:0x%x \n\r", 
-		((xnl->xnl_header.protocol_id<<8)+xnl->xnl_header.xnl_flags),
-		xnl->xnl_header.opcode);//log:R_xnlÖ¸Áî
+		//log_debug("R_xnl[%d]:0x%x \n\r", 
+		//((xnl->xnl_header.protocol_id<<8)+xnl->xnl_header.xnl_flags),
+		//xnl->xnl_header.opcode);//log:R_xnlÖ¸Áî
 		/*execute the function in list*/
 		xnl_proc_list[xnl->xnl_header.opcode].xnl_rx_exec(xnl);
 	}
