@@ -286,7 +286,7 @@ bool avrflash_check_3_party_is_valid(void)
 	
 }
 
-bool avrflash_update_third_party_info(void)
+bool avrflash_update_third_party_info(U32 addr)
 {
 	
 	df_third_party_info_t third_party_info;
@@ -296,8 +296,14 @@ bool avrflash_update_third_party_info(void)
 
 	
 	//update flag and addr
+	//third_party_info.isValid = 1;
+	//memcpy(third_party_info.addr, &third_partyStartAddr_, sizeof(third_partyStartAddr_));
+	if(addr != BOOT_UNINIT)
 	third_party_info.isValid = 1;
-	memcpy(third_party_info.addr, &third_partyStartAddr_, sizeof(third_partyStartAddr_));
+	{
+		third_party_info.isValid = 0;
+	}
+	memcpy(third_party_info.addr, &addr, sizeof(U32));
 		
 	//write third_party info
 	write_flash_in_multitask(THIRD_PARTY_INFO_START_ADD, &third_party_info, THIRD_PARTY_INFO_SIZE, true);
@@ -395,6 +401,7 @@ uint8_t df_payload_checksunm(void *p, uint8_t len)
 
 void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 {	
+	U32 temp_len = 0;
 	bool ret =false;
 	uint8_t opcode = p->opcode;
 	flash_proto_t tx_buf;
@@ -467,7 +474,7 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 					third_partyByteSize_ = p->proto_payload.df_check_flash_memory_request.fileSize;//更新应用的尺寸（bytes）
 					third_partyStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
 					if(current_app_type == APP_TYPE_BOOTLOADER)
-						avrflash_update_third_party_info();//更新第三方应用的起始地址。
+						avrflash_update_third_party_info(BOOT_UNINIT);//clear第三方应用的起始地址。
 				}
 				else
 					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_FAILURE;
@@ -559,8 +566,8 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				
 				g_is_inBOOT = false;
 				if(current_app_type == APP_TYPE_BOOTLOADER)
-					avrflash_update_third_party_info();
-				
+					avrflash_update_third_party_info(third_partyStartAddr_);//更新第三方应用的起始地址。
+							
 				tx_buf.opcode = EXIT_BOOT_RLY_OPCODE;
 				tx_buf.payload_len =1;
 				tx_buf.proto_payload.df_exit_boot_reply.result = DF_SUCCESS;
@@ -586,9 +593,12 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				
 				if(p->proto_payload.df_set_user_data_request.addr == USER_DATA_INFO_START_ADD)
 				{
+					if(p->proto_payload.df_set_user_data_request.data_len > USER_DATA_INFO_DEFAULT_SIZE)
+						temp_len=USER_DATA_INFO_DEFAULT_SIZE;
+					
 					write_flash_in_multitask(USER_DATA_INFO_START_ADD,
-					&(p->proto_payload.df_set_user_data_request.central_id),
-					(USER_DATA_INFO_SIZE + (40)),//预留的也一起写
+					(p->proto_payload.df_set_user_data_request.data),
+					(temp_len),//预留的也一起写
 					true);
 					
 					tx_buf.proto_payload.df_set_user_data_reply.result = DF_SUCCESS;
