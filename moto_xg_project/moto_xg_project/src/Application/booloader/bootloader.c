@@ -25,7 +25,7 @@ volatile df_flash_erase_state_t erase_state = DF_FLASH_IDLE;
 volatile U8 current_app_type = APP_TYPE_BOOTLOADER;//默认是bootloader
 volatile U32 third_partyStartAddr_ = MIN_BOOT_3_PARTY_BEGIN;//默认最小的固件起始地址
 volatile U32 third_partyByteSize_ = MAX_3_PARTY_BYTE_SIZE;//默认为最大的固件大小
-const U8 boot_version[4]={0x00, 0x01, 0x00, 0x00};
+const U8 boot_version[4]={0x00, 0x01, 0x00, 0x01};
 //const U8 third_party_version[4]={0x00, 0x02, 0x00, 0x01};
 void (*start_program) (void) = (void (*)(void))(BOOT_LOADER_BEGIN);//默认是bootloader	
 //The 4-byte OB Firmware Version number uses a reserved byte, a Major Number to track the major changes,
@@ -569,6 +569,41 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				
 			break;
 			
+		case QUERY_APP_TYPE_REQ_OPCODE:
+				
+				log_debug("rx QUERY_APP_TYPE_REQ_OPCODE.");
+				tx_buf.opcode = QUERY_APP_TYPE_RLY_OPCODE;
+				tx_buf.proto_payload.df_query_app_type_reply.type = current_app_type;
+				tx_buf.payload_len =1;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(QUERY_APP_TYPE_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
+				
+			break;
+		
+		case SET_USER_DATA_REQ_OPCODE:
+				
+				log_debug("rx SET_USER_DATA_REQ_OPCODE.");
+				
+				if(p->proto_payload.df_set_user_data_request.addr == USER_DATA_INFO_START_ADD)
+				{
+					write_flash_in_multitask(USER_DATA_INFO_START_ADD,
+					&(p->proto_payload.df_set_user_data_request.central_id),
+					(USER_DATA_INFO_SIZE + (40)),//预留的也一起写
+					true);
+					
+					tx_buf.proto_payload.df_set_user_data_reply.result = DF_SUCCESS;
+				}
+				else
+				{
+					tx_buf.proto_payload.df_set_user_data_reply.result = DF_FAILURE;
+				}
+				tx_buf.opcode = SET_USER_DATA_RLY_OPCODE;
+				tx_buf.payload_len =1;
+				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
+				xcmp_send_session_broadcast(SET_USER_DATA_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
+				
+			break;
+					
 		default:
 			log_debug("flash opcode err:[0x%x]", opcode);
 			break;

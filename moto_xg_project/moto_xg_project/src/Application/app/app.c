@@ -1207,7 +1207,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  900//1024//800//384,900*4=3600bytes
+	,  700//1024//800//384,900*4=3600bytes
 	,  NULL
 	,  tskIDLE_PRIORITY
 	,  NULL );
@@ -1304,6 +1304,7 @@ extern volatile U32 intDuration;
 	//}
 //}
 extern volatile U8 current_app_type;
+extern const U8 boot_version[4];
 static __app_Thread_(app_cfg)
 {
 //	static int coun=0;
@@ -1400,7 +1401,11 @@ static __app_Thread_(app_cfg)
 			log_debug("soft    water: %d\n", softtimer_water_value);
 			log_debug("pdca_int    time_us: %d\n", intDuration);
 			if(current_app_type == APP_TYPE_BOOTLOADER)
-				log_debug("current_app: bootloader \n");	
+			{
+				log_debug("current_app: bootloader \n");
+				log_debug("OB_Firmware_Ver: %d.%d.%d.%d \n",
+				boot_version[0], boot_version[1], boot_version[2], boot_version[3]);
+			}
 			else
 			{
 				log_debug("current_app: 3_third_party \n");	

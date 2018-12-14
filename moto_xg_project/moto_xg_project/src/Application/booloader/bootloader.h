@@ -38,6 +38,10 @@
 
 #define THIRD_PARTY_INFO_SIZE    			(0x00000010)//16bytes
 
+#define USER_DATA_INFO_START_ADD    		(USERPAGE_START_ADD+0x00000100)//0x80800100
+#define USER_DATA_INFO_SIZE   			(0x00000004)//4bytes
+
+
 #define BOOT_UNINIT 					(0xffffffff)
 #define BOOT_LOADER_BEGIN				(0x80000000)   
 #define BOOT_LOADER_MAX_SIZE			(0x00010000)   //64K 
@@ -107,8 +111,11 @@ typedef enum
 	ERASE_REQ_OPCODE=0x06,
 	ERASE_RLY_OPCODE =REPLYMASk | ERASE_REQ_OPCODE,
 	CHECK_MEMORY_REQ_OPCODE=0x07,
-	CHECK_MEMORY_RLY_OPCODE =REPLYMASk | CHECK_MEMORY_REQ_OPCODE
-	
+	CHECK_MEMORY_RLY_OPCODE =REPLYMASk | CHECK_MEMORY_REQ_OPCODE,
+	QUERY_APP_TYPE_REQ_OPCODE=0x08,
+	QUERY_APP_TYPE_RLY_OPCODE =REPLYMASk | QUERY_APP_TYPE_REQ_OPCODE,
+	SET_USER_DATA_REQ_OPCODE=0x09,
+	SET_USER_DATA_RLY_OPCODE =REPLYMASk | SET_USER_DATA_REQ_OPCODE	
 	
 }df_opcode_t;
 
@@ -195,6 +202,24 @@ typedef struct
 } df_check_flash_memory_reply_t;
 
 
+typedef struct
+{
+	uint8_t type;
+} df_query_app_type_reply_t;
+
+typedef struct
+{
+	uint32_t addr;
+	uint32_t central_id;//³µÌ¨idºÅ
+	uint8_t  reserved[40];//bytes
+} df_set_user_data_request_t;
+
+typedef struct
+{
+	uint8_t result;
+} df_set_user_data_reply_t;
+
+
 typedef union {
 	df_enter_boot_reply_t	df_enter_boot_reply;
 	df_read_info_reply_t	df_read_info_reply;
@@ -206,6 +231,9 @@ typedef union {
 	df_erase_reply_t		df_erase_reply;
 	df_check_flash_memory_request_t		df_check_flash_memory_request;
 	df_check_flash_memory_reply_t		df_check_flash_memory_reply;
+	df_query_app_type_reply_t			df_query_app_type_reply;
+	df_set_user_data_request_t			df_set_user_data_request;
+	df_set_user_data_reply_t			df_set_user_data_reply;
 	uint8_t					u8[MAX_PAYLOAD_LEN];
 } flash_proto_payload_t;
 
