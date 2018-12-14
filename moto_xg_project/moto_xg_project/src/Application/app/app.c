@@ -1207,7 +1207,7 @@ void app_init(void)
 	 res = xTaskCreate(
 	app_cfg
 	,  (const signed portCHAR *)"USER_P"
-	,  700//1024//800//384,900*4=3600bytes
+	,  800//1024//800//384,900*4=3600bytes
 	,  NULL
 	,  tskIDLE_PRIORITY
 	,  NULL );
