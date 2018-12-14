@@ -1223,11 +1223,12 @@ extern portTickType xnl_tx_water_value;
 extern portTickType log_water_value;
 extern portTickType softtimer_water_value;
 extern volatile U32 intDuration;
+extern volatile U32 patrol_dest_id;
 static void send_message(void * pvParameters)
 {
 
 	static U16 message_count =0;
-	U32 destination = DEST;
+	U32 destination = patrol_dest_id;
 	static  portTickType xLastWakeTime;
 	//const portTickType xFrequency = 4000;//2s,定时问题已经修正。2s x  2000hz = 4000
 //	U16  * data_ptr;
@@ -1355,7 +1356,7 @@ static __app_Thread_(app_cfg)
 					}
 					else
 					{						
-						xcmp_data_session_req(0x00, sizeof(Message_Protocol_t), DEST);//request to get system time						
+						xcmp_data_session_req(0x00, sizeof(Message_Protocol_t), patrol_dest_id);//request to get system time						
 					}
 			break;
 			case OB_WAITINGAPPTASK:
@@ -1392,7 +1393,7 @@ static __app_Thread_(app_cfg)
 				log_debug("current_app: 3_third_party \n");
 				log_debug("OB_Firmware_Version: %d.%d.%d.%d\n",
 				 third_party_version[0],  third_party_version[1], third_party_version[2], third_party_version[3]);
-					
+				log_debug("patrol id: [%u] \n", patrol_dest_id);	
 			}
 		}		
 		vTaskDelayUntil( &xLastWakeTime, (5000) / portTICK_RATE_MS  );//精确的以1000ms为周期执行。

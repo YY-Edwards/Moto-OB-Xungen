@@ -45,6 +45,12 @@
 #define MIN_BOOT_3_PARTY_BEGIN  		(BOOT_LOADER_BEGIN + BOOT_LOADER_MAX_SIZE)   //3 party:0x80010000
 #define MAX_3_PARTY_BYTE_SIZE			(0x00020000)   //128K ?
 
+#define USER_DATA_INFO_START_ADD    	(USERPAGE_START_ADD+0x00000100)//0x80800100
+#define USER_DATA_INFO_SIZE   			(0x00000100)//256bytes
+
+#define PATROL_CENTRAL_ID_START_ADD    	(USER_DATA_INFO_START_ADD)//0x80800100
+#define PATROL_CENTRAL_ID_SIZE   			(0x00000004)//4bytes
+
 
 //#if (APP_BOOTLOADER_ENBALE == 1)
 //
@@ -78,13 +84,25 @@ typedef enum
 	
 }df_third_party_type_t;
 
+
+typedef struct
+{
+	uint8_t reserved;
+	uint8_t major;
+	uint8_t minor;
+	uint8_t product_id_numb;
+	
+} firmware_version_t;//16bytes,
+
+
 typedef struct
 {
 	uint8_t type;//MOTO_PATROL
 	uint8_t isValid;//0:invalid;1:valid
 	uint8_t reserved[2];
 	uint8_t addr[4];//BOOT_3_PARTY
-	uint8_t version[4];//third_party_version
+	firmware_version_t	version;
+	//uint8_t version[4];//third_party_version
 	uint8_t id[4];
 	
 } df_third_party_info_t;//16bytes,

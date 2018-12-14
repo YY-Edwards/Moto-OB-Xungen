@@ -18,7 +18,8 @@
 
 
 #define RFID_TIMER 1
-#define DEST 100//目的ID
+//#define patrol_dest_id 100//目的ID
+
 #pragma pack(1)
 typedef struct
 {

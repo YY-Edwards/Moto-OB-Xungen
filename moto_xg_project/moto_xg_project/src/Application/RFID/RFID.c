@@ -20,6 +20,8 @@ extern volatile U32 global_count;
 extern volatile xSemaphoreHandle count_mutex;
 volatile bool is_rfid_scan = false;  
 
+volatile U32 patrol_dest_id = 65533;
+
 void rfid_init(void)
 {
 //	char card_id[4]={0};
@@ -91,7 +93,7 @@ extern volatile DateTime_t Current_time;
 	//char message[80];
 	//U8 return_err =0;
 	//U8 temp =0;
-	////U32 destination = DEST;
+	////U32 destination = patrol_dest_id;
 	//static U8 start_session = 0x80;
 	//Message_Header_t header;
 	//Message_Data_t data_buffer;//22bytes
@@ -184,7 +186,7 @@ U8 rfid_sendID_message(void)
 	U8 return_err =0;
 	U8 connect_counts =0;
 	U8 temp =0;
-	U32 destination = DEST;
+	U32 destination = patrol_dest_id;
 	static U8 start_session = 0x80;
 	Message_Header_t header;
 	Message_Data_t data_buffer;//22bytes

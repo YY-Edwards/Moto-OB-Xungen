@@ -372,6 +372,7 @@ void avr_flash_test()
 	flash_rw_example("user_page", &user_nvram_data);		
 }
 
+extern volatile U32 patrol_dest_id;
 void bootloader_init(void)
 {
 	
@@ -404,11 +405,15 @@ void bootloader_init(void)
 		//unsigned long mainaddr = (unsigned long)main;
 		third_party_info.type = MOTO_PATROL;
 		third_party_info.isValid = 1;
-		//memcpy(third_party_info.addr, &mainaddr, sizeof(mainaddr));不需要重设固件执行地址
-		memcpy(third_party_info.version, third_party_version, sizeof(third_party_version));
+		memcpy(&(third_party_info.version), third_party_version, sizeof(third_party_version));
 				
 		//write third_party info
 		flashc_memcpy(THIRD_PARTY_INFO_START_ADD, &third_party_info, THIRD_PARTY_INFO_SIZE, true);
+		
+		if(third_party_info.version.product_id_numb == MOTO_PATROL)//APP:patrol
+			//read patrol destination id 
+			memcpy((void*)&patrol_dest_id, (void*)PATROL_CENTRAL_ID_START_ADD, PATROL_CENTRAL_ID_SIZE);
+	
 	}
 	
 }
@@ -609,7 +614,6 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				tx_buf.opcode = QUERY_APP_TYPE_RLY_OPCODE;
 				tx_buf.proto_payload.df_query_app_type_reply.type = current_app_type;			
 				tx_buf.payload_len =1;
-				tx_buf.proto_payload.df_exit_boot_reply.result = DF_SUCCESS;
 				tx_buf.checkSum = df_payload_checksunm(&(tx_buf.payload_len), (tx_buf.payload_len +1));
 				xcmp_send_session_broadcast(QUERY_APP_TYPE_RLY_OPCODE, &tx_buf,3 + tx_buf.payload_len, rx_sessionID);
 							
