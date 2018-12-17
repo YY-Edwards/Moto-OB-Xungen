@@ -25,12 +25,13 @@ volatile df_flash_erase_state_t erase_state = DF_FLASH_IDLE;
 volatile U8 current_app_type = APP_TYPE_BOOTLOADER;//默认是bootloader
 volatile U32 third_partyStartAddr_ = MIN_BOOT_3_PARTY_BEGIN;//默认最小的固件起始地址
 volatile U32 third_partyByteSize_ = MAX_3_PARTY_BYTE_SIZE;//默认为最大的固件大小
-const U8 boot_version[4]={0x00, 0x01, 0x00, 0x01};
+const U8 boot_version[4]={0x00, 0x01, 0x00, 0x00};
 //const U8 third_party_version[4]={0x00, 0x02, 0x00, 0x01};
 void (*start_program) (void) = (void (*)(void))(BOOT_LOADER_BEGIN);//默认是bootloader	
 //The 4-byte OB Firmware Version number uses a reserved byte, a Major Number to track the major changes,
 // Minor Number to track minor changes and Product ID Number to differentiate the product line.
 /*Product ID Number:
+				0x00   boot loader   
 				0x01   Patrol   
 				0x02   Record
 				0x03	CSBK	
@@ -402,6 +403,7 @@ uint8_t df_payload_checksunm(void *p, uint8_t len)
 void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 {	
 	U32 temp_len = 0;
+	U32 temp_id_numb = 0;
 	bool ret =false;
 	uint8_t opcode = p->opcode;
 	flash_proto_t tx_buf;
@@ -474,7 +476,8 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 					third_partyByteSize_ = p->proto_payload.df_check_flash_memory_request.fileSize;//更新应用的尺寸（bytes）
 					third_partyStartAddr_ = p->proto_payload.df_check_flash_memory_request.programStartAddr;//更新固件运行的起始地址
 					if(current_app_type == APP_TYPE_BOOTLOADER)
-						avrflash_update_third_party_info(BOOT_UNINIT);//clear第三方应用的起始地址。
+						avrflash_update_third_party_info(third_partyStartAddr_);//更新第三方应用的起始地址。
+						//avrflash_update_third_party_info(BOOT_UNINIT);//clear第三方应用的起始地址。
 				}
 				else
 					tx_buf.proto_payload.df_check_flash_memory_reply.result = DF_FAILURE;
@@ -595,11 +598,16 @@ void parse_flash_protocol(flash_proto_t *p, U8 rx_sessionID)
 				{
 					if(p->proto_payload.df_set_user_data_request.data_len > USER_DATA_INFO_DEFAULT_SIZE)
 						temp_len=USER_DATA_INFO_DEFAULT_SIZE;
-					
+					else
+						temp_len = p->proto_payload.df_set_user_data_request.data_len;
+
 					write_flash_in_multitask(USER_DATA_INFO_START_ADD,
 					(p->proto_payload.df_set_user_data_request.data),
 					(temp_len),//预留的也一起写
 					true);
+					
+					memcpy(&temp_id_numb, (p->proto_payload.df_set_user_data_request.data), sizeof(temp_id_numb));
+					log_debug("m_patrol id:[%d]", temp_id_numb);
 					
 					tx_buf.proto_payload.df_set_user_data_reply.result = DF_SUCCESS;
 				}

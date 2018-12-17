@@ -38,10 +38,6 @@
 
 #define THIRD_PARTY_INFO_SIZE    			(0x00000010)//16bytes
 
-#define USER_DATA_INFO_START_ADD    		(USERPAGE_START_ADD+0x00000100)//0x80800100
-#define USER_DATA_INFO_SIZE   			(0x00000004)//4bytes
-
-
 #define BOOT_UNINIT 					(0xffffffff)
 #define BOOT_LOADER_BEGIN				(0x80000000)   
 #define BOOT_LOADER_MAX_SIZE			(0x00010000)   //64K 
